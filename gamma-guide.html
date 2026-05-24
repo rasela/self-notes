@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Options Gamma — Market Maker Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #00ff9d;
+    --accent2: #ff3c6e;
+    --accent3: #f5c400;
+    --accent4: #4d9fff;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --positive: #00ff9d;
+    --negative: #ff3c6e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(0,255,157,0.06) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,255,157,0.3);
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 130px);
+    letter-spacing: 4px;
+    line-height: 0.95;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p {
+    max-width: 520px;
+    color: var(--muted);
+    font-size: 16px;
+    animation: fadeUp 0.8s 0.2s ease both;
+    margin-bottom: 48px;
+  }
+
+  .nav-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .nav-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .nav-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,255,157,0.05);
+  }
+
+  /* SECTIONS */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: rgba(0,255,157,0.1);
+    line-height: 1;
+    min-width: 70px;
+  }
+
+  .section-title-block h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 2px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .section-title-block p {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+    margin-bottom: 48px;
+    opacity: 0.3;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+
+  .card.positive::before { background: var(--positive); }
+  .card.negative::before { background: var(--negative); }
+  .card.neutral::before { background: var(--accent3); }
+  .card.info::before { background: var(--accent4); }
+
+  .card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .card.positive h3 { color: var(--positive); }
+  .card.negative h3 { color: var(--negative); }
+  .card.neutral h3 { color: var(--accent3); }
+  .card.info h3 { color: var(--accent4); }
+
+  /* TWO COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    margin: 24px 0;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: rgba(0,255,157,0.05);
+    border-bottom: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag-pos { color: var(--positive); font-weight: 500; }
+  .tag-neg { color: var(--negative); font-weight: 500; }
+  .tag-warn { color: var(--accent3); font-weight: 500; }
+  .tag-info { color: var(--accent4); font-weight: 500; }
+
+  /* VISUAL DIAGRAM */
+  .gamma-diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .diagram-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-box {
+    padding: 10px 16px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .flow-box.green { background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.3); color: var(--positive); }
+  .flow-box.red { background: rgba(255,60,110,0.1); border: 1px solid rgba(255,60,110,0.3); color: var(--negative); }
+  .flow-box.yellow { background: rgba(245,196,0,0.1); border: 1px solid rgba(245,196,0,0.3); color: var(--accent3); }
+  .flow-box.blue { background: rgba(77,159,255,0.1); border: 1px solid rgba(77,159,255,0.3); color: var(--accent4); }
+  .flow-box.gray { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); }
+
+  .flow-arrow {
+    font-size: 16px;
+    color: var(--muted);
+    padding: 0 8px;
+  }
+
+  /* VIX METER */
+  .vix-meter {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin: 16px 0;
+  }
+
+  .vix-bar-container {
+    position: relative;
+    height: 32px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 16px 0;
+    background: var(--surface);
+  }
+
+  .vix-bar {
+    display: flex;
+    height: 100%;
+  }
+
+  .vix-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+  .vix-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* QUIZ */
+  .quiz-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin-top: 40px;
+    position: relative;
+  }
+
+  .quiz-block::before {
+    content: 'KNOWLEDGE CHECK';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--accent3);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    padding: 3px 10px;
+    font-weight: 500;
+  }
+
+  .quiz-question {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quiz-question:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .quiz-q {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .quiz-q span {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent3);
+    font-size: 11px;
+    margin-right: 8px;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quiz-option:hover:not(.answered) {
+    border-color: var(--accent3);
+    background: rgba(245,196,0,0.05);
+  }
+
+  .quiz-option.selected { border-color: var(--accent4); background: rgba(77,159,255,0.08); }
+  .quiz-option.correct { border-color: var(--positive) !important; background: rgba(0,255,157,0.08) !important; color: var(--positive); }
+  .quiz-option.wrong { border-color: var(--negative) !important; background: rgba(255,60,110,0.08) !important; color: var(--negative); }
+  .quiz-option.reveal-correct { border-color: var(--positive) !important; background: rgba(0,255,157,0.05) !important; }
+
+  .quiz-option .opt-letter {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .quiz-option.correct .opt-letter { background: var(--positive); color: #000; }
+  .quiz-option.wrong .opt-letter { background: var(--negative); color: #fff; }
+
+  .check-btn {
+    margin-top: 12px;
+    padding: 9px 20px;
+    background: transparent;
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .check-btn:hover { background: rgba(245,196,0,0.1); }
+  .check-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .quiz-feedback {
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 10px 14px;
+    border-radius: 3px;
+    display: none;
+  }
+
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: rgba(0,255,157,0.08); color: var(--positive); border: 1px solid rgba(0,255,157,0.2); }
+  .quiz-feedback.wrong-fb { background: rgba(255,60,110,0.08); color: var(--negative); border: 1px solid rgba(255,60,110,0.2); }
+
+  /* SCORE */
+  .score-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--accent3);
+    line-height: 1;
+  }
+
+  /* HIGHLIGHT BOX */
+  .highlight {
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    background: rgba(0,255,157,0.03);
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .highlight strong { color: var(--accent); }
+
+  .highlight-red {
+    border-left: 3px solid var(--negative);
+    padding: 16px 20px;
+    background: rgba(255,60,110,0.03);
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .highlight-red strong { color: var(--negative); }
+
+  /* SEPARATOR */
+  .section-sep {
+    height: 1px;
+    background: var(--border);
+    max-width: 900px;
+    margin: 0 auto;
+    opacity: 0.5;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 60px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* DELTA SPECTRUM */
+  .delta-spectrum {
+    display: flex;
+    height: 40px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+
+  .ds-seg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+
+  /* SCROLL INDICATOR */
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: fadeUp 1s 1s ease both;
+  }
+
+  .scroll-hint span {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-dot {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(180deg, var(--muted) 0%, transparent 100%);
+    animation: scrollPulse 2s infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* GREEK CARDS */
+  .greek-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 600px) { .greek-grid { grid-template-columns: 1fr; } }
+
+  .greek-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .greek-symbol {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .greek-card:nth-child(1) .greek-symbol { color: var(--accent); }
+  .greek-card:nth-child(2) .greek-symbol { color: var(--accent2); }
+  .greek-card:nth-child(3) .greek-symbol { color: var(--accent3); }
+
+  .greek-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .greek-trigger {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* PROGRESS BAR */
+  .section-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+    z-index: 1000;
+    transition: width 0.1s;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 500;
+    margin: 2px;
+  }
+
+  .badge-green { background: rgba(0,255,157,0.15); color: var(--positive); }
+  .badge-red { background: rgba(255,60,110,0.15); color: var(--negative); }
+  .badge-yellow { background: rgba(245,196,0,0.15); color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<div class="section-progress" id="progress"></div>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <div class="hero-tag">Market Maker Playbook</div>
+  <h1>Options<br><span>Gamma</span><br>Decoded</h1>
+  <p>Everything you need to understand how gamma, delta, GEX, Vanna & Charm drive index movements — from a market maker's perspective.</p>
+  <div class="nav-pills">
+    <a class="nav-pill" href="#s1">Delta & Gamma</a>
+    <a class="nav-pill" href="#s2">MM Mechanics</a>
+    <a class="nav-pill" href="#s3">Calls</a>
+    <a class="nav-pill" href="#s4">Puts</a>
+    <a class="nav-pill" href="#s5">VIX</a>
+    <a class="nav-pill" href="#s6">GEX</a>
+    <a class="nav-pill" href="#s7">Vanna & Charm</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-dot"></div>
+  </div>
+</div>
+
+<!-- SECTION 1: DELTA & GAMMA -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title-block">
+      <p>The Basics</p>
+      <h2>Delta & Gamma</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="two-col">
+    <div class="card positive">
+      <h3>Delta δ</h3>
+      <p>How much the option price moves per $1 move in the underlying. Your directional exposure.</p>
+      <br>
+      <table class="data-table" style="margin:0">
+        <tr><th>Option</th><th>Delta Range</th></tr>
+        <tr><td>Call (OTM→ITM)</td><td class="tag-pos">0 → +1.0</td></tr>
+        <tr><td>Put (OTM→ITM)</td><td class="tag-neg">0 → -1.0</td></tr>
+        <tr><td>ATM option</td><td class="tag-warn">±0.50</td></tr>
+      </table>
+    </div>
+    <div class="card negative">
+      <h3>Gamma γ</h3>
+      <p>How fast delta changes per $1 move. The acceleration of your directional exposure.</p>
+      <br>
+      <table class="data-table" style="margin:0">
+        <tr><th>Position</th><th>Gamma</th></tr>
+        <tr><td>Buy any option</td><td class="tag-pos">Positive / Long</td></tr>
+        <tr><td>Sell any option</td><td class="tag-neg">Negative / Short</td></tr>
+        <tr><td>ATM + near expiry</td><td class="tag-warn">Highest</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <strong>Core Rule:</strong> Delta tells you <em>where</em> you are. Gamma tells you <em>how fast</em> you're moving there.
+  </div>
+
+  <div class="card neutral" style="margin-top:16px">
+    <h3>ATM / OTM / ITM</h3>
+    <div class="delta-spectrum" style="margin-top:16px">
+      <div class="ds-seg" style="background:rgba(255,60,110,0.15); color:var(--negative); flex:1.5">Deep OTM<br><small>δ ≈ 0.05</small></div>
+      <div class="ds-seg" style="background:rgba(255,60,110,0.3); color:var(--negative)">OTM<br><small>δ ≈ 0.25</small></div>
+      <div class="ds-seg" style="background:rgba(245,196,0,0.4); color:#000; font-weight:700">ATM ★<br><small>δ = 0.50</small></div>
+      <div class="ds-seg" style="background:rgba(0,255,157,0.3); color:var(--positive)">ITM<br><small>δ ≈ 0.75</small></div>
+      <div class="ds-seg" style="background:rgba(0,255,157,0.15); color:var(--positive); flex:1.5">Deep ITM<br><small>δ ≈ 1.0</small></div>
+    </div>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">★ Gamma is HIGHEST at ATM. Collapses deep ITM or deep OTM.</p>
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz-block" id="quiz1">
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q1</span> You buy a call option. What gamma position are you in?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Negative Gamma</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Positive Gamma</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Buying any option = Long / Positive Gamma.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Buying an option gives you Positive (Long) Gamma. Selling gives Negative.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q2</span> An ATM call option expires tomorrow. What happens to gamma?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Gamma spikes massively</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Gamma collapses to zero</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! ATM + near expiry = gamma at its absolute peak. Delta can flip from 0.50 to 1.0 in one big move.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. ATM gamma SPIKES near expiry — delta can swing violently with any price move.</div>
+    </div>
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q3</span> A call goes deep ITM. What happens to gamma?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Gamma is highest here</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Gamma collapses near zero</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Deep ITM → delta already near 1.0 → nowhere to go → gamma collapses.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Deep ITM options have near-zero gamma. Delta is already maxed at ~1.0.</div>
+    </div>
+    <div class="score-display" id="score1">
+      <div class="score-num" id="scoreNum1">0</div>
+      <div>/ 3 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 2: MM MECHANICS -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title-block">
+      <p>Market Makers</p>
+      <h2>Delta Hedging</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:24px">Market Makers (MMs) are on the <strong style="color:var(--text)">opposite side</strong> of every trade. Their job is not to be directional — they want to stay <strong style="color:var(--accent)">delta neutral</strong> and earn the spread. But to do that, they must continuously re-hedge as price moves.</p>
+
+  <table class="data-table">
+    <tr>
+      <th>Who buys</th>
+      <th>MM Position</th>
+      <th>MM Gamma</th>
+      <th>Initial Hedge</th>
+    </tr>
+    <tr>
+      <td>Retail/Institution buys calls</td>
+      <td>MM sells calls</td>
+      <td class="tag-neg">Negative / Short</td>
+      <td>Buy shares</td>
+    </tr>
+    <tr>
+      <td>Institution sells calls (covered)</td>
+      <td>MM buys calls</td>
+      <td class="tag-pos">Positive / Long</td>
+      <td>Short shares</td>
+    </tr>
+    <tr>
+      <td>Institution buys puts</td>
+      <td>MM sells puts</td>
+      <td class="tag-neg">Negative / Short</td>
+      <td>Short shares</td>
+    </tr>
+  </table>
+
+  <div class="two-col" style="margin-top:16px">
+    <div class="card negative">
+      <h3>Short Gamma</h3>
+      <p style="font-size:13px;color:var(--muted)">MM sold the option. Movement hurts them. They must <strong style="color:var(--negative)">chase the market</strong> — buying into rallies, selling into drops.</p>
+      <br>
+      <div class="flow-row">
+        <div class="flow-box red">Market Rises</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Buys</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">Rally ↑↑</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px">
+        <div class="flow-box red">Market Falls</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Sells</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">Drop ↓↓</div>
+      </div>
+    </div>
+    <div class="card positive">
+      <h3>Long Gamma</h3>
+      <p style="font-size:13px;color:var(--muted)">MM bought the option. Movement helps them. They <strong style="color:var(--positive)">fade the market</strong> — selling into rallies, buying into drops.</p>
+      <br>
+      <div class="flow-row">
+        <div class="flow-box green">Market Rises</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">MM Sells</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">Rally ↓</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px">
+        <div class="flow-box green">Market Falls</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">MM Buys</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">Drop ↓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight" style="margin-top:24px">
+    <strong>Short Gamma = Accelerant.</strong> MMs push the market in whichever direction it's already moving. Moves become explosive and trending.
+  </div>
+  <div class="highlight-red">
+    <strong>Long Gamma = Shock Absorber.</strong> MMs fade every move. Market gets pinned, choppy, mean-reverting.
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz-block" id="quiz2">
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q1</span> Retail is aggressively buying calls. MMs sold those calls. Index rallies. What do MMs do?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Sell shares — cushioning the rally</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Buy shares — amplifying the rally</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! MMs short gamma → delta rises on rally → under-hedged → buy shares → rally amplifies.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. MMs are short gamma here. As index rises, they must BUY shares to re-hedge, amplifying the move.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q2</span> Institutions are selling covered calls. MMs bought those calls. Index drops. What happens to the index?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Drop gets cushioned — MMs buy shares</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Drop accelerates — MMs sell shares</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! MMs long gamma → delta shrinks on drop → over-hedged → buy shares → drop cushioned.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. MMs bought calls = Long Gamma. As index drops, delta shrinks → they buy shares → cushions the drop.</div>
+    </div>
+    <div class="score-display" id="score2">
+      <div class="score-num" id="scoreNum2">0</div>
+      <div>/ 2 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 3: CALLS -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title-block">
+      <p>Call Options</p>
+      <h2>Rally Mechanics</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="gamma-diagram">
+    <div class="diagram-label">// Negative Gamma Flow (MM Short Calls — Retail Buying)</div>
+    <div style="margin:20px 0">
+      <div class="flow-row">
+        <div class="flow-box gray">Retail Buys Calls</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Sells Calls</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Short Gamma</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box gray">MM Buys Shares</div>
+      </div>
+      <div style="margin:16px 0;padding-left:20px;border-left:2px solid var(--border)">
+        <div class="flow-row">
+          <div class="flow-box yellow">Index Rallies</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box yellow">Delta ↑</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Buy More Shares</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Rally ↑↑ Amplified</div>
+        </div>
+        <div class="flow-row" style="margin-top:10px">
+          <div class="flow-box yellow">Index Drops</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box yellow">Delta ↓</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Sell Shares</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Drop ↓↓ Amplified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card info" style="margin-top:16px">
+    <h3>What Happens at Expiration</h3>
+    <p style="font-size:13px;margin-bottom:16px">With massive ATM call open interest near expiry and MMs short gamma, two outcomes are possible:</p>
+    <div class="two-col">
+      <div style="padding:16px;border:1px solid var(--border);border-radius:3px">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent3);margin-bottom:8px;letter-spacing:2px">OUTCOME A</div>
+        <strong>Price Pins at Strike</strong>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px">MMs buy dips and sell rips right at the strike. Price gets magnetically stuck. This is <strong style="color:var(--text)">Max Pain</strong>.</p>
+      </div>
+      <div style="padding:16px;border:1px solid var(--border);border-radius:3px">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--negative);margin-bottom:8px;letter-spacing:2px">OUTCOME B</div>
+        <strong>Explosive Breakout</strong>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px">Price breaks away from strike. MMs must chase aggressively. Gamma spike creates a violent, fast move.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz-block" id="quiz3">
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q1</span> MMs are short gamma on calls. Index surges and calls go deep ITM. What happens to MM buying pressure?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Buying stops — rally loses fuel</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Buying accelerates even more</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Deep ITM → delta near 1.0 → gamma collapses → MMs fully hedged → buying pressure stops.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Deep ITM = delta maxed at ~1.0 = gamma collapses. MMs are already fully hedged, so buying STOPS.</div>
+    </div>
+    <div class="quiz-question" data-correct="2">
+      <div class="quiz-q"><span>Q2</span> Massive ATM call OI sitting at 5200. Tomorrow is expiry. Index is at 5200. What happens?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Index definitely rallies through 5200</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Index definitely crashes below 5200</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Either pins at 5200 OR explosive move — both possible</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Both outcomes are possible — pinning (Max Pain) OR explosive breakout if price moves away from the strike.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Both outcomes are possible at expiry. Price can pin at the strike OR explode through it depending on which way it breaks first.</div>
+    </div>
+    <div class="score-display" id="score3">
+      <div class="score-num" id="scoreNum3">0</div>
+      <div>/ 2 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 4: PUTS -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title-block">
+      <p>Put Options</p>
+      <h2>Crash Mechanics</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <table class="data-table">
+    <tr><th></th><th>Calls</th><th>Puts</th></tr>
+    <tr><td>Buyer wants</td><td>Market to rise</td><td>Market to fall</td></tr>
+    <tr><td>Delta range</td><td class="tag-pos">0 → +1.0</td><td class="tag-neg">0 → -1.0</td></tr>
+    <tr><td>MM sells → gamma</td><td class="tag-neg">Negative</td><td class="tag-neg">Negative</td></tr>
+    <tr><td>MM initial hedge</td><td>Buy shares</td><td>Short shares</td></tr>
+    <tr><td>Amplifies</td><td class="tag-pos">Rallies</td><td class="tag-neg">Crashes</td></tr>
+  </table>
+
+  <div class="gamma-diagram" style="margin-top:24px">
+    <div class="diagram-label">// Negative Gamma Flow (MM Short Puts — Institution Buying Protection)</div>
+    <div style="margin:20px 0">
+      <div class="flow-row">
+        <div class="flow-box gray">Funds Buy Puts</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Sells Puts</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Short Gamma</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box gray">MM Shorts Shares</div>
+      </div>
+      <div style="margin:16px 0;padding-left:20px;border-left:2px solid var(--border)">
+        <div class="flow-row">
+          <div class="flow-box yellow">Market Drops</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box yellow">Put Delta ↑ (more negative)</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Short More Shares</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box red">Crash ↓↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-red">
+    <strong>Why crashes are more violent than rallies:</strong> Fear drives put buying exactly when markets are already falling. Emotional selling + mechanical MM shorting = violent, fast crashes. Markets take the stairs up and the elevator down.
+  </div>
+
+  <!-- QUIZ 4 -->
+  <div class="quiz-block" id="quiz4">
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q1</span> A hedge fund buys massive puts on S&P 500. Market drops 2%. What do MMs do?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Short more shares — amplifying the drop</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Buy shares — cushioning the drop</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! MM sold puts → short gamma → market drops → put delta grows more negative → MMs short more → crash accelerates.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. MMs are short puts = short gamma. As market drops, put delta grows → MMs must short MORE shares → crash amplifies.</div>
+    </div>
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q2</span> Which creates more violent moves — MMs short gamma on calls or puts?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Calls — rallies get amplified more</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Puts — crashes get amplified more</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Puts drive crashes which are inherently more violent — fear + mechanical shorting combine explosively.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Puts create more violent moves. Fear-driven put buying + MM mechanical shorting = crashes far more explosive than rallies.</div>
+    </div>
+    <div class="score-display" id="score4">
+      <div class="score-num" id="scoreNum4">0</div>
+      <div>/ 2 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 5: VIX -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title-block">
+      <p>Volatility Index</p>
+      <h2>Reading VIX</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">VIX measures the market's expectation of S&P 500 volatility over the next 30 days. It's derived from implied volatility of options. Simply: <strong style="color:var(--text)">how much the market expects to move.</strong></p>
+
+  <div class="vix-meter">
+    <div class="diagram-label">// VIX Levels & Gamma Environment</div>
+    <div class="vix-bar-container">
+      <div class="vix-bar">
+        <div class="vix-segment" style="flex:3;background:rgba(0,255,157,0.7);color:#000">CALM<br>< 15</div>
+        <div class="vix-segment" style="flex:2;background:rgba(245,196,0,0.7);color:#000">NORMAL<br>15–20</div>
+        <div class="vix-segment" style="flex:2;background:rgba(255,140,0,0.8);color:#000">ELEVATED<br>20–30</div>
+        <div class="vix-segment" style="flex:2;background:rgba(255,60,110,0.9);color:#fff">FEAR<br>> 30</div>
+      </div>
+    </div>
+    <div class="vix-labels">
+      <span>0</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>40+</span>
+    </div>
+  </div>
+
+  <table class="data-table" style="margin-top:8px">
+    <tr><th>VIX Level</th><th>Gamma Environment</th><th>Market Character</th><th>Strategy</th></tr>
+    <tr><td>Below 15</td><td class="tag-pos">Likely Long Gamma</td><td>Choppy, suppressed</td><td class="tag-pos">Mean Reversion</td></tr>
+    <tr><td>15 — 20</td><td class="tag-warn">Mixed</td><td>Balanced</td><td class="tag-warn">Context Dependent</td></tr>
+    <tr><td>20 — 30</td><td class="tag-neg">Likely Short Gamma</td><td>Trending, volatile</td><td class="tag-neg">Momentum</td></tr>
+    <tr><td>Above 30</td><td class="tag-neg">Short Gamma</td><td>Panic, explosive</td><td class="tag-neg">Follow the Move</td></tr>
+  </table>
+
+  <div class="highlight" style="margin-top:24px">
+    <strong>Gamma Flip:</strong> The price level where MMs shift from net long to net short gamma (or vice versa). Above it → calm market. Below it → explosive market. VIX spikes when this flip occurs.
+  </div>
+
+  <!-- QUIZ 5 -->
+  <div class="quiz-block" id="quiz5">
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q1</span> VIX is at 13. What trading strategy fits this environment?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Mean reversion — buy dips, sell rips</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Momentum — follow every move</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Low VIX = likely positive gamma environment = MMs suppressing moves = mean reversion wins.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. VIX 13 = calm, likely positive gamma. MMs are dampening moves — fade them, don't follow them.</div>
+    </div>
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q2</span> A gamma flip just occurred. VIX was at 14. What happens next?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> VIX stays low — market stays calm</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> VIX spikes — moves become explosive</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Gamma flip → MMs now amplifying every move → volatility explodes → VIX spikes hard.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Gamma flip = market character changes completely. MMs go from dampening to amplifying → VIX spikes.</div>
+    </div>
+    <div class="score-display" id="score5">
+      <div class="score-num" id="scoreNum5">0</div>
+      <div>/ 2 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 6: GEX -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title-block">
+      <p>Gamma Exposure</p>
+      <h2>GEX Charts</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">GEX (Gamma Exposure) is the total dollar gamma MMs must hedge across all open contracts at each strike. It shows exactly where hedging pressure is concentrated.</p>
+
+  <div class="card neutral">
+    <h3>GEX Formula</h3>
+    <div style="font-family:'DM Mono',monospace;font-size:14px;padding:16px;background:var(--surface);border-radius:3px;margin-top:12px;letter-spacing:1px">
+      GEX = Open Interest × Gamma × Contract Size × Spot Price
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px">= Total dollars MMs must buy or sell per 1% move at each strike</p>
+  </div>
+
+  <!-- VISUAL GEX CHART -->
+  <div class="gamma-diagram" style="margin-top:24px">
+    <div class="diagram-label">// Example GEX Chart — S&P 500 at 5200</div>
+    <div style="margin-top:20px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5400</div>
+          <div style="height:28px;width:60%;background:rgba(0,255,157,0.3);border:1px solid rgba(0,255,157,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$1.5bn ← Resistance / Magnet</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5300</div>
+          <div style="height:28px;width:80%;background:rgba(0,255,157,0.4);border:1px solid rgba(0,255,157,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$2bn ← STRONGEST PIN LEVEL</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--accent3)">★5200</div>
+          <div style="height:28px;width:35%;background:rgba(0,255,157,0.15);border:1px solid rgba(0,255,157,0.3);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$500m</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3)">← CURRENT PRICE</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5100</div>
+          <div style="height:28px;width:45%;background:rgba(255,60,110,0.3);border:1px solid rgba(255,60,110,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--negative)">-$1bn ← GAMMA FLIP LEVEL</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5000</div>
+          <div style="height:28px;width:70%;background:rgba(255,60,110,0.4);border:1px solid rgba(255,60,110,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--negative)">-$3bn ← LANDMINE — Crash Accelerator</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center">
+        ■ GREEN = Positive GEX (Magnet) &nbsp;|&nbsp; ■ RED = Negative GEX (Landmine)
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:16px">
+    <div class="card positive">
+      <h3>Positive GEX</h3>
+      <p style="font-size:13px">Acts as a <strong style="color:var(--positive)">magnet</strong>. Price gets pulled and pinned. MMs sell rips and buy dips around it. Common expiry pinning level.</p>
+    </div>
+    <div class="card negative">
+      <h3>Negative GEX</h3>
+      <p style="font-size:13px">Acts as a <strong style="color:var(--negative)">landmine</strong>. Price approaches calmly, then explodes through. MMs forced to chase with massive hedging flows.</p>
+    </div>
+  </div>
+
+  <div class="highlight" style="margin-top:16px">
+    <strong>The Golden Rule:</strong> Above gamma flip = Trade Mean Reversion. Below gamma flip = Trade Momentum.
+  </div>
+
+  <!-- QUIZ 6 -->
+  <div class="quiz-block" id="quiz6">
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q1</span> Price is above the gamma flip level. VIX is 13. What's your trading approach?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Mean reversion — fade every move</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Momentum — follow every breakout</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Above flip = positive GEX = MMs dampening moves = fade them.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Above gamma flip = positive GEX environment = market gets suppressed = mean reversion wins.</div>
+    </div>
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q2</span> Largest negative GEX bar sits at 5000 strike. Price approaches 5000. What do you expect?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Price pins at 5000 and stalls</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Price explodes through 5000 — landmine triggered</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Largest negative GEX = landmine. MMs forced to hedge massively → explosive move through it.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Negative GEX = landmine, not magnet. Pinning happens at POSITIVE GEX strikes.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q3</span> Which platform is most popular for retail traders to access GEX data?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> SpotGamma</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Bloomberg Terminal</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Google Finance</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! SpotGamma is the go-to for retail — daily GEX levels, gamma flip, and key strike analysis for SPX.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. SpotGamma is the most popular retail platform for GEX data and gamma flip levels.</div>
+    </div>
+    <div class="score-display" id="score6">
+      <div class="score-num" id="scoreNum6">0</div>
+      <div>/ 3 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- SECTION 7: VANNA & CHARM -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title-block">
+      <p>Hidden Greeks</p>
+      <h2>Vanna & Charm</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">Beyond Gamma, MMs must also hedge <strong style="color:var(--text)">Vanna</strong> and <strong style="color:var(--text)">Charm</strong>. These forces move markets even when price hasn't moved at all.</p>
+
+  <div class="greek-grid">
+    <div class="greek-card">
+      <div class="greek-symbol">Γ</div>
+      <div class="greek-name">Gamma</div>
+      <div class="greek-trigger">Triggered by<br><strong>Price moves</strong></div>
+    </div>
+    <div class="greek-card">
+      <div class="greek-symbol">V</div>
+      <div class="greek-name">Vanna</div>
+      <div class="greek-trigger">Triggered by<br><strong>VIX / IV changes</strong></div>
+    </div>
+    <div class="greek-card">
+      <div class="greek-symbol">C</div>
+      <div class="greek-name">Charm</div>
+      <div class="greek-trigger">Triggered by<br><strong>Time passing</strong></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:24px">
+    <div class="card info">
+      <h3>Vanna</h3>
+      <p style="font-size:13px;margin-bottom:16px">How much delta changes when <strong style="color:var(--accent4)">implied volatility changes.</strong> VIX moves → delta shifts → MMs re-hedge without price moving.</p>
+      <div class="flow-row">
+        <div class="flow-box blue">VIX Spikes</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box blue">Delta ↑</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">MM Buys</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px">
+        <div class="flow-box blue">VIX Collapses</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box blue">Delta ↓</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box red">MM Sells</div>
+      </div>
+    </div>
+    <div class="card neutral">
+      <h3>Charm</h3>
+      <p style="font-size:13px;margin-bottom:16px">How much delta changes as <strong style="color:var(--accent3)">time passes.</strong> Every day, options decay → delta shifts → MMs re-hedge daily just from time.</p>
+      <div class="highlight" style="margin:0;padding:12px 16px;font-size:13px">
+        Most powerful in <strong>last 2–3 days</strong> before expiration. Creates systematic Monday morning buying drift.
+      </div>
+    </div>
+  </div>
+
+  <table class="data-table" style="margin-top:24px">
+    <tr><th>Greek</th><th>What it measures</th><th>Triggered by</th><th>When strongest</th></tr>
+    <tr><td class="tag-pos">Gamma</td><td>Rate of delta change</td><td>Price moves</td><td>ATM + near expiry</td></tr>
+    <tr><td class="tag-info">Vanna</td><td>Delta sensitivity to IV</td><td>VIX spikes or collapses</td><td>Any VIX move</td></tr>
+    <tr><td class="tag-warn">Charm</td><td>Delta decay over time</td><td>Time passing</td><td>Last 2–3 days to expiry</td></tr>
+  </table>
+
+  <div class="highlight" style="margin-top:24px">
+    <strong>Market insight:</strong> What looks like random movement is often mechanical re-hedging from one of these three Greeks. MMs are hedging all three simultaneously, every second of the trading day.
+  </div>
+
+  <!-- QUIZ 7 -->
+  <div class="quiz-block" id="quiz7">
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q1</span> Market drifts slowly higher on Monday morning. No news, no VIX move. What's driving it?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Gamma — price moved triggering re-hedging</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Charm — weekend time decay shifting delta</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Vanna — IV changed overnight</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! No price catalyst, no VIX move = Charm. Weekend time decay shifted delta → MMs buy back shares Monday morning.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. This is Charm — time passed over the weekend shifting delta on all contracts. MMs systematically re-hedge Monday morning.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q2</span> VIX spikes from 14 to 28 overnight. MMs are short calls. What do Vanna flows force MMs to do?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Buy shares — supporting the market</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Sell shares — crashing the market</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! VIX spikes → IV rises → call delta increases → MMs under-hedged → buy shares. This is why markets sometimes bounce during volatility events.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. VIX spike → IV rises → call delta increases → MMs need to BUY shares to re-hedge. Vanna can actually SUPPORT markets during vol spikes.</div>
+    </div>
+    <div class="quiz-question" data-correct="2">
+      <div class="quiz-q"><span>Q3</span> Match them: Gamma = ?, Vanna = ?, Charm = ?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Gamma = VIX, Vanna = Price, Charm = Time</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Gamma = Time, Vanna = VIX, Charm = Price</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Gamma = Price, Vanna = VIX, Charm = Time</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Perfect! The holy trinity: Gamma = Price moves. Vanna = VIX/IV moves. Charm = Time passing.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. The correct mapping: Gamma = Price moves | Vanna = VIX/IV changes | Charm = Time passing.</div>
+    </div>
+    <div class="score-display" id="score7">
+      <div class="score-num" id="scoreNum7">0</div>
+      <div>/ 3 correct</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- FINAL SUMMARY -->
+<div class="section" id="summary">
+  <div class="section-header">
+    <div class="section-num">★</div>
+    <div class="section-title-block">
+      <p>Master Reference</p>
+      <h2>Full Cheat Sheet</h2>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <table class="data-table">
+    <tr><th>Concept</th><th>Key Rule</th></tr>
+    <tr><td class="tag-pos">Buy any option</td><td>Long / Positive Gamma</td></tr>
+    <tr><td class="tag-neg">Sell any option</td><td>Short / Negative Gamma</td></tr>
+    <tr><td class="tag-neg">Short Gamma</td><td>MMs amplify moves — trending market</td></tr>
+    <tr><td class="tag-pos">Long Gamma</td><td>MMs dampen moves — choppy market</td></tr>
+    <tr><td class="tag-pos">Positive GEX strike</td><td>Magnet — price pins here</td></tr>
+    <tr><td class="tag-neg">Negative GEX strike</td><td>Landmine — price explodes through</td></tr>
+    <tr><td class="tag-warn">Gamma Flip</td><td>Market character changes completely</td></tr>
+    <tr><td>Above Flip</td><td class="tag-pos">Mean Reversion strategy</td></tr>
+    <tr><td>Below Flip</td><td class="tag-neg">Momentum strategy</td></tr>
+    <tr><td class="tag-pos">Low VIX (< 15)</td><td>Positive gamma environment likely</td></tr>
+    <tr><td class="tag-neg">High VIX (> 25)</td><td>Negative gamma environment</td></tr>
+    <tr><td class="tag-info">Vanna</td><td>Delta changes when VIX moves</td></tr>
+    <tr><td class="tag-warn">Charm</td><td>Delta changes as time passes</td></tr>
+    <tr><td>Calls amplify</td><td class="tag-pos">Rallies</td></tr>
+    <tr><td>Puts amplify</td><td class="tag-neg">Crashes (more violent)</td></tr>
+  </table>
+</div>
+
+<footer>
+  OPTIONS GAMMA — MARKET MAKER PLAYBOOK &nbsp;|&nbsp; BUILT FOR LEARNING
+</footer>
+
+<script>
+  // SCROLL PROGRESS
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = (scrolled / total) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // INTERSECTION OBSERVER for sections
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // QUIZ LOGIC
+  function checkAnswer(btn) {
+    const questionEl = btn.closest('.quiz-question');
+    const correct = parseInt(questionEl.dataset.correct);
+    const options = questionEl.querySelectorAll('.quiz-option');
+    const feedbacks = questionEl.querySelectorAll('.quiz-feedback');
+    let selected = null;
+
+    options.forEach((opt, i) => {
+      if (opt.classList.contains('selected')) selected = i;
+    });
+
+    if (selected === null) {
+      btn.style.borderColor = 'var(--negative)';
+      btn.textContent = 'Pick an answer first!';
+      setTimeout(() => {
+        btn.style.borderColor = 'var(--accent3)';
+        btn.textContent = 'Check Answer';
+      }, 1500);
+      return;
+    }
+
+    // Lock options
+    options.forEach(opt => opt.classList.add('answered'));
+    btn.disabled = true;
+    btn.textContent = selected === correct ? '✓ Correct' : '✗ Wrong';
+
+    options.forEach((opt, i) => {
+      if (i === correct) opt.classList.add('reveal-correct');
+      if (parseInt(opt.dataset.val) === selected && selected !== correct) opt.classList.add('wrong');
+      if (parseInt(opt.dataset.val) === selected && selected === correct) opt.classList.add('correct');
+    });
+
+    if (selected === correct) {
+      feedbacks[0].classList.add('show');
+      btn.style.borderColor = 'var(--positive)';
+      btn.style.color = 'var(--positive)';
+    } else {
+      feedbacks[1].classList.add('show');
+      btn.style.borderColor = 'var(--negative)';
+      btn.style.color = 'var(--negative)';
+    }
+
+    updateScore(questionEl);
+  }
+
+  document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if (this.classList.contains('answered')) return;
+      const siblings = this.closest('.quiz-options').querySelectorAll('.quiz-option');
+      siblings.forEach(s => s.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  function updateScore(questionEl) {
+    const quizBlock = questionEl.closest('.quiz-block');
+    const quizId = quizBlock.id;
+    const num = quizId.replace('quiz', '');
+    const questions = quizBlock.querySelectorAll('.quiz-question');
+    let correct = 0;
+    let answered = 0;
+
+    questions.forEach(q => {
+      const btn = q.querySelector('.check-btn');
+      if (btn.disabled) {
+        answered++;
+        if (btn.style.color === 'var(--positive)' || btn.textContent.includes('✓')) correct++;
+      }
+    });
+
+    document.getElementById('scoreNum' + num).textContent = correct;
+  }
+</script>
+</body>
+</html>
