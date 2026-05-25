@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Options Gamma — Market Maker Playbook v2</title>
+<title>Options Gamma — Market Maker Playbook v3</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230a0a0f'/><text y='.9em' font-size='80' x='10'>📈</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -151,7 +152,7 @@
 
 <div class="hero" id="top">
   <div class="hero-tag">Market Maker Playbook</div>
-  <div class="hero-version">VERSION 2.0 — NOW WITH VANNA, CHARM & GREEK RELATIONSHIPS</div>
+  <div class="hero-version">VERSION 3.0 — NOW WITH SKEW, OPTION EXERCISE & COVERED CALLS</div>
   <h1>Options<br><span>Gamma</span><br>Decoded</h1>
   <p>Complete guide — Delta, Gamma, Vanna, Charm, GEX and how they all drive index movements from a market maker's perspective.</p>
   <div class="nav-pills">
@@ -163,6 +164,10 @@
     <a class="nav-pill" href="#s5">GEX Charts</a>
     <a class="nav-pill" href="#s6">Vanna & Charm</a>
     <a class="nav-pill" href="#s7">Greek Relationships</a>
+    <a class="nav-pill" href="#s9">Covered Calls & Puts</a>
+    <a class="nav-pill" href="#s10">Option Exercise</a>
+    <a class="nav-pill" href="#s11">Skew</a>
+    <a class="nav-pill" href="#s12">Crash Anatomy</a>
     <a class="nav-pill" href="#s8">Offline Study</a>
     <a class="nav-pill" href="#cheatsheet">Cheat Sheet</a>
   </div>
@@ -906,7 +911,384 @@
   </table>
 </div>
 
-<footer>OPTIONS GAMMA — MARKET MAKER PLAYBOOK V2 &nbsp;|&nbsp; BUILT FOR LEARNING</footer>
+<div class="section-sep"></div>
+
+<!-- S9 COVERED CALLS & PUTS -->
+<div class="section" id="s9">
+  <div class="section-header"><div class="section-num">09</div><div class="section-title-block"><p>Strategies</p><h2>Covered Calls & Puts</h2></div></div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">Understanding covered strategies is essential — they are the biggest source of <strong style="color:var(--text)">positive gamma</strong> supply to MMs, directly suppressing market volatility for months at a time.</p>
+
+  <div class="two-col">
+    <div class="card positive">
+      <h3>Covered Call</h3>
+      <table class="data-table" style="margin:0 0 16px 0">
+        <tr><th>Element</th><th>Detail</th></tr>
+        <tr><td>Own</td><td class="tag-pos">Long shares</td></tr>
+        <tr><td>Sell</td><td>Call options on those shares</td></tr>
+        <tr><td>Collect</td><td class="tag-pos">Call premium (income)</td></tr>
+        <tr><td>Risk</td><td>Miss upside above strike</td></tr>
+        <tr><td>Who does it</td><td>Funds, ETFs, pensions</td></tr>
+        <tr><td>How common</td><td class="tag-pos">Very common</td></tr>
+      </table>
+      <p style="font-size:13px;color:var(--muted)">Famous examples: <strong style="color:var(--text)">XYLD</strong> (S&P 500), <strong style="color:var(--text)">QYLD</strong> (Nasdaq) — ETFs that sell calls every month for yield.</p>
+    </div>
+    <div class="card info">
+      <h3>Covered Put</h3>
+      <table class="data-table" style="margin:0 0 16px 0">
+        <tr><th>Element</th><th>Detail</th></tr>
+        <tr><td>Own</td><td class="tag-neg">Short shares</td></tr>
+        <tr><td>Sell</td><td>Put options on that short</td></tr>
+        <tr><td>Collect</td><td class="tag-pos">Put premium (income)</td></tr>
+        <tr><td>Risk</td><td>Miss downside below strike</td></tr>
+        <tr><td>Who does it</td><td>Dedicated short sellers</td></tr>
+        <tr><td>How common</td><td class="tag-neg">Rare</td></tr>
+      </table>
+      <p style="font-size:13px;color:var(--muted)">Rare because shorting the market long-term is dangerous — unlimited upside loss risk. Only used by dedicated short-selling hedge funds.</p>
+    </div>
+  </div>
+
+  <div class="gamma-diagram" style="margin-top:24px">
+    <div class="diagram-label">// What Covered Programs Do to the Gamma Environment</div>
+    <div class="two-col" style="margin-top:16px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:12px">COVERED CALL PROGRAM</div>
+        <div class="flow-row"><div class="flow-box gray">Institution sells calls</div><div class="flow-arrow">→</div><div class="flow-box green">MM buys calls</div></div>
+        <div class="flow-row"><div class="flow-box green">MM Long Gamma</div><div class="flow-arrow">→</div><div class="flow-box green">Dampens moves</div></div>
+        <div class="flow-row"><div class="flow-box green">VIX stays low</div><div class="flow-arrow">→</div><div class="flow-box green">Choppy market</div></div>
+        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">MMs absorb every move. Market grinds slowly.</p>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent4);letter-spacing:2px;margin-bottom:12px">COVERED PUT PROGRAM</div>
+        <div class="flow-row"><div class="flow-box gray">Institution sells puts</div><div class="flow-arrow">→</div><div class="flow-box blue">MM buys puts</div></div>
+        <div class="flow-row"><div class="flow-box blue">MM Long Gamma</div><div class="flow-arrow">→</div><div class="flow-box blue">Dampens drops</div></div>
+        <div class="flow-row"><div class="flow-box blue">VIX stays low</div><div class="flow-arrow">→</div><div class="flow-box blue">Drops cushioned</div></div>
+        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">MMs buy every dip mechanically. Downside suppressed.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-yellow" style="margin-top:16px"><strong>When covered programs stop:</strong> Existing contracts expire over weeks/months through OpEx cycles. GEX bars shrink gradually. Market character transitions slowly from choppy → trending. VIX drifts higher. Traders watching GEX charts see positive bars disappearing — the signal the shock absorber is being removed.</div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- S10 OPTION EXERCISE -->
+<div class="section" id="s10">
+  <div class="section-header"><div class="section-num">10</div><div class="section-title-block"><p>At Expiration</p><h2>Option Exercise</h2></div></div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">Exercise is not a surprise to MMs. It is the <strong style="color:var(--text)">finish line</strong> of a race they were running the entire time through delta hedging. By the time exercise happens, MMs are already covered.</p>
+
+  <!-- MM SELLS SCENARIOS -->
+  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:16px;text-transform:uppercase">When MM Sells Options</div>
+
+  <div class="two-col">
+    <div class="card negative">
+      <h3>MM Sells Call</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Retail bought the call. Market rallies ITM.</p>
+      <div class="flow-row"><div class="flow-box red">MM sells 5000 call</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">MM buys shares to delta hedge</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box yellow">Market rallies to 5300</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">Retail exercises — wants shares at 5000</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">MM obligated to SELL at 5000</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Delivers shares already held from hedging ✓</div></div>
+    </div>
+    <div class="card negative">
+      <h3>MM Sells Put</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Institution bought the put. Market crashes ITM.</p>
+      <div class="flow-row"><div class="flow-box red">MM sells 5000 put</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">MM shorts shares to delta hedge</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box yellow">Market crashes to 4600</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">Institution exercises — wants to sell at 5000</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">MM obligated to BUY at 5000 (market = 4600)</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Short shares profited $400 on the way down ✓</div></div>
+    </div>
+  </div>
+
+  <div class="highlight-red" style="margin-top:8px"><strong>Why MM buys above market on put exercise:</strong> MM is obligated to buy at the 5000 strike even though market is at 4600. That's $400 above market. But their short shares — held throughout the crash as delta hedge — already profited $400 per share on the way down. The exercise loss is perfectly offset by the hedge profit.</div>
+
+  <!-- MM BUYS SCENARIOS -->
+  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:16px;margin-top:40px;text-transform:uppercase">When MM Buys Options</div>
+
+  <div class="two-col">
+    <div class="card positive">
+      <h3>MM Buys Call</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Institution sold the call (covered call). Market rallies ITM.</p>
+      <div class="flow-row"><div class="flow-box green">MM buys 5000 call</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">MM shorts shares to delta hedge</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box yellow">Market rallies to 5300</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">MM exercises — buys shares at 5000</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Gets shares $300 below market ✓</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Uses shares to close short hedge ✓</div></div>
+    </div>
+    <div class="card positive">
+      <h3>MM Buys Put</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Institution sold the put (covered put). Market crashes ITM.</p>
+      <div class="flow-row"><div class="flow-box green">MM buys 5000 put</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box gray">MM buys shares to delta hedge</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box yellow">Market crashes to 4600</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">MM exercises — sells shares at 5000</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Sells $400 above market ✓</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Offsets cost of long shares held ✓</div></div>
+    </div>
+  </div>
+
+  <!-- FULL TABLE -->
+  <table class="data-table" style="margin-top:32px">
+    <tr><th>MM Position</th><th>Obligation / Right</th><th>Delta Hedge</th><th>At Exercise</th><th>Gamma</th><th>Market Effect</th></tr>
+    <tr><td class="tag-neg">Sells Call</td><td>Must sell shares at strike</td><td>Long shares</td><td>Delivers held shares</td><td class="tag-neg">Negative</td><td class="tag-neg">Amplifies rally</td></tr>
+    <tr><td class="tag-pos">Buys Call</td><td>Right to buy at strike</td><td>Short shares</td><td>Buys below market</td><td class="tag-pos">Positive</td><td class="tag-pos">Dampens rally</td></tr>
+    <tr><td class="tag-neg">Sells Put</td><td>Must buy shares at strike</td><td>Short shares</td><td>Buys above market (covered by shorts)</td><td class="tag-neg">Negative</td><td class="tag-neg">Amplifies crash</td></tr>
+    <tr><td class="tag-pos">Buys Put</td><td>Right to sell at strike</td><td>Long shares</td><td>Sells above market</td><td class="tag-pos">Positive</td><td class="tag-pos">Dampens crash</td></tr>
+  </table>
+
+  <div class="highlight"><strong>Master rule:</strong> MM sells option = obligated, hedging chases market, amplifies moves. MM buys option = has the right, hedging fades market, dampens moves. Exercise in both cases is just the final settlement of what delta hedging already anticipated.</div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- S11 SKEW -->
+<div class="section" id="s11">
+  <div class="section-header"><div class="section-num">11</div><div class="section-title-block"><p>Market Fear Gauge</p><h2>Volatility Skew</h2></div></div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">Skew is the market pricing fear into options. It explains WHY puts cost more than calls — and connects directly to everything you already know about gamma, Vanna, and crash mechanics.</p>
+
+  <div class="card neutral">
+    <h3>What Skew Is</h3>
+    <p style="font-size:13px;margin-bottom:16px">In theory — a call and put at the same distance from current price should cost the same. In reality, puts are always more expensive. That difference is <strong style="color:var(--accent3)">Skew.</strong></p>
+    <div style="background:var(--surface);border-radius:3px;padding:20px;font-family:'DM Mono',monospace;font-size:12px;margin-top:8px">
+      <div style="color:var(--muted);margin-bottom:12px">// Example — Index at 5000</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="color:var(--negative)">4800 Put (OTM) → IV: 22%</span>
+        <span style="color:var(--accent3)">5000 ATM → IV: 15%</span>
+        <span style="color:var(--positive)">5200 Call (OTM) → IV: 12%</span>
+      </div>
+      <div style="color:var(--muted);font-size:10px">Same distance from ATM. Put costs nearly DOUBLE the call in implied vol terms.</div>
+    </div>
+  </div>
+
+  <!-- WHY PUTS MORE EXPENSIVE -->
+  <div style="margin-top:24px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Three reasons puts are more expensive</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">📥</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">DEMAND</div>
+        <p style="font-size:13px;color:var(--muted)">Everyone wants crash protection. Funds, institutions, retail all buy puts as insurance. High demand = higher price.</p>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">⚡</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">CRASH ASYMMETRY</div>
+        <p style="font-size:13px;color:var(--muted)">Markets can drop 20% in days. They rarely rally 20% in days. Real asymmetry — options pricing reflects it.</p>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">💰</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">MM RISK PREMIUM</div>
+        <p style="font-size:13px;color:var(--muted)">MMs know selling puts is dangerous — crash risk, violent moves, negative gamma. They charge more to take that risk.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKEW CURVE VISUAL -->
+  <div class="gamma-diagram" style="margin-top:32px">
+    <div class="diagram-label">// The Volatility Skew Curve — IV across strikes</div>
+    <svg viewBox="0 0 600 220" style="width:100%;margin-top:16px;font-family:monospace">
+      <!-- Grid lines -->
+      <line x1="60" y1="20" x2="60" y2="180" stroke="#2a2a3a" stroke-width="1"/>
+      <line x1="60" y1="180" x2="560" y2="180" stroke="#2a2a3a" stroke-width="1"/>
+      <line x1="60" y1="60" x2="560" y2="60" stroke="#2a2a3a" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="60" y1="100" x2="560" y2="100" stroke="#2a2a3a" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="60" y1="140" x2="560" y2="140" stroke="#2a2a3a" stroke-width="0.5" stroke-dasharray="4"/>
+      <!-- ATM line -->
+      <line x1="310" y1="20" x2="310" y2="180" stroke="#f5c400" stroke-width="1" stroke-dasharray="4"/>
+      <!-- Skew curve -->
+      <path d="M 80,40 C 150,55 220,95 310,115 C 380,130 460,145 540,155" stroke="#00ff9d" stroke-width="2.5" fill="none"/>
+      <!-- Labels -->
+      <text x="40" y="45" fill="#6b6b80" font-size="10" text-anchor="end">25%</text>
+      <text x="40" y="105" fill="#6b6b80" font-size="10" text-anchor="end">15%</text>
+      <text x="40" y="145" fill="#6b6b80" font-size="10" text-anchor="end">10%</text>
+      <text x="40" y="185" fill="#6b6b80" font-size="10" text-anchor="end">IV</text>
+      <text x="80" y="195" fill="#ff3c6e" font-size="10" text-anchor="middle">OTM Puts</text>
+      <text x="310" y="195" fill="#f5c400" font-size="10" text-anchor="middle">ATM</text>
+      <text x="540" y="195" fill="#00ff9d" font-size="10" text-anchor="middle">OTM Calls</text>
+      <!-- Dot at ATM -->
+      <circle cx="310" cy="115" r="5" fill="#f5c400"/>
+      <!-- Dot at OTM put -->
+      <circle cx="80" cy="40" r="5" fill="#ff3c6e"/>
+      <!-- Annotation -->
+      <text x="90" y="35" fill="#ff3c6e" font-size="10">IV≈22% (expensive)</text>
+      <text x="320" y="112" fill="#f5c400" font-size="10">IV≈15%</text>
+      <text x="460" y="150" fill="#00ff9d" font-size="10">IV≈12% (cheaper)</text>
+      <text x="150" y="165" fill="#6b6b80" font-size="10">← Volatility Smirk / Put Skew</text>
+    </svg>
+  </div>
+
+  <!-- SKEW TYPES -->
+  <div style="margin-top:32px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Skew Types & What They Signal</div>
+    <table class="data-table" style="margin:0">
+      <tr><th>Skew Type</th><th>What it means</th><th>Signal</th><th>Gamma Environment</th></tr>
+      <tr>
+        <td><span class="tag-neg">Steep Skew</span></td>
+        <td>Puts much more expensive than calls</td>
+        <td class="tag-neg">Market very fearful — crash protection in high demand</td>
+        <td class="tag-neg">Likely negative gamma building</td>
+      </tr>
+      <tr>
+        <td><span class="tag-warn">Skew Steepens</span></td>
+        <td>Puts getting more expensive relative to calls</td>
+        <td class="tag-warn">Fear rising — institutions building protection</td>
+        <td class="tag-warn">Watch for gamma flip</td>
+      </tr>
+      <tr>
+        <td><span class="tag-pos">Flat Skew</span></td>
+        <td>Puts and calls roughly equal IV</td>
+        <td class="tag-pos">Market calm — balanced risk/reward</td>
+        <td class="tag-pos">Likely positive gamma</td>
+      </tr>
+      <tr>
+        <td><span class="tag-pos">Skew Flattens</span></td>
+        <td>Puts getting cheaper relative to calls</td>
+        <td class="tag-pos">Fear easing — calm returning</td>
+        <td class="tag-pos">Positive gamma building</td>
+      </tr>
+      <tr>
+        <td><span class="tag-purple">Symmetrical</span></td>
+        <td>Puts and calls follow similar pattern around ATM</td>
+        <td class="tag-purple">Balanced outlook — equal chance both ways</td>
+        <td class="tag-warn">Neutral — rare in equity markets</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="highlight-red" style="margin-top:16px"><strong>Skew connects to Vanna:</strong> When VIX spikes, IV rises across all strikes — but it rises MORE on puts than calls because of skew. This means Vanna flows hit harder on the put side. Asymmetric re-hedging. Crashes get amplified more than rallies get supported.</div>
+
+  <div style="margin-top:16px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:4px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px;margin-bottom:12px">QUICK RULE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;font-family:'DM Mono',monospace;font-size:11px;text-align:center">
+      <div style="padding:10px;border:1px solid rgba(255,60,110,0.3);border-radius:3px;color:var(--negative)">High Put Skew<br>= Fear</div>
+      <div style="padding:10px;border:1px solid rgba(0,255,157,0.3);border-radius:3px;color:var(--positive)">Flat Skew<br>= Calm</div>
+      <div style="padding:10px;border:1px solid rgba(255,60,110,0.3);border-radius:3px;color:var(--accent3)">Skew Rising<br>= Fear Building</div>
+      <div style="padding:10px;border:1px solid rgba(0,255,157,0.3);border-radius:3px;color:var(--positive)">Skew Falling<br>= Fear Easing</div>
+    </div>
+  </div>
+
+  <div class="quiz-block" id="quiz11">
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q1</span> A 4800 put and a 5200 call are both 200 points OTM with index at 5000. The put has IV of 24%, the call has IV of 11%. What does this tell you?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> The put is mispriced — both should have identical IV</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Steep skew — market is fearful, crash protection in very high demand</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Flat skew — 24% vs 11% is normal and expected</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! A 13-point IV gap between equidistant put and call = steep skew = market very fearful = crash protection extremely expensive.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Same distance from ATM but very different IV = steep skew. The market is pricing in much more fear on the downside than the upside.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q2</span> Skew suddenly steepens over 3 days while index barely moves. What is the market signalling?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Fear building — institutions buying put protection ahead of something</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Calm increasing — puts getting cheaper means less demand</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Nothing — skew steepening without price move is meaningless</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Skew steepening without price moving = institutions quietly buying puts = fear building under the surface = watch for gamma flip soon.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Steepening skew = puts getting MORE expensive = more demand for protection = fear building. This often happens BEFORE the actual selloff begins.</div>
+    </div>
+    <div class="score-display"><div class="score-num" id="scoreNum11">0</div><div>/ 2 correct</div></div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- S12 CRASH ANATOMY -->
+<div class="section" id="s12">
+  <div class="section-header"><div class="section-num">12</div><div class="section-title-block"><p>Full Picture</p><h2>Anatomy of a Crash</h2></div></div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">When a crash hits, it's never just one thing. It's a <strong style="color:var(--text)">three-layer pile-on</strong> of mechanics, institutional behavior, and retail panic — all pushing the same direction simultaneously.</p>
+
+  <!-- THREE LAYERS -->
+  <div style="display:flex;flex-direction:column;gap:0;margin-bottom:32px">
+    <div style="background:rgba(255,60,110,0.08);border:1px solid rgba(255,60,110,0.3);border-radius:4px 4px 0 0;padding:20px 24px;border-bottom:none">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:3px;margin-bottom:8px">LAYER 1 — GAMMA MECHANICS</div>
+      <p style="font-size:13px">Gamma flip triggers → MMs short gamma → selling into every down tick → self-reinforcing mechanical cascade. No emotion. Pure mathematics.</p>
+    </div>
+    <div style="background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);padding:20px 24px;border-bottom:none">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:3px;margin-bottom:8px">LAYER 2 — INSTITUTIONAL HEDGING</div>
+      <p style="font-size:13px">Funds see losses → buy puts for protection → MMs short those puts → negative gamma on downside → more mechanical shorting. Institutions are rational but their hedging adds fuel.</p>
+    </div>
+    <div style="background:rgba(255,60,110,0.03);border:1px solid rgba(255,60,110,0.15);border-radius:0 0 4px 4px;padding:20px 24px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:8px">LAYER 3 — RETAIL PANIC</div>
+      <p style="font-size:13px">Retail sees red screens → panic sell shares AND buy puts → more downward pressure + more negative gamma → more selling → more panic. Emotion amplifies the mechanical.</p>
+    </div>
+  </div>
+
+  <!-- FULL CRASH CHAIN -->
+  <div class="gamma-diagram">
+    <div class="diagram-label">// Full Crash Chain — All Forces Combined</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+      <div class="flow-row"><div class="flow-box yellow">Market drops — hits gamma flip</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">MMs flip to negative gamma → sell into every tick</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">Institutions buy puts for protection</div><div class="flow-arrow">+</div><div class="flow-box red">Retail panic sells shares</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">MMs short put = more negative gamma = more shorting</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box yellow">Skew steepens → puts get very expensive</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">VIX explodes → Vanna kicks in</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box blue">Vanna: VIX spike expands call delta → MMs buy shares</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box green">Brief violent bounce — "Dead Cat Bounce"</div></div>
+      <div class="flow-row"><div class="flow-arrow" style="padding:0 0 0 8px">↓</div></div>
+      <div class="flow-row"><div class="flow-box red">Bounce fades → selling resumes → cycle repeats</div></div>
+    </div>
+  </div>
+
+  <!-- DEAD CAT BOUNCE -->
+  <div class="card info" style="margin-top:24px">
+    <h3>Dead Cat Bounce — Explained</h3>
+    <p style="font-size:13px;margin-bottom:16px">Those violent bounces you see mid-crash? Almost never real buying. Three mechanical forces create them:</p>
+    <table class="data-table" style="margin:0">
+      <tr><th>Force</th><th>Mechanism</th><th>Effect</th></tr>
+      <tr><td class="tag-info">Vanna</td><td>VIX spike expands call delta → MMs under-hedged → buy shares</td><td class="tag-pos">Violent upward spike</td></tr>
+      <tr><td class="tag-neg">Delta-1 at expiry</td><td>Deep ITM puts near expiry — any bounce shifts delta → MMs forced to cover shorts</td><td class="tag-pos">Sharp short covering</td></tr>
+      <tr><td class="tag-warn">Charm</td><td>Time passing shifts delta → systematic buying pressure</td><td class="tag-pos">Mild upward drift</td></tr>
+    </table>
+    <div class="highlight-red" style="margin-top:16px;margin-bottom:0"><strong>Key insight:</strong> These bounces look like recovery. They are not. They are mechanical. Once the Vanna/covering pressure exhausts, selling resumes. Don't mistake a dead cat bounce for a trend reversal.</div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<footer>OPTIONS GAMMA — MARKET MAKER PLAYBOOK V3 &nbsp;|&nbsp; BUILT FOR LEARNING</footer>
 
 <script>
   window.addEventListener('scroll',()=>{
