@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes — Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #00ff9d;
+    --accent2: #ff3c6e;
+    --accent3: #f5c400;
+    --accent4: #4d9fff;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* progress bar */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 1000;
+    transition: width 0.1s;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(0,255,157,0.05) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,255,157,0.3);
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 10vw, 110px);
+    letter-spacing: 4px;
+    line-height: 0.95;
+    margin-bottom: 20px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    animation: fadeUp 0.8s 0.2s ease both;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* SEARCH */
+  .search-wrap {
+    max-width: 520px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .search-box {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box::placeholder { color: var(--muted); }
+  .search-box:focus { border-color: var(--accent); }
+
+  /* NOTES GRID */
+  .notes-wrap {
+    max-width: 900px;
+    margin: 60px auto 0;
+    padding: 0 24px 80px;
+  }
+
+  .grid-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .grid-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .grid-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .note-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  /* NOTE CARD */
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .note-card:hover {
+    border-color: var(--accent);
+    background: #1a1a24;
+    transform: translateY(-3px);
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.2s ease;
+  }
+
+  .note-card:hover::before { transform: scaleY(1); }
+
+  .card-top {
+    padding: 22px 22px 16px;
+    flex: 1;
+  }
+
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .card-footer {
+    padding: 12px 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-file {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .card-arrow {
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .note-card:hover .card-arrow {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 0;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: none;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .notes-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<div class="hero">
+  <div class="hero-tag">Personal Knowledge Base</div>
+  <h1>MY <span>NOTES</span></h1>
+  <p>Self-study guides &amp; playbooks</p>
+</div>
+
+<div class="search-wrap">
+  <input class="search-box" type="text" placeholder="SEARCH NOTES..." id="searchInput" autocomplete="off">
+</div>
+
+<div class="notes-wrap">
+  <div class="grid-header">
+    <span class="grid-label">All Notes</span>
+    <div class="grid-line"></div>
+    <span class="note-count" id="noteCount">1 FILE</span>
+  </div>
+
+  <div class="notes-grid" id="notesGrid">
+
+    <!-- =============================================
+         ADD NEW NOTES BELOW — copy one <a> block
+         and update: href, data-title, data-tag, data-desc
+         ============================================= -->
+
+    <a class="note-card" href="/options"
+        data-title="Options Gamma"
+        data-tag="Options · Market Structure"
+        data-desc="Market maker playbook — gamma, GEX, the gamma flip, vanna and charm flows.">
+        </a>
+
+    <!-- EXAMPLE of a second note (delete or replace):
+    <a class="note-card" href="/your-file.html"
+       data-title="Your Note Title"
+       data-tag="Category"
+       data-desc="Short description of what this note covers.">
+      <div class="card-top">
+        <span class="card-tag">Category</span>
+        <div class="card-title">Your Note Title</div>
+        <p class="card-desc">Short description of what this note covers.</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-file">your-file.html</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    -->
+
+    <div class="empty-state" id="emptyState">NO NOTES MATCH — TRY ANOTHER SEARCH</div>
+  </div>
+</div>
+
+<footer>Personal Notes Index &nbsp;|&nbsp; Keep Learning</footer>
+
+<script>
+  // Scroll progress
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // Stagger card animations
+  document.querySelectorAll('.note-card').forEach((card, i) => {
+    card.style.animationDelay = (0.5 + i * 0.08) + 's';
+  });
+
+  // Search
+  const searchInput = document.getElementById('searchInput');
+  const cards = document.querySelectorAll('.note-card');
+  const emptyState = document.getElementById('emptyState');
+  const noteCount = document.getElementById('noteCount');
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase().trim();
+    let visible = 0;
+
+    cards.forEach(card => {
+      const title = (card.dataset.title || '').toLowerCase();
+      const tag   = (card.dataset.tag   || '').toLowerCase();
+      const desc  = (card.dataset.desc  || '').toLowerCase();
+      const file  = (card.querySelector('.card-file')?.textContent || '').toLowerCase();
+
+      const match = !q || title.includes(q) || tag.includes(q) || desc.includes(q) || file.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+    noteCount.textContent = visible + (visible === 1 ? ' FILE' : ' FILES');
+  });
+
+  // Update count on load
+  noteCount.textContent = cards.length + (cards.length === 1 ? ' FILE' : ' FILES');
+</script>
+</body>
+</html>
