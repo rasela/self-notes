@@ -337,22 +337,7 @@
         data-desc="Market maker playbook — gamma, GEX, the gamma flip, vanna and charm flows.">
     </a>
 
-    <!-- EXAMPLE of a second note (delete or replace):
-    <a class="note-card" href="/your-file.html"
-       data-title="Your Note Title"
-       data-tag="Category"
-       data-desc="Short description of what this note covers.">
-      <div class="card-top">
-        <span class="card-tag">Category</span>
-        <div class="card-title">Your Note Title</div>
-        <p class="card-desc">Short description of what this note covers.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-file">your-file.html</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-    -->
+    <!-- ADD MORE NOTES — copy the <a> block above, update href + data-title + data-tag + data-desc -->
 
     <div class="empty-state" id="emptyState">NO NOTES MATCH — TRY ANOTHER SEARCH</div>
   </div>
@@ -361,44 +346,57 @@
 <footer>Personal Notes Index &nbsp;|&nbsp; Keep Learning</footer>
 
 <script>
+  // Render card inner HTML from data attributes
+  document.querySelectorAll('.note-card').forEach((card, i) => {
+    const title = card.dataset.title || '';
+    const tag   = card.dataset.tag   || '';
+    const desc  = card.dataset.desc  || '';
+    const file  = card.getAttribute('href').replace('/', '');
+
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-tag">${tag}</span>
+        <div class="card-title">${title}</div>
+        <p class="card-desc">${desc}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-file">${file}</span>
+        <span class="card-arrow">→</span>
+      </div>`;
+
+    card.style.animationDelay = (0.5 + i * 0.08) + 's';
+  });
+
   // Scroll progress
   window.addEventListener('scroll', () => {
     const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
     document.getElementById('progress').style.width = pct + '%';
   });
 
-  // Stagger card animations
-  document.querySelectorAll('.note-card').forEach((card, i) => {
-    card.style.animationDelay = (0.5 + i * 0.08) + 's';
-  });
-
   // Search
   const searchInput = document.getElementById('searchInput');
-  const cards = document.querySelectorAll('.note-card');
-  const emptyState = document.getElementById('emptyState');
-  const noteCount = document.getElementById('noteCount');
+  const emptyState  = document.getElementById('emptyState');
+  const noteCount   = document.getElementById('noteCount');
+  const allCards    = document.querySelectorAll('.note-card');
+
+  function updateCount(n) {
+    noteCount.textContent = n + (n === 1 ? ' FILE' : ' FILES');
+  }
 
   searchInput.addEventListener('input', () => {
     const q = searchInput.value.toLowerCase().trim();
     let visible = 0;
-
-    cards.forEach(card => {
-      const title = (card.dataset.title || '').toLowerCase();
-      const tag   = (card.dataset.tag   || '').toLowerCase();
-      const desc  = (card.dataset.desc  || '').toLowerCase();
-      const file  = (card.querySelector('.card-file')?.textContent || '').toLowerCase();
-
-      const match = !q || title.includes(q) || tag.includes(q) || desc.includes(q) || file.includes(q);
+    allCards.forEach(card => {
+      const text = card.dataset.title + card.dataset.tag + card.dataset.desc + card.getAttribute('href');
+      const match = !q || text.toLowerCase().includes(q);
       card.style.display = match ? '' : 'none';
       if (match) visible++;
     });
-
     emptyState.style.display = visible === 0 ? 'block' : 'none';
-    noteCount.textContent = visible + (visible === 1 ? ' FILE' : ' FILES');
+    updateCount(visible);
   });
 
-  // Update count on load
-  noteCount.textContent = cards.length + (cards.length === 1 ? ' FILE' : ' FILES');
+  updateCount(allCards.length);
 </script>
 </body>
 </html>
