@@ -157,6 +157,7 @@
   <div class="nav-pills">
     <a class="nav-pill" href="#s1">Delta & Gamma</a>
     <a class="nav-pill" href="#s2">MM Mechanics</a>
+    <a class="nav-pill" href="#s2b">Delta Matrix</a>
     <a class="nav-pill" href="#s3">Calls & Puts</a>
     <a class="nav-pill" href="#s4">VIX & Flip</a>
     <a class="nav-pill" href="#s5">GEX Charts</a>
@@ -282,6 +283,184 @@
       <div class="quiz-feedback wrong-fb">✗ Wrong. Institutions SELLING calls means MMs are BUYING calls = Long Gamma. On a drop, MMs buy shares to rebalance = cushions the move.</div>
     </div>
     <div class="score-display"><div class="score-num" id="scoreNum2">0</div><div>/ 2 correct</div></div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- S2B DELTA MATRIX -->
+<div class="section" id="s2b">
+  <div class="section-header"><div class="section-num">2B</div><div class="section-title-block"><p>The Missing Piece</p><h2>Delta Movement Matrix</h2></div></div>
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);margin-bottom:28px">This is the full picture behind every MM hedging decision. Delta moves differently for calls vs puts, on rallies vs drops — and whether MM bought or sold determines if they amplify or dampen the move.</p>
+
+  <!-- PART 1: HOW DELTA MOVES -->
+  <div class="gamma-diagram">
+    <div class="diagram-label">// Step 1 — How Delta Moves (Regardless of MM Position)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--positive);margin-bottom:12px">CALL DELTA</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px">
+            <div style="font-size:20px">📈</div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
+              <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--positive)">↑ Increases</strong> → 1.0</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px">
+            <div style="font-size:20px">📉</div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
+              <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--negative)">↓ Decreases</strong> → 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--negative);margin-bottom:12px">PUT DELTA</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px">
+            <div style="font-size:20px">📈</div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
+              <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--positive)">↑ Shrinks</strong> → 0</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px">
+            <div style="font-size:20px">📉</div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
+              <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--negative)">↓ Grows more negative</strong> → -1.0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART 2: FULL MATRIX -->
+  <div style="margin-top:32px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Step 2 — Full MM Hedging Matrix (Buy & Sell)</div>
+
+    <!-- CALLS TABLE -->
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:10px;margin-top:24px">CALL OPTIONS</div>
+    <div style="overflow-x:auto">
+    <table class="data-table" style="margin:0">
+      <tr>
+        <th>MM Position</th>
+        <th>On Rally — Delta ↑</th>
+        <th style="color:var(--accent3)">Hedge Action</th>
+        <th>On Drop — Delta ↓</th>
+        <th style="color:var(--accent3)">Hedge Action</th>
+        <th>Market Effect</th>
+      </tr>
+      <tr>
+        <td><span class="tag-neg">Short Call</span><br><small style="color:var(--muted)">(sold call)</small></td>
+        <td>Delta ↑ → <span class="tag-neg">Under-hedged</span></td>
+        <td style="color:var(--positive);font-weight:500">BUY shares ↑</td>
+        <td>Delta ↓ → <span class="tag-warn">Over-hedged</span></td>
+        <td style="color:var(--negative);font-weight:500">SELL shares ↓</td>
+        <td class="tag-neg">Amplifies both ways</td>
+      </tr>
+      <tr>
+        <td><span class="tag-pos">Long Call</span><br><small style="color:var(--muted)">(bought call)</small></td>
+        <td>Delta ↑ → <span class="tag-warn">Over-hedged</span></td>
+        <td style="color:var(--negative);font-weight:500">SELL shares ↓</td>
+        <td>Delta ↓ → <span class="tag-neg">Under-hedged</span></td>
+        <td style="color:var(--positive);font-weight:500">BUY shares ↑</td>
+        <td class="tag-pos">Dampens both ways</td>
+      </tr>
+    </table>
+    </div>
+
+    <!-- PUTS TABLE -->
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:10px;margin-top:32px">PUT OPTIONS</div>
+    <div style="overflow-x:auto">
+    <table class="data-table" style="margin:0">
+      <tr>
+        <th>MM Position</th>
+        <th>On Rally — Delta shrinks → 0</th>
+        <th style="color:var(--accent3)">Hedge Action</th>
+        <th>On Drop — Delta grows → -1.0</th>
+        <th style="color:var(--accent3)">Hedge Action</th>
+        <th>Market Effect</th>
+      </tr>
+      <tr>
+        <td><span class="tag-neg">Short Put</span><br><small style="color:var(--muted)">(sold put)</small></td>
+        <td>Delta shrinks → <span class="tag-warn">Over-hedged short</span></td>
+        <td style="color:var(--positive);font-weight:500">BUY back shorts ↑</td>
+        <td>Delta grows negative → <span class="tag-neg">Under-hedged</span></td>
+        <td style="color:var(--negative);font-weight:500">SHORT more shares ↓</td>
+        <td class="tag-neg">Amplifies both ways</td>
+      </tr>
+      <tr>
+        <td><span class="tag-pos">Long Put</span><br><small style="color:var(--muted)">(bought put)</small></td>
+        <td>Delta shrinks → <span class="tag-neg">Under-hedged</span></td>
+        <td style="color:var(--negative);font-weight:500">SHORT more shares ↓</td>
+        <td>Delta grows negative → <span class="tag-warn">Over-hedged</span></td>
+        <td style="color:var(--positive);font-weight:500">BUY back shorts ↑</td>
+        <td class="tag-pos">Dampens both ways</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- THE SINGLE RULE -->
+  <div style="margin-top:32px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:4px;position:relative">
+    <div style="position:absolute;top:-10px;left:24px;background:var(--accent);color:#000;font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;letter-spacing:3px;font-weight:700">THE MASTER RULE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+      <div style="padding:16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">UNDER-HEDGED</div>
+        <div style="font-size:13px">Trade <strong style="color:var(--negative)">WITH</strong> market direction</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">→ Amplifies the move</div>
+      </div>
+      <div style="padding:16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:8px">OVER-HEDGED</div>
+        <div style="font-size:13px">Trade <strong style="color:var(--positive)">AGAINST</strong> market direction</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">→ Dampens the move</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--border);padding-top:16px">
+      MMs never CHOOSE to buy or sell. Delta moved. Hedge is now mismatched. They are FORCED to rebalance or carry directional risk they're not paid to take.
+    </div>
+  </div>
+
+  <div class="quiz-block" id="quiz2b">
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q1</span> MM is long a put (bought put). Market rallies. Put delta shrinks toward zero. What is MM's hedge status and what do they do?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Over-hedged → buy back shorts → cushions the rally</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Under-hedged → short more shares → dampens the rally</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Perfectly hedged → no action needed</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Long put + rally = put delta shrinks = MM under-hedged (needs more short exposure) = short more shares = acts AGAINST the rally = dampens it. Long gamma absorbs moves.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Long put = long gamma. Rally = put delta shrinks = MM is now under-hedged on the short side. Must short MORE shares to rebalance. This dampens the rally.</div>
+    </div>
+    <div class="quiz-question" data-correct="0">
+      <div class="quiz-q"><span>Q2</span> MM is short a put (sold put). Market drops hard. Put delta grows more negative toward -1.0. What happens?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> Under-hedged → short MORE shares → amplifies the crash</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> Over-hedged → buy back shorts → cushions the crash</div>
+        <div class="quiz-option" data-val="2"><span class="opt-letter">C</span> Delta going negative means MM profits — no hedging needed</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Short put + drop = put delta grows more negative = MM under-hedged = must short MORE shares = crash accelerates. This is why crashes driven by put buying are so violent.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Short put = short gamma. Drop = put delta grows more negative = MM under-hedged = must short MORE shares to rebalance. This amplifies the crash — not cushions it.</div>
+    </div>
+    <div class="quiz-question" data-correct="1">
+      <div class="quiz-q"><span>Q3</span> The single master rule — when is MM forced to trade WITH market direction?</div>
+      <div class="quiz-options">
+        <div class="quiz-option" data-val="0"><span class="opt-letter">A</span> When over-hedged — they have too much exposure and must reduce</div>
+        <div class="quiz-option" data-val="1"><span class="opt-letter">B</span> When under-hedged — they don't have enough exposure and must add</div>
+      </div>
+      <button class="check-btn" onclick="checkAnswer(this)">Check Answer</button>
+      <div class="quiz-feedback correct-fb">✓ Correct! Under-hedged = not enough exposure = must buy more (in a rally) or short more (in a drop) = trades WITH direction = amplifies the move.</div>
+      <div class="quiz-feedback wrong-fb">✗ Wrong. Under-hedged = need MORE exposure = trade WITH market direction = amplify. Over-hedged = need LESS exposure = trade AGAINST direction = dampen.</div>
+    </div>
+    <div class="score-display"><div class="score-num" id="scoreNum2b">0</div><div>/ 3 correct</div></div>
   </div>
 </div>
 
@@ -781,6 +960,9 @@
     const el=document.getElementById('scoreNum'+id);
     if(el)el.textContent=correct;
   }
+
+  // handle scoreNum2b separately since it has letters
+  
 
   function revealAnswer(btn){
     const ans=btn.nextElementSibling;
