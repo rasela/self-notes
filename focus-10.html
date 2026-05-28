@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gateway Tapes — Focus 10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400&display=swap" />
+
+  <style>
+    :root {
+      --bg-primary:    #0a0a0c;
+      --bg-secondary:  #111116;
+      --bg-card:       #13131a;
+      --bg-hover:      #1a1a24;
+      --border:        rgba(255,255,255,0.07);
+      --border-accent: rgba(167,139,250,0.25);
+      --text-primary:  #e8e6f0;
+      --text-secondary:#9896a8;
+      --text-muted:    #5a5870;
+      --accent:        #a78bfa;
+      --accent-dim:    rgba(167,139,250,0.15);
+      --accent-glow:   rgba(167,139,250,0.08);
+      --gold:          #c9a96e;
+      --gold-dim:      rgba(201,169,110,0.12);
+      --font-display:  'Lora', Georgia, serif;
+      --font-ui:       'Inter', system-ui, sans-serif;
+      --font-mono:     'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      position: fixed;
+      top: 60px; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      z-index: 101;
+      width: 0%;
+      transition: width 0.1s linear;
+      opacity: 0.75;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(10,10,12,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .nav-brand span { color: var(--accent); }
+
+    .hamburger-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 44px;
+      height: 44px;
+      padding: 12px 8px;
+      cursor: pointer;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .hamburger-btn:active { background: var(--accent-glow); border-color: var(--border-accent); }
+
+    .hamburger-line {
+      display: block;
+      width: 100%;
+      height: 1.5px;
+      background: var(--text-secondary);
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+      transform-origin: center;
+    }
+    .hamburger-btn.open .hamburger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger-btn.open .hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger-btn.open .hamburger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    /* ── TOC Overlay + Drawer ── */
+    .toc-overlay {
+      position: fixed; inset: 0;
+      z-index: 90;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .toc-overlay.open { opacity: 1; pointer-events: all; }
+
+    .toc-drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: min(300px, 85vw);
+      z-index: 95;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      padding: 80px 24px 40px;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .toc-drawer.open { transform: translateX(0); }
+
+    .toc-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 20px;
+    }
+
+    .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+
+    .toc-item a {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 0;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-family: var(--font-ui);
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .toc-item a:active { color: var(--text-primary); }
+
+    .toc-item-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      min-width: 22px;
+    }
+
+    /* ── Main ── */
+    .main { padding-top: 60px; flex: 1; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      padding: 44px 20px 36px;
+      max-width: 720px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: -160px;
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse at center, rgba(167,139,250,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px; height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    .hero-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: clamp(36px, 10vw, 72px);
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin: 0 0 10px;
+      letter-spacing: -0.01em;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+
+    .hero-subtitle {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 28px;
+    }
+
+    .hero-sequence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .sequence-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      padding: 7px 13px;
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .sequence-arrow {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    /* ── Content sections ── */
+    .content-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .technique-block {
+      margin-bottom: 52px;
+      position: relative;
+      animation: fadeUp 0.55s ease both;
+    }
+    .technique-block:nth-child(1) { animation-delay: 0.05s; }
+    .technique-block:nth-child(2) { animation-delay: 0.15s; }
+    .technique-block:nth-child(3) { animation-delay: 0.25s; }
+    .technique-block:nth-child(4) { animation-delay: 0.35s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .technique-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .technique-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      padding-top: 8px;
+      min-width: 22px;
+    }
+
+    .technique-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: clamp(24px, 7vw, 38px);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    .technique-abbr {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.16em;
+      display: block;
+      margin-top: 5px;
+    }
+
+    .technique-body p {
+      font-family: var(--font-display);
+      font-size: clamp(17px, 4.8vw, 19px);
+      line-height: 1.85;
+      color: #c8c6d4;
+      margin: 0 0 18px;
+      font-weight: 400;
+    }
+    .technique-body p strong { color: #eceaf5; font-weight: 600; }
+
+    /* ── Note card ── */
+    .note-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 4px;
+      padding: 16px 18px;
+      margin: 22px 0;
+    }
+    .note-card p {
+      font-family: var(--font-ui);
+      font-size: 15px !important;
+      letter-spacing: 0.01em;
+      color: #9896a8 !important;
+      margin: 0 !important;
+      line-height: 1.7 !important;
+    }
+    .note-card p strong { color: var(--gold) !important; }
+
+    /* ── Affirmation ── */
+    .affirmation-wrapper {
+      position: relative;
+      margin: 22px 0;
+    }
+
+    .affirmation-quote {
+      font-family: var(--font-display);
+      font-size: clamp(16px, 4.5vw, 19px);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.9;
+      color: #c8c6d4;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: 4px;
+      padding: 28px 20px 24px;
+      margin: 0;
+      position: relative;
+    }
+    .affirmation-quote::before {
+      content: '\201C';
+      position: absolute;
+      top: -22px; left: 20px;
+      font-size: 80px;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.18;
+      font-style: normal;
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 52px;
+    }
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider-mark {
+      width: 5px; height: 5px;
+      border: 1px solid var(--accent);
+      transform: rotate(45deg);
+      opacity: 0.45;
+    }
+
+    /* ── Key correction banner ── */
+    .correction-banner {
+      max-width: 720px;
+      margin: 8px auto 52px;
+      padding: 0 20px;
+    }
+    .correction-inner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 18px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .correction-icon {
+      width: 22px; height: 22px; min-width: 22px;
+      margin-top: 2px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .correction-icon svg { width: 10px; height: 10px; color: var(--accent); }
+    .correction-text {
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    .correction-text strong { color: var(--accent); font-weight: 600; }
+
+    /* ── Back to top ── */
+    .back-to-top {
+      position: fixed;
+      bottom: 24px; right: 20px;
+      z-index: 80;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-to-top.visible { opacity: 1; pointer-events: all; }
+    .back-to-top:active { transform: scale(0.92); }
+    .back-to-top svg { width: 18px; height: 18px; }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 20px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* ── Desktop tweaks ── */
+    @media (min-width: 768px) {
+      .hero { padding: 80px 32px 64px; }
+      .content-section { padding: 0 32px; }
+      .section-divider { padding: 0 32px; }
+      .correction-banner { padding: 0 32px; }
+      .footer { padding: 40px 32px; }
+      .technique-body { padding-left: 38px; }
+      .hamburger-btn:hover { border-color: var(--border-accent); background: var(--accent-glow); }
+      .toc-item a:hover { color: var(--text-primary); padding-left: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Scroll progress -->
+  <div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-brand">Gateway Tapes <span>/ Focus 10</span></div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open table of contents" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </nav>
+
+  <!-- TOC overlay -->
+  <div class="toc-overlay" id="tocOverlay" aria-hidden="true"></div>
+
+  <!-- TOC drawer -->
+  <aside class="toc-drawer" id="tocDrawer" aria-label="Table of contents">
+    <p class="toc-label">Table of Contents</p>
+    <ul class="toc-list">
+      <li class="toc-item">
+        <a href="#energy-conversion-box" data-anchor="energy-conversion-box">
+          <span class="toc-item-num">01</span>Energy Conversion Box
+        </a>
+      </li>
+      <li class="toc-item">
+        <a href="#resonant-tuning" data-anchor="resonant-tuning">
+          <span class="toc-item-num">02</span>Resonant Tuning
+        </a>
+      </li>
+      <li class="toc-item">
+        <a href="#resonant-energy-balloon" data-anchor="resonant-energy-balloon">
+          <span class="toc-item-num">03</span>Resonant Energy Balloon
+        </a>
+      </li>
+      <li class="toc-item">
+        <a href="#gateway-affirmation" data-anchor="gateway-affirmation">
+          <span class="toc-item-num">04</span>The Gateway Affirmation
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero">
+      <p class="hero-eyebrow">Monroe Institute</p>
+      <h1 class="hero-title">The Four Core<br><em>Techniques</em></h1>
+      <p class="hero-subtitle">Gateway Tapes &mdash; Focus 10 Protocol</p>
+      <div class="hero-sequence">
+        <span class="sequence-badge">ECB</span>
+        <span class="sequence-arrow">&rarr;</span>
+        <span class="sequence-badge">Resonant Tuning</span>
+        <span class="sequence-arrow">&rarr;</span>
+        <span class="sequence-badge">REBAL</span>
+        <span class="sequence-arrow">&rarr;</span>
+        <span class="sequence-badge">Affirmation</span>
+      </div>
+    </section>
+
+    <!-- Techniques -->
+    <div class="content-section">
+
+      <!-- 01 ECB -->
+      <article id="energy-conversion-box" class="technique-block">
+        <div class="technique-header">
+          <span class="technique-num">01</span>
+          <div>
+            <h2 class="technique-title">Energy Conversion Box</h2>
+            <span class="technique-abbr">ECB</span>
+          </div>
+        </div>
+        <div class="technique-body">
+          <p>The purpose is to take whatever is on your mind prior to beginning the exercise and <strong>transform it into a symbol</strong> before putting it in the box. The box itself can take any form meaningful to you.</p>
+          <p>It&rsquo;s a place to put all your physical matter worries and concerns &mdash; essentially a place to dump your fears and <strong>convert them to power</strong>.</p>
+          <div class="note-card">
+            <p><strong>Note &mdash; </strong>If you don&rsquo;t have much of an internal dialogue and can leave daily distractions behind naturally, you may not need this tool much at all.</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="section-divider" aria-hidden="true"><div class="divider-mark"></div></div>
+
+      <!-- 02 RT -->
+      <article id="resonant-tuning" class="technique-block">
+        <div class="technique-header">
+          <span class="technique-num">02</span>
+          <div>
+            <h2 class="technique-title">Resonant Tuning</h2>
+            <span class="technique-abbr">RT</span>
+          </div>
+        </div>
+        <div class="technique-body">
+          <p>This consciousness tool uses breath and sound to <strong>increase, move, and balance the energy flow</strong> in your physical and energy bodies. It is an effective way to quiet your mind, enhance your energy levels, and support deep meditative states.</p>
+          <p>It is a breathing exercise to help you vitalize and charge your entire system. It promotes an <strong>accelerated gathering of your vibrational energy</strong> while reducing your internal dialogue.</p>
+          <p>In practice, it involves humming and toning along with voices on the tape, building energy before moving forward.</p>
+        </div>
+      </article>
+
+      <div class="section-divider" aria-hidden="true"><div class="divider-mark"></div></div>
+
+      <!-- 03 REBAL -->
+      <article id="resonant-energy-balloon" class="technique-block">
+        <div class="technique-header">
+          <span class="technique-num">03</span>
+          <div>
+            <h2 class="technique-title">Resonant Energy Balloon</h2>
+            <span class="technique-abbr">REBAL</span>
+          </div>
+        </div>
+        <div class="technique-body">
+          <p>You create a flow pattern with your breath &mdash; letting energy flow out of the top of your head like a fountain, allowing it to continue flowing gently down and around you, then re-entering your body through the bottoms of your feet. Then shift the flow pattern into a <strong>spiral</strong>, winding the energy down around you and coiling it back up inside you.</p>
+          <p>Your REBAL is an intensification of your own energy, helping to create a high-energy state within and around you. Operating on a principle of resonance, it acts like a <strong>sieve or filter</strong>: only energy that is equal to, or of a higher or more refined vibration than yours will have access to your energy field.</p>
+          <p>It also acts as a <strong>magnet</strong>, attracting influences and guidance from higher energy forms.</p>
+          <div class="note-card">
+            <p><strong>Note &mdash; </strong>The original name is REBAL, not &ldquo;resonance balloon.&rdquo; The REBAL is a breath-driven energy flow &mdash; not a static bubble you visualize around yourself. That is a meaningful difference in practice.</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="section-divider" aria-hidden="true"><div class="divider-mark"></div></div>
+
+      <!-- 04 Affirmation -->
+      <article id="gateway-affirmation" class="technique-block">
+        <div class="technique-header">
+          <span class="technique-num">04</span>
+          <div>
+            <h2 class="technique-title">The Gateway Affirmation</h2>
+            <span class="technique-abbr">GA</span>
+          </div>
+        </div>
+        <div class="technique-body">
+          <div class="affirmation-wrapper">
+            <blockquote class="affirmation-quote">
+              I am more than my physical body. Because I am more than physical matter, I can perceive that which is greater than the physical world. Therefore, I deeply desire to Expand, to Experience; to Know, to Understand; to Control, to Use such greater energies and energy systems as may be beneficial and constructive to me and to those who follow me. Also, I deeply desire the help and cooperation, the assistance, the understanding of those individuals whose wisdom, development, and experience are equal to or greater than my own. I ask their guidance and protection from any influence or any source that might provide me with less than my stated desires.
+            </blockquote>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /content-section -->
+
+    <!-- Key distinction banner -->
+    <div class="correction-banner">
+      <div class="correction-inner">
+        <div class="correction-icon" aria-hidden="true">
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="5" y1="2" x2="5" y2="5.5"/>
+            <circle cx="5" cy="7.5" r="0.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <p class="correction-text">
+          <strong>Key distinction &mdash; </strong>
+          The REBAL is a breath-driven energy flow: fountain out the top of the head, spiral back in through the feet.
+          It is <em>not</em> a static bubble visualized around the body.
+          That is a meaningful difference in practice.
+        </p>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+
+  <!-- Back to top -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </button>
+
+  <footer class="footer">
+    <p class="footer-text">Gateway Tapes &mdash; Focus 10 &mdash; Monroe Institute</p>
+  </footer>
+
+</div><!-- /page-wrapper -->
+
+<script>
+  // Progress bar
+  const progressBar = document.getElementById('progressBar');
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const scrollTop = el.scrollTop || document.body.scrollTop;
+    const scrollHeight = el.scrollHeight - el.clientHeight;
+    if (scrollHeight > 0) {
+      progressBar.style.width = ((scrollTop / scrollHeight) * 100) + '%';
+    }
+  }, { passive: true });
+
+  // Hamburger / TOC
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const tocOverlay   = document.getElementById('tocOverlay');
+  const tocDrawer    = document.getElementById('tocDrawer');
+
+  function openToc() {
+    hamburgerBtn.classList.add('open');
+    tocOverlay.classList.add('open');
+    tocDrawer.classList.add('open');
+    hamburgerBtn.setAttribute('aria-expanded', 'true');
+    hamburgerBtn.setAttribute('aria-label', 'Close table of contents');
+  }
+  function closeToc() {
+    hamburgerBtn.classList.remove('open');
+    tocOverlay.classList.remove('open');
+    tocDrawer.classList.remove('open');
+    hamburgerBtn.setAttribute('aria-expanded', 'false');
+    hamburgerBtn.setAttribute('aria-label', 'Open table of contents');
+  }
+
+  hamburgerBtn.addEventListener('click', () => {
+    hamburgerBtn.classList.contains('open') ? closeToc() : openToc();
+  });
+  tocOverlay.addEventListener('click', closeToc);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeToc(); });
+
+  // TOC links — smooth scroll with offset
+  tocDrawer.querySelectorAll('a[data-anchor]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const anchor = link.getAttribute('data-anchor');
+      closeToc();
+      setTimeout(() => {
+        const target = document.getElementById(anchor);
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      }, 380);
+    });
+  });
+
+  // Back to top
+  const backToTop = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }, { passive: true });
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
