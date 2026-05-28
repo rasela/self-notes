@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Psychology — The Manipulation Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ece4;
+    --muted: #888880;
+    --accent: #c8372d;
+    --accent2: #e8a030;
+    --accent3: #3a8c6e;
+    --accent4: #6b52c8;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 4rem 4rem;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 40%;
+    height: 100%;
+    background: radial-gradient(ellipse at 80% 30%, rgba(200,55,45,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    font-size: 1.05rem;
+    color: var(--muted);
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    margin-bottom: 3rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .meta-item {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .meta-item span {
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    font-size: 1.4rem;
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 4rem;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .scroll-cue::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--muted));
+  }
+
+  /* ── NAV BAR ───────────────────────────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 4rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar { display: none; }
+
+  .nav-item {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 1.1rem 1.2rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── SECTION WRAPPER ────────────────────── */
+  .section {
+    padding: 6rem 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  /* ── TECHNIQUE GRID ─────────────────────── */
+  .technique-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+  }
+
+  .technique-card {
+    background: var(--surface);
+    padding: 2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .technique-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    transition: height 0.3s ease;
+  }
+
+  .technique-card:hover::before, .technique-card.open::before {
+    height: 100%;
+  }
+
+  .technique-card.open { background: var(--surface2); }
+
+  .card-accent-red::before { background: var(--accent); }
+  .card-accent-amber::before { background: var(--accent2); }
+  .card-accent-green::before { background: var(--accent3); }
+  .card-accent-purple::before { background: var(--accent4); }
+
+  .card-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+
+  .tag-red { background: rgba(200,55,45,0.15); color: #e07060; }
+  .tag-amber { background: rgba(232,160,48,0.15); color: #e8a030; }
+  .tag-green { background: rgba(58,140,110,0.15); color: #5ab89a; }
+  .tag-purple { background: rgba(107,82,200,0.15); color: #9e8ee0; }
+
+  .card-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-summary {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+
+  .card-toggle {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-toggle::after {
+    content: '+';
+    font-size: 16px;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .technique-card.open .card-toggle::after { transform: rotate(45deg); }
+
+  /* ── EXPAND PANEL ────────────────────────── */
+  .expand-panel {
+    display: none;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    grid-column: 1 / -1;
+    animation: expandIn 0.3s ease;
+  }
+
+  .expand-panel.open { display: block; }
+
+  @keyframes expandIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-what {
+    font-size: 1rem;
+    color: #c8c4bc;
+    line-height: 1.75;
+    max-width: 780px;
+    margin-bottom: 2.5rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--border2);
+  }
+
+  .panel-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .panel-col-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-list { list-style: none; }
+
+  .panel-list li {
+    font-size: 0.9rem;
+    color: #a8a49c;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+    padding-left: 1.2rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .panel-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    font-size: 0.75rem;
+  }
+
+  .warn-list li::before { color: var(--accent); }
+  .def-list li::before { color: var(--accent3); }
+
+  /* ── FUNDAMENTALS ────────────────────────── */
+  .fundamentals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+  }
+
+  .fund-card {
+    background: var(--surface);
+    padding: 2rem;
+  }
+
+  .fund-num {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .fund-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .fund-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── DARK TRIAD ─────────────────────────── */
+  .triad-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .triad-card {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    position: relative;
+  }
+
+  .triad-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .triad-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .triad-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .triad-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── PROTECTION ─────────────────────────── */
+  .protection-steps {
+    counter-reset: step;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+  }
+
+  .step {
+    background: var(--surface);
+    padding: 2rem;
+    counter-increment: step;
+    position: relative;
+  }
+
+  .step::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── REAL WORLD ─────────────────────────── */
+  .contexts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .context-card {
+    border: 1px solid var(--border);
+    padding: 2rem;
+  }
+
+  .context-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .context-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .ctx-marketing .context-label::before { background: var(--accent); }
+  .ctx-politics .context-label::before { background: var(--accent2); }
+  .ctx-personal .context-label::before { background: var(--accent3); }
+
+  .context-heading {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .context-list { list-style: none; }
+
+  .context-list li {
+    font-size: 0.875rem;
+    color: var(--muted);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .context-list li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  /* ── FOOTER ─────────────────────────────── */
+  .footer {
+    padding: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .footer-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--border2);
+  }
+
+  .footer-note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    max-width: 380px;
+    line-height: 1.7;
+  }
+
+  /* ── UTILS ────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 5rem 1.5rem 3rem; }
+    .nav { padding: 0 1rem; }
+    .section { padding: 4rem 1.5rem; }
+    .fundamentals-grid, .triad-row, .contexts, .protection-steps { grid-template-columns: 1fr; }
+    .panel-cols { grid-template-columns: 1fr; }
+    .footer { padding: 3rem 1.5rem; }
+    .scroll-cue { left: 1.5rem; }
+  }
+
+  @media (max-width: 500px) {
+    .technique-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <p class="eyebrow">Dark Psychology — Complete Reference</p>
+  <h1 class="hero-title">The <em>art</em> of<br>manipulation<br>decoded.</h1>
+  <p class="hero-desc">A comprehensive guide to 11 psychological manipulation techniques — what they are, how they work, and how to protect yourself.</p>
+  <div class="hero-meta">
+    <div class="meta-item">Techniques<span>11</span></div>
+    <div class="meta-item">Warning signs<span>44+</span></div>
+    <div class="meta-item">Defences<span>44+</span></div>
+  </div>
+  <p class="scroll-cue">scroll to explore</p>
+</section>
+
+<!-- NAV -->
+<nav class="nav" role="navigation" aria-label="Page sections">
+  <button class="nav-item active" onclick="scrollTo('fundamentals')">Fundamentals</button>
+  <button class="nav-item" onclick="scrollTo('techniques')">Techniques</button>
+  <button class="nav-item" onclick="scrollTo('realworld')">Real world</button>
+  <button class="nav-item" onclick="scrollTo('protection')">Protection</button>
+</nav>
+
+<!-- FUNDAMENTALS -->
+<section class="section" id="fundamentals">
+  <div class="section-header fade-in">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Grasping the fundamentals</h2>
+  </div>
+
+  <div class="fundamentals-grid fade-in">
+    <div class="fund-card">
+      <p class="fund-num">01</p>
+      <p class="fund-title">What is dark psychology?</p>
+      <p class="fund-text">An area of study focused on how and why people manipulate, deceive, and coerce others. It explores the exploitation of cognitive biases, emotional reactions, and social vulnerabilities — not to endorse them, but to recognise and resist them.</p>
+    </div>
+    <div class="fund-card">
+      <p class="fund-num">02</p>
+      <p class="fund-title">Influence vs. manipulation</p>
+      <p class="fund-text">Influence guides people toward decisions they might genuinely benefit from. Manipulation controls or exploits people for personal gain, often without their informed consent. The difference is intent — and whether the other person's wellbeing matters.</p>
+    </div>
+    <div class="fund-card">
+      <p class="fund-num">03</p>
+      <p class="fund-title">The role of empathy</p>
+      <p class="fund-text">Skilled manipulators often have high empathy — they read emotions accurately. But instead of using that to connect, they use it to exploit. Recognising empathic manipulation is one of the most important skills you can develop.</p>
+    </div>
+  </div>
+
+  <div class="section-header fade-in" style="margin-top: 3rem;">
+    <span class="section-num"></span>
+    <h3 class="section-title" style="font-size: 1.6rem;">The dark triad</h3>
+  </div>
+
+  <div class="triad-row fade-in">
+    <div class="triad-card">
+      <span class="triad-icon">◈</span>
+      <p class="triad-name">Narcissism</p>
+      <p class="triad-sub">Ego-driven</p>
+      <p class="triad-text">An inflated sense of self-importance combined with a deep need for admiration. Narcissists exploit relationships to maintain their self-image, often showing little genuine empathy.</p>
+    </div>
+    <div class="triad-card">
+      <span class="triad-icon" style="color: var(--accent2);">◆</span>
+      <p class="triad-name">Machiavellianism</p>
+      <p class="triad-sub">Strategically cold</p>
+      <p class="triad-text">A calculating disposition that views people as tools. Machiavellian individuals plan manipulation long-term, maintaining a pleasant facade while pursuing personal gain at others' expense.</p>
+    </div>
+    <div class="triad-card">
+      <span class="triad-icon" style="color: var(--accent);">◉</span>
+      <p class="triad-name">Psychopathy</p>
+      <p class="triad-sub">Empathy absent</p>
+      <p class="triad-text">Characterised by a persistent lack of empathy, remorse, and emotional depth. Psychopathic traits enable manipulation without the discomfort most people feel when harming others.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNIQUES -->
+<section class="section" id="techniques">
+  <div class="section-header fade-in">
+    <span class="section-num">02</span>
+    <h2 class="section-title">The 11 techniques</h2>
+  </div>
+  <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; font-family: var(--font-mono); letter-spacing: 0.05em;" class="fade-in">Click any card to expand</p>
+
+  <div class="technique-grid fade-in" id="technique-grid"></div>
+</section>
+
+<!-- REAL WORLD -->
+<section class="section" id="realworld">
+  <div class="section-header fade-in">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Dark psychology in everyday life</h2>
+  </div>
+
+  <div class="contexts fade-in">
+    <div class="context-card ctx-marketing">
+      <p class="context-label">Advertising & marketing</p>
+      <p class="context-heading">What you buy and why</p>
+      <ul class="context-list">
+        <li>Scarcity tactics: "Only 3 left in stock!"</li>
+        <li>Anchoring: show inflated RRP beside sale price</li>
+        <li>Emotional manipulation: fear, guilt, desire in ads</li>
+        <li>Bait & switch: attractive offer that changes at checkout</li>
+        <li>Illusory truth: repeat slogans until they feel factual</li>
+        <li>Halo effect: celebrity faces = product credibility</li>
+      </ul>
+    </div>
+    <div class="context-card ctx-politics">
+      <p class="context-label">Politics & government</p>
+      <p class="context-heading">How public opinion is shaped</p>
+      <ul class="context-list">
+        <li>Fear campaigns: exaggerate threats to demand solutions</li>
+        <li>Framing bias: "tax relief" vs "tax cuts" — same thing, different feeling</li>
+        <li>Illusory truth: repeat the message until it's "known"</li>
+        <li>Halo effect: charisma assigned as competence</li>
+        <li>Misleading promises engineered to win elections</li>
+        <li>Divide & conquer: amplify social division for distraction</li>
+      </ul>
+    </div>
+    <div class="context-card ctx-personal">
+      <p class="context-label">Relationships & workplace</p>
+      <p class="context-heading">Closest to home</p>
+      <ul class="context-list">
+        <li>Gaslighting: deny shared reality to maintain control</li>
+        <li>Love bombing: flood with affection, then withdraw</li>
+        <li>Push-pull: hot and cold to create anxious attachment</li>
+        <li>White knight: rescue someone to build dependency</li>
+        <li>Mirroring: fake deep connection to earn trust fast</li>
+        <li>Foot-in-door: small favours become impossible demands</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PROTECTION -->
+<section class="section" id="protection">
+  <div class="section-header fade-in">
+    <span class="section-num">04</span>
+    <h2 class="section-title">10 ways to protect yourself</h2>
+  </div>
+
+  <div class="protection-steps fade-in">
+    <div class="step">
+      <p class="step-title">Educate yourself</p>
+      <p class="step-text">Understanding how manipulation works is the first line of defence. You can't recognise what you don't know exists.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Develop self-awareness</p>
+      <p class="step-text">Know your vulnerabilities, emotional triggers, and patterns. Manipulators exploit blind spots — awareness closes them.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Trust your intuition</p>
+      <p class="step-text">If something feels off, that feeling is data. The gut registers patterns before the conscious mind catches up.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Maintain healthy boundaries</p>
+      <p class="step-text">Manipulators probe for weak boundaries and exploit them systematically. Clear limits, communicated early, reduce opportunity.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Build emotional resilience</p>
+      <p class="step-text">Low self-esteem is a vulnerability. Confidence in your own worth makes you far less susceptible to tactics built on shame or validation-seeking.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Improve communication skills</p>
+      <p class="step-text">Being able to express yourself clearly and assertively makes it harder for others to put words in your mouth or reframe your reality.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Practice critical thinking</p>
+      <p class="step-text">Question what you're told. Ask for evidence. Consider who benefits from you believing something. Don't mistake familiarity for truth.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Recognise persuasion techniques</p>
+      <p class="step-text">Marketing, politics, and sales use these daily. Awareness doesn't make you paranoid — it makes you a more conscious participant.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Seek trusted support</p>
+      <p class="step-text">Manipulators isolate. Maintain your relationships. Outside perspectives can catch patterns you're too close to see.</p>
+    </div>
+    <div class="step">
+      <p class="step-title">Take time for decisions</p>
+      <p class="step-text">Urgency is a manipulation tool. A decision that can't wait until tomorrow is probably not as urgent as it's being made to feel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p class="footer-title">The Manipulates<br>You Need.</p>
+  <p class="footer-note">Knowledge of dark psychology is not an invitation to use it. It is armour. Understanding how these techniques work empowers you to recognise them in real time — in relationships, media, and daily life — and respond with clarity rather than react from confusion.</p>
+</footer>
+
+<script>
+  const techniques = [
+    {
+      name: "Gaslighting",
+      tag: "Identity attack", tagClass: "tag-red", accentClass: "card-accent-red",
+      summary: "Making you doubt your own memory, perception, and sanity.",
+      what: "The manipulator systematically denies your experiences, contradicts your memories, and makes you feel like you're losing your mind. Over time you stop trusting yourself and become dependent on them for your version of reality. It often escalates gradually — each incident small enough to explain away.",
+      signs: [
+        "They deny things you clearly remember happening",
+        "They call you 'too sensitive' or 'crazy' when you raise concerns",
+        "You constantly second-guess your own judgment after talking to them",
+        "You feel confused and anxious after interactions, not before"
+      ],
+      defense: [
+        "Keep a private journal — written records are harder to deny",
+        "Trust your gut even when they contradict you consistently",
+        "Talk to people outside the relationship for reality checks",
+        "Name the pattern out loud: 'You're questioning my memory again'"
+      ]
+    },
+    {
+      name: "Anchoring",
+      tag: "Decision hijack", tagClass: "tag-amber", accentClass: "card-accent-amber",
+      summary: "The first number or idea you hear shapes every judgment after it.",
+      what: "A manipulator or marketer drops an extreme reference point first — a high price, an outrageous demand. Everything you see afterwards looks reasonable by comparison, even when it objectively isn't. The anchor works because the brain uses it as a shortcut rather than independently evaluating what follows.",
+      signs: [
+        "Negotiations always open with an extreme offer",
+        "You feel like you got a deal but can't explain the baseline",
+        "Prices always sit beside a higher 'original' price",
+        "Arguments start with exaggerated claims that get 'walked back'"
+      ],
+      defense: [
+        "Research independent benchmarks before any negotiation",
+        "Set your own reference point before they present theirs",
+        "Ask: is this genuinely good, or just better than their opening?",
+        "Evaluate offers on their own merits — ignore the first number"
+      ]
+    },
+    {
+      name: "Love bombing",
+      tag: "Emotional flood", tagClass: "tag-red", accentClass: "card-accent-red",
+      summary: "Overwhelming affection designed to create fast, deep dependency.",
+      what: "The manipulator showers you with intense love, gifts, praise, and attention very early on. It feels extraordinary — but the purpose is to create an emotional bond so strong you'll tolerate future control or abuse. Once you're hooked, the warmth often disappears, replaced by demands and withdrawal.",
+      signs: [
+        "They feel like 'the one' within days or weeks",
+        "They want all your time and gradually cut off your other relationships",
+        "Grand gestures and declarations of love come unnaturally fast",
+        "You feel indebted or guilty if you don't match their intensity"
+      ],
+      defense: [
+        "Slow down — genuine love does not demand urgency",
+        "Keep your friendships and outside relationships intact",
+        "Notice if affection spikes when you try to create distance",
+        "Ask yourself: do I know this person, or just how they make me feel?"
+      ]
+    },
+    {
+      name: "Framing bias",
+      tag: "Perception shaping", tagClass: "tag-amber", accentClass: "card-accent-amber",
+      summary: "The same fact presented differently produces opposite reactions.",
+      what: "Manipulators choose words deliberately. '90% survival rate' and '10% death rate' are identical facts — they land completely differently. The frame controls your emotional response before you have a chance to think critically, steering you towards a reaction they designed.",
+      signs: [
+        "'Tax relief' vs 'tax cuts' — identical policy, different emotional charge",
+        "Headlines on the same event feel opposite depending on the outlet",
+        "You feel strong emotion about a statistic before questioning it",
+        "Positive options use warm language; alternatives use alarming language"
+      ],
+      defense: [
+        "Strip the language — restate the claim in plain neutral terms",
+        "Seek out how the opposing side frames the exact same facts",
+        "Pause before reacting emotionally to presented data",
+        "Ask: who chose these words, and what do they want me to feel?"
+      ]
+    },
+    {
+      name: "White knight method",
+      tag: "False saviour", tagClass: "tag-purple", accentClass: "card-accent-purple",
+      summary: "Playing the hero to build dependency and control.",
+      what: "The manipulator engineers or exaggerates a problem, then positions themselves as the solution. They appear selfless — but are actually constructing a power dynamic where you owe them, need them, and begin to doubt your ability to function without them. The help always comes with strings.",
+      signs: [
+        "They always seem to appear just when things go wrong",
+        "Their help comes with subtle obligations or debts",
+        "They undermine your confidence while offering solutions",
+        "You feel grateful but also slightly trapped"
+      ],
+      defense: [
+        "Trust people whose help makes you stronger, not more reliant",
+        "Ask: does this person's support foster my independence?",
+        "Watch patterns — do they help everyone, or just create situations to rescue you from?",
+        "Genuine helpers don't keep score"
+      ]
+    },
+    {
+      name: "Halo effect",
+      tag: "Bias exploit", tagClass: "tag-purple", accentClass: "card-accent-purple",
+      summary: "One good quality colours every judgment you make about them.",
+      what: "Because someone is attractive, famous, charming, or successful, we unconsciously assume they're also honest, competent, and moral. Manipulators cultivate one impressive quality to receive a free pass on everything else. One strength becomes a shield for every weakness.",
+      signs: [
+        "You trust someone's opinion in areas where they have no expertise",
+        "You forgive serious flaws because of charm or appearance",
+        "Celebrity endorsements make products feel more credible",
+        "A confident, well-dressed person is assumed to be correct"
+      ],
+      defense: [
+        "Evaluate each trait independently — charm does not equal honesty",
+        "Ask: would I trust this exact advice from a stranger?",
+        "Notice when you excuse bad behaviour because of status",
+        "Research rather than assume — one quality is not the full picture"
+      ]
+    },
+    {
+      name: "Push-pull method",
+      tag: "Emotional trap", tagClass: "tag-red", accentClass: "card-accent-red",
+      summary: "Hot and cold cycles that keep you chasing their approval.",
+      what: "Warmth, then distance. Affection, then coldness. The manipulator makes their approval unpredictable, and you become addicted to the positive moments. Intermittent reinforcement — the same mechanism behind slot machines — is the most powerful form of behavioural conditioning there is.",
+      signs: [
+        "You feel constantly off-balance — never sure where you stand",
+        "You work increasingly hard to maintain their approval",
+        "Their interest in you spikes when you try to pull away",
+        "You feel anxious when they're cold and intensely relieved when they're warm"
+      ],
+      defense: [
+        "Name the pattern — intermittent reinforcement, not love",
+        "Build your self-worth outside of this relationship",
+        "The cycle only ends when you're willing to leave it",
+        "Stable people provide stable warmth — inconsistency is not passion"
+      ]
+    },
+    {
+      name: "Foot-in-the-door",
+      tag: "Compliance creep", tagClass: "tag-amber", accentClass: "card-accent-amber",
+      summary: "A small yes leads to a big yes — your identity gets recruited.",
+      what: "After agreeing to a small request, you begin seeing yourself as 'someone who helps' or 'someone who agreed.' The manipulator then escalates, and you comply to stay consistent with that self-image. Each agreement makes the next one easier to extract — until you're doing far more than you ever would have agreed to upfront.",
+      signs: [
+        "Requests start small and grow gradually over time",
+        "You feel guilty or inconsistent if you suddenly refuse",
+        "Charities, cults, and salespeople use this systematically",
+        "You're doing far more than you ever consciously signed up for"
+      ],
+      defense: [
+        "Each request deserves independent evaluation — past agreement is not a contract",
+        "It's legitimate to say: 'I agreed to that, but not this'",
+        "Notice escalating patterns early — the first request is the tell",
+        "Pause before saying yes to anything, even small things"
+      ]
+    },
+    {
+      name: "Illusory truth effect",
+      tag: "Repetition = reality", tagClass: "tag-red", accentClass: "card-accent-red",
+      summary: "Repeated exposure makes false things feel true.",
+      what: "The brain uses familiarity as a shortcut for truth. If you've heard it before, it feels more credible — even if it's demonstrably wrong. Manipulators, propagandists, and advertisers exploit this by simply repeating claims relentlessly. You don't argue a lie into truth — you say it until people stop questioning it.",
+      signs: [
+        "Slogans and talking points repeat constantly across media",
+        "A claim feels true even though you can't remember seeing evidence for it",
+        "You've 'always known' something but can't trace where you learned it",
+        "Effective propaganda doesn't argue — it just repeats"
+      ],
+      defense: [
+        "Familiarity is not evidence — ask what actually supports this",
+        "Fact-check using independent sources, not the same ecosystem",
+        "Diversify where your information comes from",
+        "Be especially sceptical of things that feel 'obviously true'"
+      ]
+    },
+    {
+      name: "Mirroring",
+      tag: "False connection", tagClass: "tag-green", accentClass: "card-accent-green",
+      summary: "Copying your behaviour to manufacture artificial rapport.",
+      what: "Natural mirroring is normal in human bonding. Manipulative mirroring is calculated — they study your language, values, gestures, and interests, then reflect them back so you feel deeply understood. It's a shortcut to trust that bypasses the time and genuine experience that real connection requires.",
+      signs: [
+        "They seem to share all your interests and values almost immediately",
+        "They adopt your vocabulary and communication style quickly",
+        "They seem to know exactly what you want to hear",
+        "The connection feels intense but slightly unreal or too perfect"
+      ],
+      defense: [
+        "Real connection builds over time — be wary of instant depth",
+        "Test consistency: do they behave this way with everyone?",
+        "Share something unpredictable and notice how it gets reflected",
+        "Trust connections that survive disagreement, not just agreement"
+      ]
+    },
+    {
+      name: "Bait & switch",
+      tag: "Deceptive offer", tagClass: "tag-amber", accentClass: "card-accent-amber",
+      summary: "Attract with something appealing, deliver something worse.",
+      what: "You're drawn in by an attractive offer — a price, a promise, a deal. Once you're emotionally or financially committed, the original offer disappears and you're redirected toward something worse. The sunk-cost feeling makes you accept rather than walk away, even when you know you've been deceived.",
+      signs: [
+        "The advertised item is 'sold out' — but a pricier one is available",
+        "Relationship promises change significantly once you're committed",
+        "Job descriptions don't match the actual role after you've joined",
+        "You feel too invested to walk away from a worse deal"
+      ],
+      defense: [
+        "Get promises in writing before committing anything",
+        "Know your walk-away point before entering any deal",
+        "Sunk cost is not a reason to stay — cut losses early",
+        "Treat high-pressure urgency as a warning sign, not a deadline"
+      ]
+    }
+  ];
+
+  const grid = document.getElementById('technique-grid');
+  let openCard = null;
+  let openPanel = null;
+
+  techniques.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = `technique-card ${t.accentClass}`;
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-expanded', 'false');
+    card.innerHTML = `
+      <span class="card-tag ${t.tagClass}">${t.tag}</span>
+      <p class="card-name">${t.name}</p>
+      <p class="card-summary">${t.summary}</p>
+      <p class="card-toggle">Details</p>
+    `;
+
+    const panel = document.createElement('div');
+    panel.className = 'expand-panel';
+    panel.innerHTML = `
+      <p class="panel-what">${t.what}</p>
+      <div class="panel-cols">
+        <div>
+          <p class="panel-col-title">Signs to watch for</p>
+          <ul class="panel-list warn-list">
+            ${t.signs.map(s => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+        <div>
+          <p class="panel-col-title">How to defend yourself</p>
+          <ul class="panel-list def-list">
+            ${t.defense.map(d => `<li>${d}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const toggle = () => {
+      if (card.classList.contains('open')) {
+        card.classList.remove('open');
+        panel.classList.remove('open');
+        card.setAttribute('aria-expanded', 'false');
+        openCard = null; openPanel = null;
+      } else {
+        if (openCard) {
+          openCard.classList.remove('open');
+          openCard.setAttribute('aria-expanded', 'false');
+        }
+        if (openPanel) openPanel.classList.remove('open');
+        card.classList.add('open');
+        panel.classList.add('open');
+        card.setAttribute('aria-expanded', 'true');
+        openCard = card; openPanel = panel;
+        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+      }
+    };
+
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }});
+
+    grid.appendChild(card);
+    grid.appendChild(panel);
+  });
+
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = ['top', 'fundamentals', 'techniques', 'realworld', 'protection'];
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        const idx = sections.indexOf(id) - 1;
+        navItems.forEach((n, i) => n.classList.toggle('active', i === idx));
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const fadeObs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = `${i * 0.05}s`;
+        e.target.classList.add('visible');
+        fadeObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  fadeEls.forEach(el => fadeObs.observe(el));
+</script>
+</body>
+</html>
