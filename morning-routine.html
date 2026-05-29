@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Morning Routine — The System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"/>
+<style>
+:root {
+  --bg:       #0c0f0a;
+  --bg2:      #111410;
+  --bgc:      #161a12;
+  --border:   rgba(255,255,255,0.07);
+  --bora:     rgba(134,188,80,0.2);
+  --tp:       #e6ead8;
+  --ts:       #8a9178;
+  --tm:       #505a40;
+  --acc:      #86bc50;
+  --accdim:   rgba(134,188,80,0.08);
+  --gold:     #c8a84b;
+  --golddim:  rgba(200,168,75,0.1);
+  --amber:    #d4844a;
+  --amberdim: rgba(212,132,74,0.1);
+  --blue:     #5b9bd4;
+  --bluedim:  rgba(91,155,212,0.08);
+  --serif:    'DM Serif Display', Georgia, serif;
+  --sans:     'DM Sans', system-ui, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tp);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.25}
+
+#prog{position:fixed;top:52px;left:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--gold));z-index:101;width:0;transition:width .1s linear}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(12,15,10,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.brand{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--tm)}
+.brand span{color:var(--acc)}
+.hbtn{display:flex;flex-direction:column;gap:5px;width:40px;height:40px;padding:11px 7px;cursor:pointer;background:none;border:1px solid var(--border);border-radius:8px;justify-content:center;transition:border-color .2s}
+.hline{display:block;width:100%;height:1.5px;background:var(--ts);transition:all .3s cubic-bezier(.23,1,.32,1);transform-origin:center}
+.hbtn.open .hline:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hbtn.open .hline:nth-child(2){opacity:0;transform:scaleX(0)}
+.hbtn.open .hline:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+.overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(290px,86vw);z-index:95;background:var(--bg2);border-left:1px solid var(--border);padding:68px 20px 32px;transform:translateX(100%);transition:transform .4s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.toc-label{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--tm);margin-bottom:16px}
+.toc-list{list-style:none}
+.toc-list a{display:flex;align-items:center;gap:12px;padding:14px 0;text-decoration:none;color:var(--ts);font-family:var(--sans);font-size:15px;border-bottom:1px solid var(--border);transition:color .2s;-webkit-tap-highlight-color:transparent}
+.toc-list a:active{color:var(--tp)}
+.toc-tag{font-family:var(--sans);font-size:9px;letter-spacing:.1em;padding:3px 8px;border:1px solid var(--bora);border-radius:2px;color:var(--acc);background:var(--accdim);white-space:nowrap;flex-shrink:0}
+.toc-tag.amber{border-color:rgba(212,132,74,.3);color:var(--amber);background:var(--amberdim)}
+.toc-tag.blue{border-color:rgba(91,155,212,.3);color:var(--blue);background:var(--bluedim)}
+.toc-tag.gold{border-color:rgba(200,168,75,.3);color:var(--gold);background:var(--golddim)}
+
+main{padding-top:52px}
+
+.hero{padding:36px 16px 32px;max-width:680px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:300px;height:300px;background:radial-gradient(ellipse,rgba(134,188,80,.05) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(36px,11vw,68px);font-weight:400;line-height:1.05;margin-bottom:10px}
+h1 em{font-style:italic;color:var(--acc)}
+.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:24px;line-height:1.6}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:20px}
+.badge{font-family:var(--sans);font-size:10px;letter-spacing:.07em;padding:6px 12px;border:1px solid var(--bora);border-radius:3px;color:var(--acc);background:var(--accdim)}
+.badge.amber{border-color:rgba(212,132,74,.3);color:var(--amber);background:var(--amberdim)}
+.badge.blue{border-color:rgba(91,155,212,.3);color:var(--blue);background:var(--bluedim)}
+.badge.gold{border-color:rgba(200,168,75,.3);color:var(--gold);background:var(--golddim)}
+.arrow{color:var(--tm);font-size:11px}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+.section-eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--tm);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-eyebrow::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.technique{margin-bottom:44px;animation:fu .5s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.tech-num{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+.tech-num.amber{color:var(--amber)}
+.tech-num.blue{color:var(--blue)}
+.tech-num.gold{color:var(--gold)}
+.tech-title{font-family:var(--serif);font-size:clamp(24px,8vw,38px);font-weight:400;line-height:1.1;margin-bottom:4px}
+.tech-abbr{font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm)}
+
+.tech-body p{font-family:var(--sans);font-size:clamp(15px,4vw,17px);line-height:1.85;color:#b8bda8;margin-bottom:16px}
+.tech-body p strong{color:#dde1ce;font-weight:600}
+.tech-body p:last-child{margin-bottom:0}
+
+.tip{background:var(--bgc);border:1px solid var(--border);border-top:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
+.tip p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.tip p strong{color:var(--acc) !important;font-weight:600}
+.tip.amber{border-top-color:var(--amber)}
+.tip.amber p strong{color:var(--amber) !important}
+.tip.blue{border-top-color:var(--blue)}
+.tip.blue p strong{color:var(--blue) !important}
+.tip.gold{border-top-color:var(--gold)}
+.tip.gold p strong{color:var(--gold) !important}
+
+.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
+.note p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.note p strong{color:var(--gold) !important}
+.note.green{border-left-color:var(--acc)}
+.note.green p strong{color:var(--acc) !important}
+
+.steps{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.step{background:var(--bgc);border:1px solid var(--border);border-radius:4px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.step-n{font-family:var(--sans);font-size:10px;letter-spacing:.1em;color:var(--acc);min-width:18px;padding-top:3px;flex-shrink:0}
+.step-n.amber{color:var(--amber)}
+.step-n.blue{color:var(--blue)}
+.step-n.gold{color:var(--gold)}
+.step-body{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts)}
+.step-body strong{color:var(--tp);font-weight:600;display:block;margin-bottom:3px}
+
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.pill{font-family:var(--sans);font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--ts)}
+
+.supp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+@media(min-width:480px){.supp-grid{grid-template-columns:1fr 1fr 1fr}}
+.supp-card{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:14px;position:relative;overflow:hidden}
+.supp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.supp-card.green::before{background:var(--acc)}
+.supp-card.purple::before{background:#9b6dcc}
+.supp-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tp);margin-bottom:4px}
+.supp-role{font-family:var(--sans);font-size:12px;color:var(--ts);line-height:1.5;margin-bottom:8px}
+.supp-dose{font-family:var(--sans);font-size:11px;color:var(--tm);letter-spacing:.04em}
+
+.div{display:flex;align-items:center;gap:14px;margin:4px 0 44px}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.35}
+
+.highlight-box{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:20px 18px;margin:16px 0}
+.highlight-box h4{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--tp);margin-bottom:8px}
+.highlight-box p{font-family:var(--sans);font-size:14px;line-height:1.7;color:var(--ts)}
+.highlight-box p strong{color:var(--tp);font-weight:600}
+
+.protein-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.protein-card{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:14px}
+.protein-card .label{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm);margin-bottom:6px}
+.protein-card .val{font-family:var(--serif);font-size:28px;color:var(--acc)}
+.protein-card .unit{font-family:var(--sans);font-size:12px;color:var(--ts);margin-top:2px}
+
+#btt{position:fixed;bottom:20px;right:16px;z-index:80;width:42px;height:42px;border-radius:50%;background:var(--bgc);border:1px solid var(--bora);color:var(--acc);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;-webkit-tap-highlight-color:transparent}
+#btt.vis{opacity:1;pointer-events:all}
+#btt:active{transform:scale(.92)}
+
+footer{border-top:1px solid var(--border);padding:24px 16px;text-align:center;margin-top:8px}
+footer p{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tm)}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">Morning <span>/ System</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#theory" data-a="theory"><span class="toc-tag">↗</span>The Three Systems</a></li>
+    <li><a href="#no-phone" data-a="no-phone"><span class="toc-tag">1</span>No Phone</a></li>
+    <li><a href="#supplements" data-a="supplements"><span class="toc-tag">2</span>Supplements</a></li>
+    <li><a href="#sunlight" data-a="sunlight"><span class="toc-tag">3</span>Sunlight + Run</a></li>
+    <li><a href="#cold" data-a="cold"><span class="toc-tag">4</span>Cold Shower</a></li>
+    <li><a href="#protein" data-a="protein"><span class="toc-tag">5</span>Protein</a></li>
+    <li><a href="#bdnf" data-a="bdnf"><span class="toc-tag amber">+</span>BDNF Stack</a></li>
+    <li><a href="#discipline" data-a="discipline"><span class="toc-tag blue">↑</span>Discipline Layer</a></li>
+  </ul>
+</aside>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Neuroscience-backed</p>
+    <h1>The Morning<br><em>System</em></h1>
+    <p class="subtitle">A 1-hour routine built on dopamine, circadian biology & neuroplasticity</p>
+    <div class="seq">
+      <span class="badge">No phone</span>
+      <span class="arrow">→</span>
+      <span class="badge">Supplements</span>
+      <span class="arrow">→</span>
+      <span class="badge amber">Sunlight + Run</span>
+      <span class="arrow">→</span>
+      <span class="badge blue">Cold shower</span>
+      <span class="arrow">→</span>
+      <span class="badge gold">Protein</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- Theory section -->
+    <section id="theory">
+      <div class="section-eyebrow">The theory</div>
+
+      <div class="technique">
+        <div class="tech-head">
+          <div class="tech-num">Why it works</div>
+          <h2 class="tech-title">Three Systems,<br>One Window</h2>
+          <p class="tech-abbr">Dopamine · Circadian · Neuroplasticity</p>
+        </div>
+        <div class="tech-body">
+          <p>The routine targets three interlocking biological systems simultaneously. Each step is chosen because it moves <strong>all three levers at once</strong> — not just one. Skip a step and the chain weakens. Stack them and the effects compound.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <span class="step-n">01</span>
+            <div class="step-body">
+              <strong>Dopamine regulation</strong>
+              Goal: keep your baseline clean, then earn the spike through action — not a screen. The prefrontal cortex is exquisitely sensitive to dopamine first thing in the morning. Flood it too fast (phone) and focus degrades for hours. Protect it, and it compounds.
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n amber">02</span>
+            <div class="step-body">
+              <strong>Circadian anchoring</strong>
+              Goal: pull the cortisol spike earlier and sharper. Bright morning light triggers your suprachiasmatic nucleus — the brain's master clock — and clears residual melatonin. Without this signal, you stay in a biological twilight state regardless of how awake you feel.
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n blue">03</span>
+            <div class="step-body">
+              <strong>Neuroplasticity window</strong>
+              Goal: maximise BDNF (brain-derived neurotrophic factor) before you start work. BDNF is called "fertiliser for the brain" — it makes neurons better at forming new connections. Exercise spikes it. Cold extends it. Your first few hours of work then happen inside this elevated window.
+            </div>
+          </div>
+        </div>
+
+        <div class="note green">
+          <p><strong>The key insight —</strong> These three systems are tightly coupled. Cortisol supports dopamine availability in the prefrontal cortex. Exercise raises both cortisol and BDNF simultaneously. The cold shower then adds a norepinephrine spike on top. Each step amplifies the previous one — which is why order matters.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Step 1: No Phone -->
+    <article id="no-phone" class="technique">
+      <div class="tech-head">
+        <div class="tech-num">Step 1 — 0 min</div>
+        <h2 class="tech-title">No Phone</h2>
+        <p class="tech-abbr">Protect your dopamine baseline</p>
+      </div>
+      <div class="tech-body">
+        <p>When you wake, your prefrontal cortex is coming back online — the part of the brain that handles memory, planning, and sustained attention. It is <strong>extremely sensitive to dopamine in this window</strong>. Too little and you struggle to focus. Too much, too fast, and your brain gets flooded with noise.</p>
+        <p>Phone notifications, social feeds, and messages deliver rapid, unpredictable dopamine hits — exactly what the prefrontal cortex doesn't need first thing. The result isn't just distraction during the notification; it's <strong>degraded focus for the rest of the morning</strong>, a compulsive urge to keep checking, and difficulty settling into deep work.</p>
+        <p>Brains with dysregulated dopamine systems are especially vulnerable to this. The contrast between your resting baseline and the phone-induced spike is larger, and the subsequent crash is harder. The fix is simple: don't touch your phone for the first 30 minutes.</p>
+      </div>
+      <div class="tip">
+        <p><strong>What to do instead —</strong> Put the phone face-down before you sleep. In the morning window, do your supplement intake, drink water, get dressed. Let the prefrontal cortex come online gently before you give it anything to react to.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Step 2: Supplements -->
+    <article id="supplements" class="technique">
+      <div class="tech-head">
+        <div class="tech-num">Step 2 — 5 min</div>
+        <h2 class="tech-title">Supplements</h2>
+        <p class="tech-abbr">Take early, let them absorb while you move</p>
+      </div>
+      <div class="tech-body">
+        <p>Take your supplements immediately after waking with a full glass of water. The timing matters: <strong>by the time you finish your run and cold shower, they've had 30–40 minutes to begin absorbing</strong> — which means their effect peaks right as you sit down to work.</p>
+        <p>This ordering is deliberate. Exercise increases blood flow and accelerates absorption. Taking supplements before your workout is more effective than taking them afterward.</p>
+      </div>
+      <div class="tip">
+        <p><strong>Already taking —</strong> Omega-3 (DHA) + Magnesium glycinate. Both are strong BDNF supporters and cover the neuroplasticity and sleep quality angles. See the BDNF section for what these specifically do.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Step 3: Sunlight + Run -->
+    <article id="sunlight" class="technique">
+      <div class="tech-head">
+        <div class="tech-num amber">Step 3 — 20 min</div>
+        <h2 class="tech-title">Sunlight + Run</h2>
+        <p class="tech-abbr">Your biggest lever — do these together</p>
+      </div>
+      <div class="tech-body">
+        <p>This is the highest-value block in the routine. Do both simultaneously — run outside — so you get the <strong>circadian anchor and the neuroplasticity spike in a single 20-minute window</strong>.</p>
+
+        <p><strong>What sunlight does:</strong> Morning light (even on a cloudy day) hits specialised photoreceptors in your eyes and triggers a cortisol spike via the suprachiasmatic nucleus — your brain's master clock. This spike is healthy and essential. It's what gives you alertness, motivation, and focus in the first half of the day. Without it, that spike remains small and weak, and you stay in a biological twilight state. Outdoor light on a cloudy day is still 10,000–25,000 lux. Indoor light rarely exceeds 500 lux. Your eyes can tell the difference.</p>
+
+        <p><strong>What the run does:</strong> Cardio exercise — even 15–20 minutes — triggers the largest release of BDNF of any morning activity. It also releases dopamine, norepinephrine, and serotonin, which increase focus and mood for many hours afterward. Consistency matters far more than intensity here. A steady 20-minute run every day produces better results than an occasional hard effort.</p>
+
+        <p><strong>Why they stack:</strong> Cortisol and dopamine are tightly linked. A strong cortisol spike from sunlight directly supports dopamine availability in the prefrontal cortex — the exact area that governs focus and impulse control. Exercise then adds its own dopamine and BDNF on top. The two effects multiply, not add.</p>
+      </div>
+      <div class="tip amber">
+        <p><strong>Cloudy days —</strong> Still go outside. Cloud cover blocks some light but ambient outdoor light is always dramatically higher than indoors. If sunlight is genuinely unavailable (winter, no windows), a 10,000 lux light therapy lamp positioned at eye level for 10 minutes works as a substitute.</p>
+      </div>
+      <div class="note">
+        <p><strong>On the melatonin side —</strong> Morning light also suppresses melatonin faster. The sleep hormone often lingers into the morning — especially in people with a naturally delayed circadian rhythm. This is a chemical reason for grogginess that no amount of willpower fixes. Bright light clears it.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Step 4: Cold Shower -->
+    <article id="cold" class="technique">
+      <div class="tech-head">
+        <div class="tech-num blue">Step 4 — 10 min</div>
+        <h2 class="tech-title">Cold Shower</h2>
+        <p class="tech-abbr">The norepinephrine multiplier</p>
+      </div>
+      <div class="tech-body">
+        <p>A cold shower — even just 30–60 seconds of cold at the end of a warm shower — triggers a significant release of norepinephrine and dopamine in the brain. These are the same neurochemicals that exercise releases, but <strong>cold water produces a larger and longer-lasting spike</strong>.</p>
+        <p>Norepinephrine is the neurotransmitter most directly linked to alertness, attention, and executive function. This is relevant: it's the same system that most attention-support medications target. Cold water is a direct, pharmacology-free way to raise it meaningfully.</p>
+        <p>The second effect is behavioural. In psychology, this is called <strong>cognitive consistency</strong>: every action you take is a vote for the kind of person you are. A cold shower is a vote for someone who does hard things. That vote makes the next hard thing — a difficult task, a boring meeting, sustained focus — incrementally easier. How you do one thing is how you do everything.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n blue">→</span>
+          <div class="step-body"><strong>Start warm</strong>Normal warm shower. Use it to wind down the run, wash, come back to yourself.</div>
+        </div>
+        <div class="step">
+          <span class="step-n blue">→</span>
+          <div class="step-body"><strong>End cold</strong>Turn to cold for the last 30–60 seconds minimum. Build to 2 minutes over weeks. Breathe slowly — do not hold your breath.</div>
+        </div>
+        <div class="step">
+          <span class="step-n blue">→</span>
+          <div class="step-body"><strong>Don't dry immediately</strong>Let yourself air-dry for 30 seconds. The continued mild cold extends the norepinephrine response slightly.</div>
+        </div>
+      </div>
+      <div class="tip blue">
+        <p><strong>Consistency over intensity —</strong> 30 seconds of cold every morning beats 5 minutes of cold twice a week. The neurochemical and behavioural effects are both primarily driven by regularity, not heroics.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Step 5: Protein -->
+    <article id="protein" class="technique">
+      <div class="tech-head">
+        <div class="tech-num gold">Step 5 — 20 min</div>
+        <h2 class="tech-title">Protein Breakfast</h2>
+        <p class="tech-abbr">Stable energy + dopamine synthesis substrate</p>
+      </div>
+      <div class="tech-body">
+        <p>Most people eat carbohydrates and sugar for breakfast. This causes a spike in blood glucose, followed by a crash 60–90 minutes later — jitteriness, fatigue, and difficulty concentrating exactly when you need to be at your best. The fix is simple: <strong>aim for 80% of your breakfast calories to come from protein</strong>.</p>
+        <p>Protein does two things for this system. First, it provides stable energy — no spike, no crash, smooth glucose throughout the morning. Second, protein is the raw material for neurotransmitter synthesis. <strong>Tyrosine</strong> (abundant in whey, eggs, and chicken) is the direct precursor to dopamine and norepinephrine. Eating protein in the morning literally provides the building blocks your brain needs to sustain the neurochemical state you've just created.</p>
+      </div>
+
+      <div class="protein-row">
+        <div class="protein-card">
+          <div class="label">Your shake</div>
+          <div class="val">30g</div>
+          <div class="unit">whey protein · fast-absorbing</div>
+        </div>
+        <div class="protein-card">
+          <div class="label">Daily target</div>
+          <div class="val">~1.8g</div>
+          <div class="unit">per kg bodyweight · total day</div>
+        </div>
+      </div>
+
+      <div class="tech-body">
+        <p><strong>Why whey in the morning specifically:</strong> Whey is a fast protein — it digests quickly and raises blood amino acids within 30 minutes. For the morning window, that speed matters. The tyrosine gets to your brain fast, right when you need dopamine support most. Slower proteins like casein are better suited for night.</p>
+        <p><strong>Is 30g enough?</strong> For a single meal, yes — research suggests each meal can effectively use 20–40g. Going higher doesn't increase the benefit. The gap to watch is lunch and mid-afternoon. Appetite suppression from stimulants is common during the day, and most people compensate by overeating at night — the worst pattern for stable energy. A small but protein-dense lunch (Greek yogurt, eggs, a handful of nuts) prevents this.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <span class="step-n gold">→</span>
+          <div class="step-body"><strong>Morning: 30g whey shake</strong>Your current routine. Solid. Tyrosine-rich, fast-absorbing, no crash.</div>
+        </div>
+        <div class="step">
+          <span class="step-n gold">→</span>
+          <div class="step-body"><strong>Pair with something small</strong>Eggs, Greek yogurt, cottage cheese, or a small amount of healthy fat (avocado, nuts). Don't eat carbs alone.</div>
+        </div>
+        <div class="step">
+          <span class="step-n gold">→</span>
+          <div class="step-body"><strong>Don't skip lunch</strong>Even if you're not hungry mid-day. 20–30g protein at lunch maintains the energy curve and prevents the evening overeating pattern.</div>
+        </div>
+      </div>
+
+      <div class="tip gold">
+        <p><strong>The daily maths —</strong> At 75–80kg bodyweight, your target is roughly 135–175g protein per day. 30g in the morning gets you ~20%. The other 80% needs to come from meals. Dinner alone can't cover it reliably — distribute it.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- BDNF Stack -->
+    <section id="bdnf">
+      <div class="section-eyebrow">Supplement stack</div>
+
+      <div class="technique">
+        <div class="tech-head">
+          <div class="tech-num amber">Supporting layer</div>
+          <h2 class="tech-title">BDNF Stack</h2>
+          <p class="tech-abbr">What you already take · what amplifies further</p>
+        </div>
+        <div class="tech-body">
+          <p>BDNF (brain-derived neurotrophic factor) is the chemical that makes neurons better at forming new connections — the biological substrate of learning, memory, and cognitive adaptability. Exercise is the biggest trigger. These supplements <strong>amplify and sustain that effect</strong>.</p>
+          <p>You're already covering two of the most important bases. Here's the full picture:</p>
+        </div>
+
+        <p style="font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin:16px 0 10px">Already taking — direct BDNF boost</p>
+        <div class="supp-grid">
+          <div class="supp-card green">
+            <div class="supp-name">Omega-3 DHA</div>
+            <div class="supp-role">Directly boosts BDNF gene expression in brain tissue. Also supports cell membrane fluidity — how well neurons communicate.</div>
+            <div class="supp-dose">1–2g DHA daily · with food</div>
+          </div>
+          <div class="supp-card green">
+            <div class="supp-name">Magnesium glycinate</div>
+            <div class="supp-role">Supports BDNF production and improves sleep quality — poor sleep crushes BDNF levels the next day. The glycinate form is the most bioavailable.</div>
+            <div class="supp-dose">200–400mg · at night</div>
+          </div>
+        </div>
+
+        <p style="font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tm);margin:20px 0 10px">High-evidence additions to consider</p>
+        <div class="supp-grid">
+          <div class="supp-card green">
+            <div class="supp-name">Lion's Mane</div>
+            <div class="supp-role">Stimulates NGF (nerve growth factor) and BDNF directly. The most targeted neuroplasticity supplement available. Noticeable over 4–8 weeks.</div>
+            <div class="supp-dose">500–1000mg · morning · 4–8 weeks</div>
+          </div>
+          <div class="supp-card green">
+            <div class="supp-name">Vitamin D3</div>
+            <div class="supp-role">Deficiency significantly blunts BDNF production. Extremely common in winter months. Check your levels — most people need supplementation.</div>
+            <div class="supp-dose">2000–5000 IU + K2 · morning</div>
+          </div>
+          <div class="supp-card purple">
+            <div class="supp-name">Creatine</div>
+            <div class="supp-role">Primarily known for muscle, but improves prefrontal cortex energy metabolism directly. Growing evidence for cognitive benefit — not just physical.</div>
+            <div class="supp-dose">3–5g daily · no loading needed</div>
+          </div>
+          <div class="supp-card purple">
+            <div class="supp-name">Ashwagandha</div>
+            <div class="supp-role">Lowers cortisol when chronically elevated — important because sustained high cortisol actively suppresses BDNF. An indirect but important protector.</div>
+            <div class="supp-dose">300–600mg · morning or night</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <p><strong>Where to start —</strong> Lion's Mane + Vitamin D3 is the highest-evidence pair to add next. Creatine is worth adding if cognitive energy is a priority. Always check new supplements against anything you're currently taking.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Discipline layer -->
+    <section id="discipline">
+      <div class="section-eyebrow">Psychology</div>
+
+      <div class="technique">
+        <div class="tech-head">
+          <div class="tech-num blue">Supporting layer</div>
+          <h2 class="tech-title">Discipline Layer</h2>
+          <p class="tech-abbr">Cognitive consistency · how you do one thing</p>
+        </div>
+        <div class="tech-body">
+          <p>There is a psychological mechanism running underneath the neurochemistry. In psychology it's called <strong>cognitive consistency</strong>: every action you take is a vote for the kind of person you are. The brain wants to act in line with how it has acted before.</p>
+          <p>This is why the cold shower matters beyond the norepinephrine spike. It is a hard thing done first thing. That vote — for being someone who does hard things — makes the next hard thing marginally easier. Sustained focus on a boring task, declining an impulse, sitting with discomfort rather than reaching for the phone — all of these become slightly more available to you because you already voted for them at 7am.</p>
+          <p>The routine compounds over time not just biologically but behaviourally. <strong>How you do one thing is how you do everything.</strong> The cold shower and the 20-minute run are small repetitions of a larger identity claim.</p>
+        </div>
+        <div class="highlight-box">
+          <h4>On consistency vs. perfection</h4>
+          <p>Three steps on a hard morning is a win, not a failure. The biological effects are real even at partial completion. What the routine can't survive is abandonment — a long break resets the behavioural vote count. <strong>Show up imperfectly, every day, over weeks.</strong> That is the actual protocol.</p>
+        </div>
+        <div class="tip blue">
+          <p><strong>Already proven —</strong> You ran today and noticed the energy difference. That single data point is the most reliable predictor of long-term follow-through. You know it works. Now the only question is repetition.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Quick reference -->
+    <section>
+      <div class="section-eyebrow">Quick reference</div>
+      <div class="technique">
+        <div class="tech-head">
+          <h2 class="tech-title">The 1-Hour Stack</h2>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-n">0 min</span>
+            <div class="step-body"><strong>No phone</strong>Face down. Let the prefrontal cortex come online without interference. First 30 minutes minimum.</div>
+          </div>
+          <div class="step">
+            <span class="step-n">5 min</span>
+            <div class="step-body"><strong>Supplements + water</strong>Take everything with a full glass of water. They absorb during the run.</div>
+          </div>
+          <div class="step">
+            <span class="step-n amber">25 min</span>
+            <div class="step-body"><strong>Outdoor run in daylight</strong>15–20 minutes cardio. Outside. Even cloudy. Circadian anchor + BDNF spike + dopamine.</div>
+          </div>
+          <div class="step">
+            <span class="step-n blue">35 min</span>
+            <div class="step-body"><strong>Cold shower</strong>End with 30–60 seconds cold. Norepinephrine spike. Discipline vote.</div>
+          </div>
+          <div class="step">
+            <span class="step-n gold">55 min</span>
+            <div class="step-body"><strong>Protein breakfast</strong>30g whey shake + eggs or Greek yogurt. No carbs alone. Tyrosine for dopamine synthesis.</div>
+          </div>
+          <div class="step">
+            <span class="step-n">~60 min</span>
+            <div class="step-body"><strong>Start work</strong>Dopamine stable. Cortisol high. BDNF elevated. Norepinephrine up. The window is open.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Morning System · Built from neuroscience + daily practice</p>
+  </footer>
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+  const prog = document.getElementById('prog');
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const s = el.scrollTop || document.body.scrollTop;
+    const h = el.scrollHeight - el.clientHeight;
+    if (h > 0) prog.style.width = (s / h * 100) + '%';
+  }, {passive:true});
+
+  const hbtn = document.getElementById('hbtn');
+  const overlay = document.getElementById('overlay');
+  const drawer = document.getElementById('drawer');
+
+  const openNav = () => { hbtn.classList.add('open'); overlay.classList.add('open'); drawer.classList.add('open'); hbtn.setAttribute('aria-expanded','true'); };
+  const closeNav = () => { hbtn.classList.remove('open'); overlay.classList.remove('open'); drawer.classList.remove('open'); hbtn.setAttribute('aria-expanded','false'); };
+
+  hbtn.addEventListener('click', () => hbtn.classList.contains('open') ? closeNav() : openNav());
+  overlay.addEventListener('click', closeNav);
+  document.addEventListener('keydown', e => e.key === 'Escape' && closeNav());
+
+  drawer.querySelectorAll('a[data-a]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-a');
+      closeNav();
+      setTimeout(() => {
+        const t = document.getElementById(id);
+        if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 64, behavior:'smooth'});
+      }, 400);
+    });
+  });
+
+  const btt = document.getElementById('btt');
+  window.addEventListener('scroll', () => {
+    btt.classList.toggle('vis', window.scrollY > 280);
+  }, {passive:true});
+  btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
