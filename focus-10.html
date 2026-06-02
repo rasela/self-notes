@@ -155,9 +155,21 @@ h1 em{font-style:italic;color:var(--gold)}
 footer{border-top:1px solid var(--border);padding:20px 16px;text-align:center;margin-top:8px}
 footer p{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tm)}
 
+/* ===== protocol cta ===== */
+.cta{display:flex;align-items:center;gap:16px;text-decoration:none;background:var(--bgc);border:1px solid var(--bora);border-radius:8px;padding:18px 18px;margin:16px 0;transition:border-color .2s,transform .2s,background .2s;-webkit-tap-highlight-color:transparent}
+.cta:active{transform:scale(.99)}
+.cta-icon{flex-shrink:0;width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accdim),var(--golddim));border:1px solid var(--bora);display:flex;align-items:center;justify-content:center;font-size:20px}
+.cta-body{flex:1}
+.cta-k{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:3px}
+.cta-title{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--tp);line-height:1.2;margin-bottom:4px}
+.cta-desc{font-family:var(--sans);font-size:12.5px;line-height:1.55;color:var(--ts)}
+.cta-arrow{flex-shrink:0;color:var(--acc);font-size:20px;transition:transform .2s}
+
 @media(min-width:640px){
   .tech-body{padding-left:0}
   .toc-list a:hover{color:var(--tp)}
+  .cta:hover{border-color:var(--acc);background:#17171f}
+  .cta:hover .cta-arrow{transform:translateX(4px)}
 }
 </style>
 </head>
@@ -183,6 +195,7 @@ footer p{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transf
     <li><a href="#rebal" data-a="rebal"><span class="toc-tag">5</span>REBAL</a></li>
     <li><a href="#vibration" data-a="vibration"><span class="toc-tag">⚡</span>The Vibration State</a></li>
     <li><a href="#tapes" data-a="tapes"><span class="toc-tag">♪</span>Wave 1 Tape Guide</a></li>
+    <li><a href="protocol.html"><span class="toc-tag">▦</span>The 4-Week Protocol</a></li>
     <li><a href="#forum" data-a="forum"><span class="toc-tag">★</span>From the Forums</a></li>
   </ul>
 </aside>
@@ -353,6 +366,19 @@ footer p{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transf
       </div>
       <div class="note"><p><strong>Note —</strong> Don't rush to Waves 2 &amp; 3. Many practitioners deliberately set them aside to solidify Focus 10 first, and practise entering it <strong>without the audio</strong> (e.g. 4-7-8 breathing) to build true, tape-independent mastery.</p></div>
     </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Protocol route card -->
+    <a class="cta" href="protocol.html">
+      <span class="cta-icon">▦</span>
+      <span class="cta-body">
+        <span class="cta-k">Put it into practice</span>
+        <span class="cta-title">The 4-Week Protocol</span>
+        <span class="cta-desc">Block-style WBTB + Focus 10 — two-vector schedule, nightly checklist, in-the-moment cue cards, and a journal prompt.</span>
+      </span>
+      <span class="cta-arrow">→</span>
+    </a>
 
     <div class="div"><div class="div-dot"></div></div>
 
