@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Phasing — The Kepple / Tasker Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap"/>
+<style>
+:root {
+  --bg:        #0a0a0c;
+  --bg2:       #111116;
+  --bgc:       #13131a;
+  --border:    rgba(255,255,255,0.07);
+  --bora:      rgba(129,178,250,0.22);
+  --tp:        #e6e8f0;
+  --ts:        #969aa8;
+  --tm:        #585a70;
+  --acc:       #81b2fa;
+  --accdim:    rgba(129,178,250,0.1);
+  --gold:      #c9a96e;
+  --golddim:   rgba(201,169,110,0.1);
+  --red:       #e06464;
+  --serif:     'Lora', Georgia, serif;
+  --sans:      'Inter', system-ui, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tp);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3}
+
+/* progress */
+#prog{position:fixed;top:52px;left:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--gold));z-index:101;width:0;opacity:.7;transition:width .1s linear}
+
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(10,10,12,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.brand{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--tm)}
+.brand span{color:var(--acc)}
+.hbtn{display:flex;flex-direction:column;gap:5px;width:40px;height:40px;padding:11px 7px;cursor:pointer;background:none;border:1px solid var(--border);border-radius:8px;justify-content:center;transition:border-color .2s}
+.hline{display:block;width:100%;height:1.5px;background:var(--ts);transition:all .3s cubic-bezier(.23,1,.32,1);transform-origin:center}
+.hbtn.open .hline:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hbtn.open .hline:nth-child(2){opacity:0;transform:scaleX(0)}
+.hbtn.open .hline:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* toc */
+.overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(290px,85vw);z-index:95;background:var(--bg2);border-left:1px solid var(--border);padding:64px 20px 32px;transform:translateX(100%);transition:transform .4s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.toc-label{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--tm);margin-bottom:16px}
+.toc-list{list-style:none}
+.toc-list a{display:flex;align-items:center;gap:14px;padding:13px 0;text-decoration:none;color:var(--ts);font-family:var(--sans);font-size:14.5px;border-bottom:1px solid var(--border);transition:color .2s;-webkit-tap-highlight-color:transparent}
+.toc-list a:active{color:var(--tp)}
+.toc-tag{font-family:var(--sans);font-size:10px;letter-spacing:.05em;padding:3px 8px;border:1px solid var(--bora);border-radius:2px;color:var(--acc);background:var(--accdim);white-space:nowrap;min-width:30px;text-align:center}
+.toc-back{margin-top:20px}
+.toc-back a{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--sans);font-size:12px;letter-spacing:.04em;color:var(--tm);transition:color .2s}
+.toc-back a:active{color:var(--acc)}
+
+/* main */
+main{padding-top:52px}
+
+/* hero */
+.hero{padding:34px 16px 28px;max-width:700px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:420px;height:420px;background:radial-gradient(ellipse,rgba(129,178,250,.07) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(32px,9vw,58px);font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+h1 em{font-style:italic;color:var(--gold)}
+.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:20px}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
+.badge{font-family:var(--sans);font-size:10px;letter-spacing:.08em;padding:6px 11px;border:1px solid var(--acc);border-radius:2px;color:var(--acc);background:var(--accdim)}
+.arrow{color:var(--tm);font-size:12px}
+
+/* banner */
+.warn{max-width:700px;margin:0 auto 0;padding:0 16px 24px}
+.warn-inner{background:var(--bgc);border:1px solid var(--bora);border-left:3px solid var(--acc);border-radius:4px;padding:14px 16px}
+.warn-inner p{font-family:var(--sans);font-size:13px;line-height:1.65;color:var(--ts)}
+.warn-inner p strong{color:var(--acc)}
+
+/* content */
+.wrap{max-width:700px;margin:0 auto;padding:0 16px}
+
+/* section */
+.technique{margin-bottom:44px;animation:fu .5s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.tech-title{font-family:var(--serif);font-size:clamp(22px,7vw,32px);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:4px}
+.tech-abbr{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.tech-body p{font-family:var(--serif);font-size:clamp(16px,4.5vw,18px);line-height:1.85;color:#c8cad4;margin-bottom:16px}
+.tech-body p strong{color:#eaecf5;font-weight:600}
+.tech-body p:last-child{margin-bottom:0}
+
+/* sub-title within a section */
+.sub-t{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--tp);margin:24px 0 10px;display:flex;align-items:baseline;gap:10px}
+.sub-t .lt{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--acc);border:1px solid var(--bora);border-radius:3px;padding:2px 7px;background:var(--accdim)}
+
+/* callouts */
+.tip{background:var(--bgc);border:1px solid var(--border);border-top:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
+.tip p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.tip p strong{color:var(--acc) !important;font-weight:600}
+.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
+.note p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.note p strong{color:var(--gold) !important}
+.imp{background:var(--bgc);border:1px solid var(--bora);border-left:3px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
+.imp .ti{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:7px}
+.imp p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0}
+.imp p strong{color:var(--tp);font-weight:600}
+.caution{background:var(--bgc);border:1px solid rgba(224,100,100,.18);border-left:3px solid var(--red);border-radius:4px;padding:14px 16px;margin:16px 0}
+.caution p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0}
+.caution p strong{color:#e88;font-weight:600}
+
+/* steps */
+.steps{margin:16px 0;display:flex;flex-direction:column;gap:12px}
+.step{background:var(--bgc);border:1px solid var(--border);border-radius:4px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.step-n{font-family:var(--sans);font-size:10px;letter-spacing:.1em;color:var(--acc);min-width:18px;padding-top:3px}
+.step-body{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts)}
+.step-body strong{color:var(--tp);font-weight:600;display:block;margin-bottom:3px}
+
+/* rows (table replacement) */
+.rows{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.row{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:13px 16px}
+.row-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:5px}
+.row-t{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--tp)}
+.row-src{font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);padding:2px 7px;border:1px solid var(--bora);border-radius:2px;background:var(--accdim);white-space:nowrap}
+.row-p{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts)}
+.row-p strong{color:var(--tp);font-weight:600}
+.row.pin{border-left:3px solid var(--gold)}
+
+/* continuum bar */
+.cont{display:flex;align-items:stretch;gap:0;margin:16px 0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.cnode{flex:1;background:var(--bgc);padding:14px 12px;text-align:center;border-right:1px solid var(--border)}
+.cnode:last-child{border-right:none}
+.cnode.peak{background:var(--accdim)}
+.cnode .cn-t{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--tp);margin-bottom:5px}
+.cnode.peak .cn-t{color:var(--acc)}
+.cnode .cn-d{font-family:var(--sans);font-size:11px;line-height:1.5;color:var(--tm)}
+.cont-cap{font-family:var(--sans);font-size:12px;color:var(--tm);text-align:center;margin:-6px 0 0;letter-spacing:.06em}
+
+/* diagnostics chips */
+.diag{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.dchip{background:var(--bgc);border:1px solid var(--border);border-radius:4px;padding:11px 14px;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ts)}
+.dchip strong{color:var(--acc);font-weight:600}
+
+/* authors */
+.auth{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.au{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:13px 16px}
+.au-n{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--gold);margin-bottom:3px}
+.au-p{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts)}
+.au-p strong{color:var(--tp)}
+
+/* prog label */
+.prog-label{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px}
+
+/* checklist */
+.checklist{margin:16px 0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bgc)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.check:first-child{border-top:none}
+.cbox{flex-shrink:0;width:20px;height:20px;border:1.5px solid var(--bora);border-radius:5px;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.cbox svg{width:12px;height:12px;color:#0a0a0c;opacity:0;transition:opacity .2s}
+.check.done .cbox{background:var(--acc);border-color:var(--acc)}
+.check.done .cbox svg{opacity:1}
+.check-text{font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ts);transition:opacity .2s}
+.check.done .check-text{opacity:.45;text-decoration:line-through}
+
+/* divider */
+.div{display:flex;align-items:center;gap:14px;margin:8px 0 44px}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.4}
+
+/* back to top */
+#btt{position:fixed;bottom:20px;right:16px;z-index:80;width:42px;height:42px;border-radius:50%;background:var(--bgc);border:1px solid var(--bora);color:var(--acc);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;-webkit-tap-highlight-color:transparent}
+#btt.vis{opacity:1;pointer-events:all}
+#btt:active{transform:scale(.92)}
+
+footer{border-top:1px solid var(--border);padding:20px 16px;text-align:center;margin-top:8px}
+footer p{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm);line-height:1.8}
+footer a{color:var(--acc);text-decoration:none}
+
+@media(min-width:640px){
+  .toc-list a:hover{color:var(--tp)}
+}
+@media(max-width:520px){
+  .cont{flex-direction:column}
+  .cnode{border-right:none;border-bottom:1px solid var(--border);text-align:left}
+  .cnode:last-child{border-bottom:none}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">Kepple · Tasker <span>/ Phasing</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#idea" data-a="idea"><span class="toc-tag">◐</span>What Phasing Is</a></li>
+    <li><a href="#continuum" data-a="continuum"><span class="toc-tag">↔</span>The Continuum</a></li>
+    <li><a href="#focus" data-a="focus"><span class="toc-tag">▦</span>Focus Model</a></li>
+    <li><a href="#techniques" data-a="techniques"><span class="toc-tag">◆</span>The Techniques</a></li>
+    <li><a href="#bridge" data-a="bridge"><span class="toc-tag">⚡</span>The Vibrational Bridge</a></li>
+    <li><a href="#problems" data-a="problems"><span class="toc-tag">!</span>The Two Problems</a></li>
+    <li><a href="#stabilise" data-a="stabilise"><span class="toc-tag">⊕</span>Staying In</a></li>
+    <li><a href="#when" data-a="when"><span class="toc-tag">◷</span>When &amp; Meditation</a></li>
+    <li><a href="#reception" data-a="reception"><span class="toc-tag">✎</span>Lineage &amp; Reception</a></li>
+    <li><a href="#entry" data-a="entry"><span class="toc-tag">✓</span>My Entry Plan</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← All notes</a></p>
+</aside>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Frank Kepple · Ryan Tasker (Xanth)</p>
+    <h1>Phasing<br><em>The Kepple Path</em></h1>
+    <p class="subtitle">Shift focus — don't separate</p>
+    <div class="seq">
+      <span class="badge">Quiet</span>
+      <span class="arrow">→</span>
+      <span class="badge">Notice</span>
+      <span class="arrow">→</span>
+      <span class="badge">3D Blackness</span>
+      <span class="arrow">→</span>
+      <span class="badge">Step Through</span>
+    </div>
+  </div>
+
+  <div class="warn">
+    <div class="warn-inner">
+      <p><strong>A separate track —</strong> this is <strong>not</strong> the energy-body / vibrational / separation approach (Monroe's <em>Journeys</em>, Bruce's program, Buhlman). Phasing comes at the non-physical from a different angle and deliberately <strong>bypasses the vibrational-state and separation steps</strong> that are the bottleneck in the other track. Cross-reference only — don't blend the protocols.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- 1. Idea -->
+    <article id="idea" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">What Phasing Is</h2>
+        <span class="tech-abbr">Shift focus, not location</span>
+      </div>
+      <div class="tech-body">
+        <p><strong>Phasing = shifting the focus of awareness from the physical to the non-physical while staying consciously awake — with no "exit" and no "leaving the body."</strong></p>
+        <p>Kepple's framing (he and Monroe were both electronics engineers): two voltages can share one wire, mixed yet separated by their <strong>phase-angle relationship</strong>. Physical and non-physical consciousness occupy the same space, separated by a ~180° phase. Projection is <strong>"switching phase"</strong> between the two — not travelling anywhere.</p>
+        <p>Before the shift, the physical is the <strong>foreground</strong> and the non-physical sits in the background. After the 180° turn, the non-physical <strong>becomes the foreground</strong> and the physical recedes. You're not aware of the body — you've phased away from it, not climbed out of it.</p>
+      </div>
+      <div class="note"><p><strong>Why this matters for me —</strong> the whole "get the buzz reliable → don't tense → separate the double" problem <strong>doesn't exist in this model</strong>. There's nothing to exit. For a tension / active-mind blocker at the separation threshold, a method with <strong>no separation threshold</strong> is the entire point.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 2. Continuum -->
+    <article id="continuum" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">The Continuum</h2>
+        <span class="tech-abbr">Set by awareness, not location</span>
+      </div>
+      <div class="cont">
+        <div class="cnode"><div class="cn-t">Dream</div><div class="cn-d">Don't know you're non-physical — a normal dream.</div></div>
+        <div class="cnode"><div class="cn-t">Lucid</div><div class="cn-d">Know you're non-physical, but that's all.</div></div>
+        <div class="cnode peak"><div class="cn-t">Astral ★</div><div class="cn-d">Non-physical <em>and</em> full waking awareness — "the holy grail."</div></div>
+      </div>
+      <p class="cont-cap">awareness slides both ways, mid-experience</p>
+      <div class="tech-body">
+        <p>The label is set by <strong>how aware you are, not where you are</strong>. Dream, lucid dream and OBE are <strong>one experience</strong> at different awareness levels — "an astral projection is just a dream where you have full waking awareness."</p>
+      </div>
+      <p class="prog-label">Two-question diagnostic</p>
+      <div class="diag">
+        <div class="dchip"><strong>Realised you were dreaming?</strong> + <strong>Had full waking awareness?</strong></div>
+        <div class="dchip">No + Yes, or No + No → <strong>Dream</strong> awareness (incl. false awakening)</div>
+        <div class="dchip">Yes + No → <strong>Lucid</strong> awareness</div>
+        <div class="dchip">Yes + Yes → <strong>Astral</strong> awareness (= "astral projection")</div>
+      </div>
+      <div class="tip"><p><strong>Direct relevance —</strong> I already get spontaneous experiences. Under this model many were probably <strong>lucid-awareness</strong> ones I didn't ratchet up to astral. The work isn't "build from zero" — it's <strong>upgrade awareness in experiences I'm already having</strong> (see the conversion technique).</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 3. Focus Model -->
+    <article id="focus" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Focus Model</h2>
+        <span class="tech-abbr">Monroe vs Kepple, mapped across</span>
+      </div>
+      <div class="tech-body">
+        <p>Kepple compressed Monroe's ~17 levels into a coarser <strong>Primary Focus (PF)</strong> model of 4 areas, plus a jump-off point he labelled <strong>Fz</strong> (= Monroe's Focus 21). The numbers are <strong>"motorway signposts,"</strong> not destinations — you flow <em>through</em> them, you don't sit <em>at</em> them.</p>
+      </div>
+      <div class="rows">
+        <div class="row"><div class="row-h"><span class="row-t">C1 / Focus 1</span><span class="row-src">PF1</span></div><p class="row-p">Normal waking, open to the physical.</p></div>
+        <div class="row"><div class="row-h"><span class="row-t">Focus 3</span><span class="row-src">→ PF2</span></div><p class="row-p">Edge state, just before things "get lively."</p></div>
+        <div class="row pin"><div class="row-h"><span class="row-t">Focus 10</span><span class="row-src">early PF2</span></div><p class="row-p">Mind awake / body asleep. <strong>Like being engrossed in a TV movie</strong> — no longer aware of room or body. Blackness shows patches "lighter than black" coming and going.</p></div>
+        <div class="row"><div class="row-h"><span class="row-t">Focus 12</span><span class="row-src">PF2 core</span></div><p class="row-p">Hypnagogic imagery — velvety/liquid blackness, outline shapes, faces, swirling foggy colour. A sense of forward mental movement begins.</p></div>
+        <div class="row pin"><div class="row-h"><span class="row-t">Focus 21 / "Fz"</span><span class="row-src">PF2 ↔ PF3</span></div><p class="row-p">The <strong>3D Blackness</strong> — often a starscape. The jump-off doorway. (Void / Point Consciousness / Fz = same place.)</p></div>
+        <div class="row"><div class="row-h"><span class="row-t">Focus 22–27</span><span class="row-src">PF3</span></div><p class="row-p">Afterlife / "ring" realms — the Astral proper.</p></div>
+      </div>
+      <div class="note"><p><strong>Takeaway —</strong> don't collect Focus numbers; people fail by trying to "sit at F10 wondering what to do next." The flow is continuous: <strong>relaxed launch (F10) → imagery (F12) → forward movement → 3D Blackness (Fz/F21) → step through.</strong> The whole skill is <em>slowing the flow down</em> enough to control it — not forcing it.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 4. Techniques -->
+    <article id="techniques" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">The Techniques</h2>
+        <span class="tech-abbr">Noticing is the on-ramp; Rundown is the workhorse</span>
+      </div>
+
+      <div class="sub-t"><span class="lt">A</span>Noticing — Kepple's core method</div>
+      <div class="tech-body">
+        <p>Stare into the <strong>3D Blackness</strong> behind closed eyes and <strong>passively notice</strong> the faintest changes — a patch less black, a flash, a swirl, a sound. Don't analyse, don't grab. Each thing noticed <strong>builds</strong> fixation inward; the build-up snowballs until consciousness "pops" into the non-physical.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>The paradox</strong>Noticing is something you actively <em>do</em>, but you stay <em>passively aware</em> while doing it. Active attention, passive grip.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>It's a build-up, not a checklist</strong>Each notice deepens the last — not "a thing… and another thing."</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Paper drill (daytime)</strong>Dot on a white page, soft gaze at it, then notice every speck/crease in peripheral vision without moving the eyes. Carry that stance to the blackness.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Who it's for</strong>The complete-beginner drill — it just teaches you to look <em>within</em> instead of exteriorising. Then Kepple moves people to Mental Rundown.</div></div>
+      </div>
+      <div class="imp"><div class="ti">The biggest Noticing mechanic — look THROUGH the images</div><p>When imagery appears it sits <strong>right in your face, in the foreground</strong> — and the instinct is to watch it. Watching cues the physical eyes to "snatch a glance" (zaps you back) and helps you fall asleep. Instead, pitch focus <strong>beyond / behind</strong> the imagery, into the background, and hold it there as the body sleeps — you may "suddenly find yourself in Fz." The images are <strong>boundary-layer effects</strong>; the place you want is past the boundary. Don't camp on it.</p></div>
+      <div class="tip"><p><strong>Eye-focus-shift drill —</strong> the core skill is getting mental focus off the backs of the physical eyes. Picture a shape in mind → shift focus to "the backs of your closed eyes" → shift back to the shape. You'll feel a distinct <strong>click</strong>. Kepple aims focus <strong>up and back ~100° from horizontal</strong> — just past vertical, within the mind. Catch: relaxing the eyes is also the body's sleep cue, so relax them <em>without</em> following into sleep.</p></div>
+
+      <div class="sub-t"><span class="lt">B</span>A twist on Noticing — Tasker</div>
+      <div class="tech-body">
+        <p>Instead of passively observing, <strong>actively let patterns form</strong> — allow shapes to coalesce until you recognise something, then focus to strengthen it (it grows, or fades and you restart). Stay passive-but-focused; use <strong>Intent</strong> to make it move (raise an arm, roll a ball). Same goal: awareness fully parked in the blackness.</p>
+      </div>
+
+      <div class="sub-t"><span class="lt">C</span>Mental Rundown — the workhorse</div>
+      <div class="tech-body">
+        <p>Run an imagined <strong>multi-sensory scene</strong> on repeat until consciousness "steps into" it in full 3D. The scene is a primer you shift <em>into</em>.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Two forms</strong>A short repeating scene (the classic trampoline bounce — feel the air, the backyard sounds) or a longer scripted scene.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Under-build it</strong>The less you specify, the more your mind auto-fills (birdsong, waves) and the more it entices you in. Don't over-detail.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Allow, don't force</strong>The rundown just gives consciousness something more enticing than physical sense-input to shift toward.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Kepple's favourites</strong>A rising-trot on horseback (engaging but not too engaging — plain walking isn't enough); or sitting in a small audience watching Monroe deliver the Gateway instructions.</div></div>
+      </div>
+      <div class="tip"><p><strong>Gateway tie-in —</strong> Astral Pulse practitioners ran the longer rundown <strong>alongside Monroe's Gateway Wave 1, Track 2</strong> — it slots into existing Gateway audio practice without conflict. Kepple used the Wave-1 CD as a mental primer before a rundown.</p></div>
+      <div class="imp"><div class="ti">The 3D Blackness is FOUND, not created</div><p>A trap carried over from traditional OBE: people <strong>try to manufacture</strong> the 3D Blackness (like visualising a rope). Wrong. <strong>It's already there inside you</strong> — you reach within and focus on it. Where? Look out horizontally, close the eyes (that's 2D blackness on the lids), then turn mental focus ~100° up from horizontal — within the mind, just past vertical. That's where it lives.</p></div>
+
+      <div class="sub-t"><span class="lt">D</span>Eyes-Closed / Body-Still (EC/BS)</div>
+      <div class="tech-body">
+        <p>On waking (esp. from a lucid/astral experience), <strong>don't open your eyes, don't move a muscle.</strong> Lie still and you can slip straight back into what you just left — Tasker chained 4–6 in a row this way. Can be trained from cold sleep via a <strong>nightly affirmation</strong> to wake slowly and stay still. Hardest part: recognising the moment of waking and staying motionless.</p>
+      </div>
+
+      <div class="sub-t"><span class="lt">E</span>Lucid → Astral conversion (the ratchet)</div>
+      <div class="tech-body">
+        <p>When lucid, <strong>stop</strong>, focus on yourself or the environment, and ask sincerely:</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">1</span><div class="step-body">"Where am I?"</div></div>
+        <div class="step"><span class="step-n">2</span><div class="step-body">"Where am I going?"</div></div>
+        <div class="step"><span class="step-n">3</span><div class="step-body">"How did I get here?"</div></div>
+        <div class="step"><span class="step-n">4</span><div class="step-body">"What am I doing?"</div></div>
+      </div>
+      <div class="tech-body">
+        <p>Asked honestly in the non-physical, these snap you to <strong>full waking = astral awareness</strong>. Tasker says it has never failed for him; the only trick is remembering. If the questions don't fire, just <strong>hold the lucid state</strong> with pre-loaded fixed goals (meet a guide, go somewhere) repeated while falling asleep, so you act on them even at lower awareness.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 5. Bridge -->
+    <article id="bridge" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">The Vibrational Bridge</h2>
+        <span class="tech-abbr">Where this track touches my other one</span>
+      </div>
+      <div class="imp"><div class="ti">Why this section exists</div><p>Phasing is supposed to bypass vibrations — but Kepple had <strong>both</strong> modes, and his account of the vibrational route is the best description I've found of the exact state I get stuck in. Read it as <strong>cross-calibration</strong>, not as merging protocols.</p></div>
+      <p class="prog-label">Kepple's two exit modes</p>
+      <div class="rows">
+        <div class="row"><div class="row-h"><span class="row-t">Step-in projection</span><span class="row-src">pure phasing</span></div><p class="row-p">Activate the "Astral Visual Interface," watch imagery on the screen, mentally <strong>step into</strong> it. <strong>No vibrations at all.</strong></p></div>
+        <div class="row"><div class="row-h"><span class="row-t">Travelling projection</span><span class="row-src">vibrational</span></div><p class="row-p">Vibrations begin, a "gateway" opens, he flies off through the RTZ into the Astral. His old "cannonball exit," later controlled.</p></div>
+      </div>
+      <p class="prog-label">His vibrational phenomenology (matches my buzzing/roar)</p>
+      <div class="diag">
+        <div class="dchip">Onset begins <strong>at the crown / top of head</strong> every time — a "gateway" feeling.</div>
+        <div class="dchip">Earliest sign: a gentle <strong>"swoosh"</strong> in the head ~every 30s, speeding to every 1–2s, then a low-frequency vibration like the brain shaking side to side.</div>
+        <div class="dchip">He feels that swoosh <strong>~half the time while naturally waking</strong> — most people dismiss it as "just waking." (Watch for it on WBTB.)</div>
+        <div class="dchip">Vibrations can be <strong>heard as well as felt</strong> — different frequencies you can "tune in" to before take-off.</div>
+      </div>
+      <p class="prog-label">The control method — directly on my tension problem</p>
+      <div class="tech-body">
+        <p>"It is not enough merely to feel vibrations. <strong>You have to let them build in intensity.</strong>" He first ramped intensity with <strong>slow deep breathing</strong> (not literal breath — it <em>feels</em> like breathing), later just by thinking about them. At sufficient intensity, separation is <strong>automatic</strong> — "you just know you can separate… you don't try to do anything, you just do it."</p>
+      </div>
+      <div class="diag">
+        <div class="dchip"><strong>Posture fork:</strong> build vibrations while <strong>rocking</strong> → roll out into the real-time zone. Build to screaming intensity <strong>lying perfectly still</strong> → take off "like a cannonball" into the Astral.</div>
+        <div class="dchip"><strong>99.9% of early failures = fear-induced tension</strong> — a deep fight/flight reflex, even when he welcomed it. Fix: familiarity through repetition.</div>
+      </div>
+      <div class="tip"><p><strong>Cross-calibration for my main track —</strong> (1) my "spread through the body" habit = Kepple's "bathe in them," confirmed good. (2) The missing piece may be <strong>building intensity</strong>, not just reaching the buzz — try the slow-deep-(felt)-breathing ramp. (3) <strong>Lie still vs rock</strong> is a deliberate fork: still → Astral, rock → RTZ. (4) "Snap awake" = the protective reflex, not a technique error — fix is repetition. (5) Watch for the <strong>swoosh on waking</strong> as a free recognition rep.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 6. Problems -->
+    <article id="problems" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">The Two Problems</h2>
+        <span class="tech-abbr">The eyes &amp; body dissociation</span>
+      </div>
+      <div class="sub-t">The Eyes — the #1 hurdle</div>
+      <div class="tech-body">
+        <p>Your focal point of consciousness normally "lives behind the physical eyes." The instant something definite appears in the blackness, the protective awareness shouts <em>"What's that!"</em> and the eyes dart to look — zapping you back to the body.</p>
+      </div>
+      <div class="tip"><p><strong>Fix —</strong> practice until the protective awareness treats everything as <strong>normal</strong> and the eyes stay switched-off. Never fully eradicated (it still got Kepple), but it fades hard with repetition.</p></div>
+      <div class="sub-t">Physical body dissociation</div>
+      <div class="tech-body">
+        <p>Phasing has two halves: keep consciousness fixed on something not-here, and <strong>reduce physical sensory input</strong> so the body stops anchoring you.</p>
+      </div>
+      <div class="diag">
+        <div class="dchip"><strong>Sight</strong> — desensitises the moment eyes close.</div>
+        <div class="dchip"><strong>Touch</strong> — keep perfectly still → input gets ignored → the numb/heavy sensation.</div>
+        <div class="dchip"><strong>Hearing</strong> — hardest; use earplugs / white noise / quiet room.</div>
+        <div class="dchip"><strong>Taste &amp; smell</strong> — non-issues.</div>
+      </div>
+      <div class="note"><p><strong>Divergence from the other track —</strong> Tasker concludes deep relaxation is <strong>not</strong> a primary requirement — only enough to remove muscle tension. Comfort + stillness + sensory reduction matter more than the deep energy-body relaxation the Monroe/Bruce track drills.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 7. Stabilise -->
+    <article id="stabilise" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Staying In</h2>
+        <span class="tech-abbr">Flood the non-physical senses</span>
+      </div>
+      <div class="tech-body">
+        <p>To keep from snapping back: <strong>examine the environment in minute detail</strong> — look hard, touch, listen, smell, even taste, intensely and with focus. This drowns out returning physical-sense input and <strong>locks</strong> you in (the inverse of waking someone by shaking them). Do it <strong>every few minutes, proactively</strong> — don't wait for the "about to return" feeling, which is usually too late (if it hits, fall back to EC/BS).</p>
+      </div>
+      <div class="caution"><p><strong>Perception caveat —</strong> the non-physical is malleable to expectation. A snap judgment ("that's a dead squirrel") becomes your reality and won't self-correct. Unfamiliar things render as the closest match your mind can find (unknown creature → "dragon"). <em>What</em> you experience is real; <em>how</em> it appears is a metaphor. <strong>Don't make snap judgments; control emotions</strong> — a sad snap-judgment can spiral and end the whole scene.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 8. When -->
+    <article id="when" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">When &amp; Meditation</h2>
+        <span class="tech-abbr">Best window + the prerequisite</span>
+      </div>
+      <div class="rows">
+        <div class="row pin"><div class="row-h"><span class="row-t">After-sleep exit</span><span class="row-src">easiest</span></div><p class="row-p">Practice right after waking from sleep/nap — body relaxed, mind on the groggy-but-aware edge. <strong>This is my WBTB window</strong>, different vocabulary.</p></div>
+        <div class="row"><div class="row-h"><span class="row-t">Conscious exit</span><span class="row-src">harder</span></div><p class="row-p">From full waking, any time — requires meditation skill to manufacture the primed state. Where most beginners fail by jumping straight in.</p></div>
+      </div>
+      <div class="tech-body">
+        <p>Phasing rests on being able to <strong>quiet inner dialogue</strong>. Two standard anchors: a meaningless <strong>mantra</strong> repeated internally, or a <strong>simple visual object</strong> (candle, geometric shape) held in the blackness. When focus drifts, gently return to the anchor. Eventually focus sticks → strange effects appear (time distortion, the physical melting into a "sea of nothing" = the <strong>Void / Point Consciousness</strong> = you've phased).</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 9. Reception -->
+    <article id="reception" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Lineage &amp; Reception</h2>
+        <span class="tech-abbr">Who said it + how it holds up</span>
+      </div>
+      <div class="auth">
+        <div class="au"><div class="au-n">Frank Kepple</div><p class="au-p">Posted thousands of times on the Astral Pulse forum (~early 2000s); no books. Developed the phasing method and the 4-level Focus Model. Fell ill ~2005, presumed deceased. Compiled posthumously into the <strong>Frank Kepple Phasing Resource</strong>.</p></div>
+        <div class="au"><div class="au-n">Ryan Tasker (Xanth)</div><p class="au-p">Distilled Kepple + his own practice into the free eBook <em>My Astral Projection Truth</em> (2011). <strong>Strips the mystical framing</strong> and says not to over-trust any author including himself — treat as single-practitioner, hold the metaphysics lightly.</p></div>
+        <div class="au"><div class="au-n">Adjacent lineage</div><p class="au-p">Connects to <strong>Bruce Moen</strong> ("Moen-school" of phasing) and, loosely, Castaneda's "assemblage point" as a metaphor for the phase shift (speculative).</p></div>
+      </div>
+      <p class="prog-label">What holds up (practitioner praise)</p>
+      <div class="diag">
+        <div class="dchip"><strong>"Years on exit techniques with no success, then Noticing worked."</strong> The single strongest recurring pattern.</div>
+        <div class="dchip"><strong>Lower fear/anxiety</strong> — no vibrations, sounds or separation jolt = fewer abort-spikes. Attractive when the blocker is the startle reflex (me).</div>
+        <div class="dchip">The <strong>"it's all one thing" reframe relieves pressure</strong> — people stop feeling they "failed" at only lucid, which helps them progress.</div>
+      </div>
+      <p class="prog-label">What to weigh (criticism)</p>
+      <div class="diag">
+        <div class="dchip"><strong>"Just lucid dreaming with a fancy name."</strong> Even some believers (Erin Pavlina) argue a true OBE needs felt separation — phasing is contested as "not real OBE" inside the AP community.</div>
+        <div class="dchip"><strong>Imagination-vs-reality</strong> — the Rundown begins in imagination; hard to tell a real shift from an absorbing daydream.</div>
+        <div class="dchip"><strong>Neuroscience baseline</strong> — OBE/AP read as sleep-wake boundary phenomena. The <em>techniques</em> fit cleanly; the <em>metaphysics</em> is where it departs.</div>
+      </div>
+      <div class="imp"><div class="ti">Correction — the two tracks aren't rivals</div><p>The forum's better conclusion: they're <strong>two ends of one process</strong>. A classic separation OBE = a phasing run you <em>interrupt</em> at F10/12 to fire an exit; a phasing run = a classic attempt where you <em>skip</em> the exit and keep going. Same continuum from different ends — <strong>I can fork mid-session</strong>.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 10. Entry -->
+    <article id="entry" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">My Entry Plan</h2>
+        <span class="tech-abbr">Tap to check — parallel, low-commitment</span>
+      </div>
+      <div class="checklist">
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>Daytime</strong> — paper-dot Noticing drill + practice sensory reduction at the computer/TV.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>Meditation base</strong> — one anchor (mantra <em>or</em> candle-in-blackness) to quiet inner dialogue. The gate to everything here.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>WBTB / after-sleep</strong> — run Noticing (or a short Mental Rundown) from the groggy-aware state. Nothing asked of vibrations.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>On any lucid moment</strong> — fire the 4 questions to ratchet lucid → astral.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>On waking</strong> — EC/BS: stay still, eyes closed, try to slip back in.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text"><strong>Once in</strong> — flood the senses every few minutes to stay locked.</div></div>
+      </div>
+      <div class="caution"><p><strong>Keep tracks clean —</strong> run this as its own experiment. If Noticing / phasing clicks, the entire vibrational-reliability problem from the other track may simply not apply here — which is the whole reason to try it from this separate angle.</p></div>
+    </article>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <p>Phasing · Frank Kepple &amp; Ryan Tasker (Xanth)<br>Personal study notes · <a href="obe-taxonomy.html">OBE Taxonomy</a> · <a href="abtb.html">Beyond the Body</a> · <a href="focus-10.html">Focus 10</a></p>
+  </footer>
+
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+  // progress
+  const prog = document.getElementById('prog');
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const s = el.scrollTop || document.body.scrollTop;
+    const h = el.scrollHeight - el.clientHeight;
+    if (h > 0) prog.style.width = (s / h * 100) + '%';
+  }, {passive:true});
+
+  // nav
+  const hbtn = document.getElementById('hbtn');
+  const overlay = document.getElementById('overlay');
+  const drawer = document.getElementById('drawer');
+  const open = () => { hbtn.classList.add('open'); overlay.classList.add('open'); drawer.classList.add('open'); hbtn.setAttribute('aria-expanded','true'); };
+  const close = () => { hbtn.classList.remove('open'); overlay.classList.remove('open'); drawer.classList.remove('open'); hbtn.setAttribute('aria-expanded','false'); };
+  hbtn.addEventListener('click', () => hbtn.classList.contains('open') ? close() : open());
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', e => e.key === 'Escape' && close());
+
+  drawer.querySelectorAll('a[data-a]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-a');
+      close();
+      setTimeout(() => {
+        const t = document.getElementById(id);
+        if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 64, behavior:'smooth'});
+      }, 400);
+    });
+  });
+
+  // checklist (session only)
+  document.querySelectorAll('.check').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('done'));
+  });
+
+  // back to top
+  const btt = document.getElementById('btt');
+  window.addEventListener('scroll', () => {
+    btt.classList.toggle('vis', window.scrollY > 280);
+  }, {passive:true});
+  btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
