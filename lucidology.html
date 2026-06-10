@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucidology 101 — Field Manual</title>
+<style>
+  :root{
+    /* Dawn-to-dark palette: the 4–5:30 AM "sweet spot" the whole system orbits */
+    --night:#0e1230;        /* deep pre-dawn sky */
+    --night-2:#161b42;      /* raised surface */
+    --night-3:#1f2552;      /* card border glow */
+    --ink:#e8eafc;          /* primary text */
+    --ink-dim:#a7adcf;      /* secondary text */
+    --ink-faint:#6f76a0;    /* captions */
+    --dawn:#ff9e5e;         /* sunrise accent (serotonin / "on") */
+    --dawn-deep:#ff7a3c;
+    --cool:#5ed0d6;         /* signal cyan (paralysis / nonphysical) */
+    --cool-deep:#39a9b0;
+    --violet:#9d8cff;       /* vibrations / energy */
+    --line:#2b3168;
+    --good:#6ee7a8;
+    --bad:#ff6b7d;
+    --maxw:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(120% 60% at 50% -10%, #25264f 0%, rgba(37,38,79,0) 55%),
+      linear-gradient(180deg,var(--night) 0%, #0a0d24 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    padding:52px 0 5rem;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.15rem}
+
+  /* ---- Top nav + hamburger drawer (house pattern, themed to this page) ---- */
+  .topnav{position:fixed;top:0;left:0;right:0;height:52px;z-index:30;
+    display:flex;align-items:center;justify-content:space-between;padding:0 1.15rem;
+    background:rgba(14,18,48,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-faint);font-family:-apple-system,system-ui,sans-serif}
+  .brand span{color:var(--dawn)}
+  .hbtn{display:flex;flex-direction:column;gap:5px;width:40px;height:40px;padding:11px 7px;
+    cursor:pointer;background:none;border:1px solid var(--line);border-radius:8px;
+    justify-content:center;transition:border-color .2s}
+  .hbtn .hline{height:2px;width:100%;background:var(--ink);border-radius:2px;
+    transition:transform .3s,opacity .3s}
+  .hbtn.open{border-color:var(--dawn)}
+  .hbtn.open .hline:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .hbtn.open .hline:nth-child(2){opacity:0;transform:scaleX(0)}
+  .hbtn.open .hline:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  .overlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+    opacity:0;pointer-events:none;transition:opacity .3s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(290px,85vw);z-index:50;
+    background:var(--night-2);border-left:1px solid var(--line);padding:64px 20px 32px;
+    transform:translateX(100%);transition:transform .4s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+  .drawer.open{transform:translateX(0)}
+  .toc-label{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+    font-family:-apple-system,system-ui,sans-serif;margin-bottom:.4rem}
+  .toc-list{list-style:none;margin:0;padding:0}
+  .toc-list a{display:flex;align-items:center;gap:12px;padding:12px 0;text-decoration:none;
+    color:var(--ink-dim);font-family:-apple-system,system-ui,sans-serif;font-size:.92rem;
+    border-bottom:1px solid var(--line);transition:color .2s;-webkit-tap-highlight-color:transparent}
+  .toc-list a:active,.toc-list a:hover{color:var(--ink)}
+  .toc-tag{font-size:.72rem;letter-spacing:.06em;padding:3px 7px;border:1px solid var(--line);
+    border-radius:4px;color:var(--dawn);background:rgba(255,158,94,.08);white-space:nowrap;
+    min-width:1.7rem;text-align:center}
+  .toc-back{margin-top:1.2rem}
+  .toc-back a{color:var(--cool);text-decoration:none;
+    font-family:-apple-system,system-ui,sans-serif;font-size:.85rem}
+
+  /* ---- Type ---- */
+  h1,h2,h3,.eyebrow{font-family:"Georgia","Times New Roman",serif}
+  .eyebrow{
+    font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--dawn);font-family:-apple-system,system-ui,sans-serif;font-weight:600;
+  }
+  h2{font-size:1.62rem;line-height:1.15;margin:.2rem 0 .6rem;letter-spacing:-.01em}
+  h3{font-size:1.12rem;margin:1.4rem 0 .5rem;color:var(--ink);letter-spacing:-.01em}
+  p{margin:.7rem 0;color:var(--ink-dim)}
+  p strong, li strong{color:var(--ink);font-weight:600}
+  .lead{font-size:1.06rem;color:var(--ink)}
+  a{color:var(--cool)}
+
+  /* ---- Hero ---- */
+  header{padding:3.2rem 0 1.4rem;text-align:center;position:relative;overflow:hidden}
+  .hero-sun{display:block;margin:0 auto .4rem}
+  header h1{
+    font-size:2.5rem;line-height:1.02;letter-spacing:-.02em;margin:.3rem 0 .4rem;
+    background:linear-gradient(180deg,#fff 0%, var(--dawn) 140%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header .sub{color:var(--ink-dim);font-size:1rem;max-width:30ch;margin:0 auto}
+  header .by{margin-top:.9rem;font-size:.75rem;color:var(--ink-faint);letter-spacing:.04em}
+
+  /* ---- Nav chips ---- */
+  nav{position:sticky;top:0;z-index:20;
+    background:rgba(14,18,48,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);margin-bottom:1.4rem}
+  .nav-scroll{display:flex;gap:.45rem;overflow-x:auto;padding:.6rem 1.15rem;
+    max-width:var(--maxw);margin:0 auto;scrollbar-width:none}
+  .nav-scroll::-webkit-scrollbar{display:none}
+  .nav-scroll a{
+    flex:0 0 auto;font-size:.78rem;text-decoration:none;color:var(--ink-dim);
+    border:1px solid var(--line);border-radius:999px;padding:.32rem .7rem;
+    white-space:nowrap;transition:.18s}
+  .nav-scroll a:hover,.nav-scroll a:active{color:var(--night);background:var(--dawn);border-color:var(--dawn)}
+
+  /* ---- Sections ---- */
+  section{margin:2.6rem 0;scroll-margin-top:4rem}
+  .secnum{font-size:.72rem;letter-spacing:.3em;color:var(--cool);font-weight:600;
+    font-family:-apple-system,system-ui,sans-serif}
+
+  /* ---- Cards ---- */
+  .card{
+    background:linear-gradient(180deg,var(--night-2) 0%, rgba(22,27,66,.6) 100%);
+    border:1px solid var(--night-3);border-radius:16px;padding:1.15rem 1.15rem 1.25rem;
+    margin:1rem 0}
+  .card h3{margin-top:.2rem}
+  figure{margin:1.1rem 0;text-align:center}
+  figure svg{max-width:100%;height:auto;display:block;margin:0 auto;
+    border-radius:12px}
+  figcaption{font-size:.8rem;color:var(--ink-faint);margin-top:.5rem;font-style:italic}
+
+  /* ---- Callouts ---- */
+  .callout{border-radius:12px;padding:.85rem 1rem;margin:1rem 0;font-size:.93rem;
+    border-left:3px solid}
+  .callout p{margin:.3rem 0;color:var(--ink)}
+  .callout .tag{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;font-family:-apple-system,system-ui,sans-serif;display:block;margin-bottom:.25rem}
+  .c-key{background:rgba(255,158,94,.09);border-color:var(--dawn)}
+  .c-key .tag{color:var(--dawn)}
+  .c-warn{background:rgba(255,107,125,.09);border-color:var(--bad)}
+  .c-warn .tag{color:var(--bad)}
+  .c-cool{background:rgba(94,208,214,.09);border-color:var(--cool)}
+  .c-cool .tag{color:var(--cool)}
+
+  /* ---- Lists ---- */
+  ul.clean,ol.clean{margin:.6rem 0 .6rem 1.1rem}
+  ul.clean li,ol.clean li{margin:.4rem 0;color:var(--ink-dim)}
+  ul.clean li::marker{color:var(--cool)}
+  ol.clean li::marker{color:var(--dawn);font-weight:700}
+
+  /* ---- Step list (quick start) ---- */
+  .steps{counter-reset:step;list-style:none;margin:1rem 0}
+  .steps li{position:relative;padding:.6rem 0 .6rem 2.6rem;border-bottom:1px dashed var(--line)}
+  .steps li:last-child{border-bottom:none}
+  .steps li::before{
+    counter-increment:step;content:counter(step);
+    position:absolute;left:0;top:.55rem;width:1.85rem;height:1.85rem;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,var(--dawn),var(--dawn-deep));color:var(--night);
+    border-radius:50%;font-weight:700;font-size:.85rem;font-family:system-ui}
+  .steps li b{color:var(--ink)}
+
+  /* ---- Signal meter ---- */
+  .meter{display:flex;flex-direction:column;gap:.5rem;margin:1rem 0}
+  .meter .row{display:flex;align-items:center;gap:.7rem}
+  .meter .dot{flex:0 0 auto;width:2.1rem;height:2.1rem;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-family:system-ui;
+    color:var(--night)}
+  .meter .txt{font-size:.92rem}
+  .meter .txt b{color:var(--ink)}
+
+  /* ---- Technique grid ---- */
+  .tech{display:grid;gap:.6rem;margin:1rem 0}
+  .tech .t{background:var(--night-2);border:1px solid var(--night-3);border-radius:12px;
+    padding:.8rem .9rem}
+  .tech .t .n{font-size:.72rem;color:var(--dawn);font-weight:700;letter-spacing:.1em;font-family:system-ui}
+  .tech .t h4{font-size:1rem;margin:.15rem 0 .3rem;color:var(--ink)}
+  .tech .t p{margin:.2rem 0;font-size:.88rem}
+
+  /* ---- Tier note ---- */
+  .tier{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+  .tier span{font-size:.74rem;border:1px solid var(--line);border-radius:8px;
+    padding:.3rem .6rem;color:var(--ink-dim)}
+  .tier b{color:var(--cool)}
+
+  hr.div{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:2.4rem 0}
+
+  footer{text-align:center;color:var(--ink-faint);font-size:.78rem;margin-top:3rem;padding-top:1.5rem;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--cool)}
+
+  @media (min-width:620px){
+    header h1{font-size:3.1rem}
+    .tech{grid-template-columns:1fr 1fr}
+    .tech .t.full{grid-column:1/-1}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .fade{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+    .fade.in{opacity:1;transform:none}
+    @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <!-- Hero signature: a figure on the threshold, the green "exit" rising from the body -->
+    <svg class="hero-sun" width="150" height="150" viewBox="0 0 150 150" role="img" aria-label="A sleeping figure with consciousness rising from the body at dawn">
+      <defs>
+        <radialGradient id="dawnGlow" cx="50%" cy="38%" r="60%">
+          <stop offset="0%" stop-color="#ff9e5e" stop-opacity=".55"/>
+          <stop offset="100%" stop-color="#ff9e5e" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="riseG" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#5ed0d6"/>
+          <stop offset="100%" stop-color="#9d8cff"/>
+        </linearGradient>
+      </defs>
+      <circle cx="75" cy="60" r="70" fill="url(#dawnGlow)"/>
+      <!-- horizon arc -->
+      <path d="M5 96 Q75 78 145 96" stroke="#ff9e5e" stroke-width="1.5" fill="none" opacity=".6"/>
+      <!-- pillow + sleeping body -->
+      <ellipse cx="58" cy="120" rx="34" ry="11" fill="#1f2552"/>
+      <path d="M30 118 q6 -10 22 -10 q26 0 40 4 q8 3 0 8 q-30 8 -52 4 q-12 -2 -10 -6 z" fill="#2b3168"/>
+      <circle cx="48" cy="110" r="11" fill="#3a4180"/>
+      <!-- rising astral figure -->
+      <g opacity=".95">
+        <path d="M92 112 q3 -28 8 -40" stroke="url(#riseG)" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/>
+        <circle cx="102" cy="58" r="9" fill="url(#riseG)"/>
+        <path d="M102 67 q-7 6 -7 22 q0 14 4 22" stroke="url(#riseG)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M102 67 q7 6 7 22 q0 14 -4 22" stroke="url(#riseG)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <p class="eyebrow">Field Manual</p>
+    <h1>Lucidology&nbsp;101</h1>
+    <p class="sub">Nicholas Newport's visualization-free system for inducing waking sleep paralysis — and converting it into out-of-body experiences.</p>
+    <p class="by">A study reference · theory + do-tonight protocol</p>
+  </div>
+</header>
+
+<div class="topnav">
+  <div class="brand">Lucidology <span>/ 101</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#bigpicture" data-a="bigpicture"><span class="toc-tag">◇</span>The whole system</a></li>
+    <li><a href="#sp" data-a="sp"><span class="toc-tag">◷</span>Sleep paralysis</a></li>
+    <li><a href="#timing" data-a="timing"><span class="toc-tag">☀</span>Brain timing</a></li>
+    <li><a href="#sdr" data-a="sdr"><span class="toc-tag">↻</span>Stop·Drop·Roll</a></li>
+    <li><a href="#commands" data-a="commands"><span class="toc-tag">⌘</span>Sleep commands</a></li>
+    <li><a href="#relax" data-a="relax"><span class="toc-tag">≈</span>Relaxation</a></li>
+    <li><a href="#timer" data-a="timer"><span class="toc-tag">⏱</span>Timer method</a></li>
+    <li><a href="#checks" data-a="checks"><span class="toc-tag">✓</span>Reality checks</a></li>
+    <li><a href="#signals" data-a="signals"><span class="toc-tag">⚡</span>Signals</a></li>
+    <li><a href="#blind" data-a="blind"><span class="toc-tag">◐</span>Exit blindness</a></li>
+    <li><a href="#exits" data-a="exits"><span class="toc-tag">⇡</span>Exit techniques</a></li>
+    <li><a href="#quickstart" data-a="quickstart"><span class="toc-tag">①</span>Quick start</a></li>
+    <li><a href="#beyond" data-a="beyond"><span class="toc-tag">→</span>102 / 103</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← All notes</a></p>
+</aside>
+
+<div class="wrap">
+
+  <!-- ================= BIG PICTURE ================= -->
+  <section id="bigpicture" class="fade">
+    <p class="secnum">01 — THE MODEL</p>
+    <h2>The whole system in one diagram</h2>
+    <p class="lead">Every Lucidology induction is the same two transitions. First you trick the body into falling asleep while the mind stays awake — that lands you in <strong>waking sleep paralysis</strong>. Then you use an <strong>exit technique</strong> to convert that paralysis into an OBE or lucid dream.</p>
+
+    <figure>
+      <svg width="700" height="300" viewBox="0 0 700 300" role="img" aria-label="Flow: awake to sleep commands to sleep paralysis to exit to OBE">
+        <defs>
+          <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff9e5e"/><stop offset="50%" stop-color="#5ed0d6"/><stop offset="100%" stop-color="#9d8cff"/>
+          </linearGradient>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+            <path d="M0 0 L6 3 L0 6 Z" fill="#6f76a0"/>
+          </marker>
+        </defs>
+        <rect x="0" y="142" width="700" height="6" rx="3" fill="url(#bg1)" opacity=".4"/>
+
+        <!-- node helper boxes -->
+        <g font-family="system-ui" text-anchor="middle">
+          <!-- Awake -->
+          <circle cx="70" cy="145" r="40" fill="#161b42" stroke="#ff9e5e" stroke-width="2"/>
+          <text x="70" y="140" fill="#ff9e5e" font-size="14" font-weight="700">AWAKE</text>
+          <text x="70" y="160" fill="#a7adcf" font-size="10">body + mind on</text>
+
+          <line x1="115" y1="145" x2="180" y2="145" stroke="#6f76a0" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="147" y="128" fill="#e8eafc" font-size="10" font-weight="600">sleep</text>
+          <text x="147" y="118" fill="#e8eafc" font-size="10" font-weight="600">commands</text>
+
+          <!-- Sleep paralysis -->
+          <circle cx="240" cy="145" r="46" fill="#161b42" stroke="#5ed0d6" stroke-width="2"/>
+          <text x="240" y="135" fill="#5ed0d6" font-size="13" font-weight="700">SLEEP</text>
+          <text x="240" y="151" fill="#5ed0d6" font-size="13" font-weight="700">PARALYSIS</text>
+          <text x="240" y="168" fill="#a7adcf" font-size="9.5">body off · mind on</text>
+
+          <line x1="291" y1="145" x2="360" y2="145" stroke="#6f76a0" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="326" y="128" fill="#e8eafc" font-size="10" font-weight="600">exit</text>
+          <text x="326" y="118" fill="#e8eafc" font-size="10" font-weight="600">technique</text>
+
+          <!-- OBE -->
+          <circle cx="430" cy="145" r="46" fill="#161b42" stroke="#9d8cff" stroke-width="2"/>
+          <text x="430" y="140" fill="#9d8cff" font-size="13" font-weight="700">O.B.E. /</text>
+          <text x="430" y="158" fill="#9d8cff" font-size="13" font-weight="700">LUCID</text>
+
+          <!-- bracket labels -->
+          <text x="155" y="210" fill="#5ed0d6" font-size="11" font-weight="600">TRANSITION 1</text>
+          <text x="155" y="225" fill="#6f76a0" font-size="9.5">trick the body asleep</text>
+          <text x="378" y="210" fill="#9d8cff" font-size="11" font-weight="600">TRANSITION 2</text>
+          <text x="378" y="225" fill="#6f76a0" font-size="9.5">separate</text>
+        </g>
+
+        <!-- side caption: two engines -->
+        <g font-family="system-ui">
+          <rect x="510" y="70" width="170" height="150" rx="12" fill="#1f2552" opacity=".5"/>
+          <text x="525" y="95" fill="#ff9e5e" font-size="11" font-weight="700">VISUALIZATION-FREE</text>
+          <text x="525" y="113" fill="#a7adcf" font-size="10">101 path. Simple,</text>
+          <text x="525" y="127" fill="#a7adcf" font-size="10">but needs DEEP</text>
+          <text x="525" y="141" fill="#a7adcf" font-size="10">paralysis to work.</text>
+          <text x="525" y="170" fill="#9d8cff" font-size="11" font-weight="700">VISUALIZATION</text>
+          <text x="525" y="188" fill="#a7adcf" font-size="10">102 path. Little/no</text>
+          <text x="525" y="202" fill="#a7adcf" font-size="10">paralysis needed.</text>
+        </g>
+      </svg>
+      <figcaption>The two-transition spine. Lucidology 101 teaches the visualization-free route; 102 adds visualization to skip the deep-paralysis requirement.</figcaption>
+    </figure>
+
+    <div class="callout c-cool">
+      <span class="tag">Core claim</span>
+      <p>Waking sleep paralysis is the "holy grail" because it's <strong>stable</strong>. OBEs are normally fleeting and subtle; once you're in paralysis you can just hang there and work calmly. In nearly all of Newport's OBEs, he enters through paralysis first.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= SLEEP PARALYSIS ================= -->
+  <section id="sp" class="fade">
+    <p class="secnum">02 — THE GATE</p>
+    <h2>Waking sleep paralysis</h2>
+    <p>Sleep paralysis is what happens when the <strong>body</strong> falls asleep but the <strong>mind</strong> stays conscious. Normally body and mind switch off together; the entire method is a set of tricks to split them apart and keep the mind awake through the threshold.</p>
+
+    <figure>
+      <svg width="700" height="240" viewBox="0 0 700 240" role="img" aria-label="Mind-body independence: the body runs many processes the mind never sees">
+        <g font-family="system-ui" text-anchor="middle">
+          <circle cx="160" cy="120" r="62" fill="#161b42" stroke="#ff9e5e" stroke-width="2"/>
+          <text x="160" y="116" fill="#ff9e5e" font-size="18" font-weight="700">MIND</text>
+          <text x="160" y="138" fill="#a7adcf" font-size="11">"not sure what's</text>
+          <text x="160" y="152" fill="#a7adcf" font-size="11">going on"</text>
+
+          <circle cx="540" cy="120" r="62" fill="#161b42" stroke="#5ed0d6" stroke-width="2"/>
+          <text x="540" y="124" fill="#5ed0d6" font-size="18" font-weight="700">BODY</text>
+
+          <!-- processes body runs silently -->
+          <g font-size="10.5" fill="#a7adcf" text-anchor="start">
+            <text x="300" y="58">· digesting food</text>
+            <text x="300" y="80">· making blood cells</text>
+            <text x="300" y="102">· transcribing DNA</text>
+            <text x="300" y="124">· regenerating tissue</text>
+            <text x="300" y="146">· growing hair</text>
+            <text x="300" y="168">· …and falling asleep</text>
+          </g>
+          <line x1="228" y1="120" x2="290" y2="120" stroke="#2b3168" stroke-width="2" stroke-dasharray="4 4"/>
+          <line x1="410" y1="120" x2="478" y2="120" stroke="#2b3168" stroke-width="2" stroke-dasharray="4 4"/>
+        </g>
+      </svg>
+      <figcaption>Mind–body independence: the body handles countless processes without the mind's awareness. Falling asleep is one of them — so it can be triggered while the mind stays awake.</figcaption>
+    </figure>
+
+    <div class="callout c-key">
+      <span class="tag">The condition that makes it likely</span>
+      <p>Sleep paralysis is most likely right after you've <strong>just been asleep</strong> and then fall asleep again <strong>without moving</strong>. That single fact — wake, then re-sleep without moving — is the engine behind both Stop·Drop·Roll and the timer method.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= TIMING ================= -->
+  <section id="timing" class="fade">
+    <p class="secnum">03 — BRAIN CHEMISTRY</p>
+    <h2>The #1 mistake: trying at bedtime</h2>
+    <p>Newport's sharpest claim: <strong>do your attempts in the early morning, not at night.</strong> He reports thousands of early-morning OBEs and fewer than ten at bedtime. The reason is circadian chemistry.</p>
+
+    <figure>
+      <svg width="700" height="320" viewBox="0 0 700 320" role="img" aria-label="Circadian chart of melatonin and cortisol showing the 4 to 5:30 AM OBE sweet spot">
+        <defs>
+          <linearGradient id="sweet" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff9e5e" stop-opacity=".34"/>
+            <stop offset="100%" stop-color="#ff9e5e" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- axes -->
+        <line x1="55" y1="250" x2="660" y2="250" stroke="#2b3168" stroke-width="1.5"/>
+        <line x1="55" y1="40" x2="55" y2="250" stroke="#2b3168" stroke-width="1.5"/>
+        <g font-family="system-ui" font-size="10" fill="#6f76a0" text-anchor="middle">
+          <text x="120" y="268">dusk</text>
+          <text x="270" y="268">midnight</text>
+          <text x="390" y="268">2–4 AM</text>
+          <text x="500" y="268">dawn</text>
+          <text x="610" y="268">8 AM</text>
+        </g>
+
+        <!-- sweet spot band 4–5:30 -->
+        <rect x="430" y="40" width="80" height="210" fill="url(#sweet)"/>
+        <text x="470" y="34" font-family="system-ui" font-size="11" font-weight="700" fill="#ff9e5e" text-anchor="middle">SWEET SPOT</text>
+        <text x="470" y="232" font-family="system-ui" font-size="9.5" fill="#ff9e5e" text-anchor="middle">4–5:30 AM</text>
+
+        <!-- melatonin curve (peaks 2-4am) -->
+        <path d="M55 230 Q150 210 270 110 Q340 55 400 70 Q460 95 540 210 Q600 240 660 245"
+              fill="none" stroke="#5ed0d6" stroke-width="3"/>
+        <text x="360" y="48" font-family="system-ui" font-size="11" fill="#5ed0d6" font-weight="600">melatonin · relax</text>
+
+        <!-- cortisol curve (surges toward morning, max 8am) -->
+        <path d="M55 245 Q200 244 330 232 Q450 218 540 120 Q600 70 660 55"
+              fill="none" stroke="#ff9e5e" stroke-width="3"/>
+        <text x="565" y="100" font-family="system-ui" font-size="11" fill="#ff9e5e" font-weight="600">cortisol · alert</text>
+
+        <text x="35" y="48" font-family="system-ui" font-size="10" fill="#6f76a0" transform="rotate(-90 35 48)" text-anchor="middle">level</text>
+      </svg>
+      <figcaption>At 4–5:30 AM melatonin is still high (relaxation is easy) while cortisol has begun surging to wake you (alertness is easy). That overlap is the OBE sweet spot. Bedtime is the <em>worst</em> time: low on both.</figcaption>
+    </figure>
+
+    <h3>Two chemicals, two switches</h3>
+    <ul class="clean">
+      <li><strong>Serotonin — the "on" switch.</strong> Built from daylight exposure; increases alertness and lucidity. You're high on it in the morning, low at night.</li>
+      <li><strong>Melatonin — the "off" switch.</strong> Made from serotonin in darkness, peaks around 2–4 AM, breaks down at dawn. Drives relaxation.</li>
+      <li><strong>Cortisol — the alertness surge.</strong> Depleted through the day, surges back early morning to wake you, bringing epinephrine and norepinephrine you can borrow for dream alertness.</li>
+    </ul>
+
+    <div class="callout c-key">
+      <span class="tag">Wake-back-to-bed (WBTB)</span>
+      <p>Get up early (~5 AM), stay up <strong>~45 minutes</strong> avoiding light, then return to bed. LaBerge's research showed a wake period sharply increases lucidity; Newport finds 45 min beats a full hour for most people. Rule of thumb: go back when you <strong>start yawning again</strong>.</p>
+    </div>
+
+    <h3>Daytime habits that compound</h3>
+    <ul class="clean">
+      <li><strong>Get sunlight</strong> at daybreak and sundown (low sun, low burn risk) to build serotonin.</li>
+      <li><strong>Dim lights ~1 hour before bed</strong> to simulate dusk and avoid insomnia from abrupt light→dark.</li>
+      <li><strong>Avoid TV before bed</strong> — it removes the darkness window and shifts you into an alpha state within ~30 seconds.</li>
+    </ul>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= STOP DROP ROLL ================= -->
+  <section id="sdr" class="fade">
+    <p class="secnum">04 — FALL ASLEEP FAST</p>
+    <h2>Stop · Drop · Roll</h2>
+    <p>To exploit "re-sleep without moving" you first need to fall asleep on command. Stop·Drop·Roll does it by <strong>releasing tension in two big, calculated chunks</strong> instead of tossing and turning — making the body <em>ask</em> to sleep, then telling it <em>yes</em>.</p>
+
+    <figure>
+      <svg width="700" height="270" viewBox="0 0 700 270" role="img" aria-label="Three stages of Stop Drop and Roll with a figure releasing tension">
+        <g font-family="system-ui" text-anchor="middle">
+          <!-- 1 STOP: arms above head -->
+          <g>
+            <rect x="20" y="30" width="200" height="200" rx="14" fill="#161b42" stroke="#2b3168"/>
+            <text x="120" y="58" fill="#ff9e5e" font-size="14" font-weight="700">1 · STOP</text>
+            <text x="120" y="76" fill="#a7adcf" font-size="10">arms above head, relax</text>
+            <!-- figure arms up -->
+            <circle cx="120" cy="120" r="13" fill="#3a4180"/>
+            <line x1="120" y1="133" x2="120" y2="185" stroke="#5ed0d6" stroke-width="8" stroke-linecap="round"/>
+            <line x1="120" y1="148" x2="98" y2="108" stroke="#5ed0d6" stroke-width="6" stroke-linecap="round"/>
+            <line x1="120" y1="148" x2="142" y2="108" stroke="#5ed0d6" stroke-width="6" stroke-linecap="round"/>
+            <text x="120" y="212" fill="#6f76a0" font-size="9">"Relax step"</text>
+          </g>
+          <!-- 2 DROP -->
+          <g>
+            <rect x="250" y="30" width="200" height="200" rx="14" fill="#161b42" stroke="#2b3168"/>
+            <text x="350" y="58" fill="#ff9e5e" font-size="14" font-weight="700">2 · DROP</text>
+            <text x="350" y="76" fill="#a7adcf" font-size="10">arms to sides → roll signal</text>
+            <circle cx="350" cy="120" r="13" fill="#3a4180"/>
+            <line x1="350" y1="133" x2="350" y2="185" stroke="#5ed0d6" stroke-width="8" stroke-linecap="round"/>
+            <line x1="350" y1="150" x2="326" y2="178" stroke="#5ed0d6" stroke-width="6" stroke-linecap="round"/>
+            <line x1="350" y1="150" x2="374" y2="178" stroke="#5ed0d6" stroke-width="6" stroke-linecap="round"/>
+            <text x="350" y="212" fill="#6f76a0" font-size="9">"Ask step"</text>
+          </g>
+          <!-- 3 ROLL -->
+          <g>
+            <rect x="480" y="30" width="200" height="200" rx="14" fill="#161b42" stroke="#2b3168"/>
+            <text x="580" y="58" fill="#ff9e5e" font-size="14" font-weight="700">3 · ROLL</text>
+            <text x="580" y="76" fill="#a7adcf" font-size="10">roll over, don't move again</text>
+            <ellipse cx="580" cy="150" rx="42" ry="15" fill="#1f2552"/>
+            <circle cx="558" cy="140" r="12" fill="#3a4180"/>
+            <path d="M566 150 q30 -4 46 6" stroke="#5ed0d6" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <text x="580" y="212" fill="#6f76a0" font-size="9">"Yes step" → sleep</text>
+          </g>
+        </g>
+      </svg>
+      <figcaption>Each position change dumps a chunk of tension at once: shoulders (drop), then everything else (roll). Then you don't move for the rest of the night.</figcaption>
+    </figure>
+
+    <div class="callout c-warn">
+      <span class="tag">The roll-over signal — never obey it</span>
+      <p>Once relaxed, the body sends an urge to roll over. <strong>Ignoring it is the trigger that tells the body the mind is asleep</strong> — so it shuts down into paralysis. If you move, the body learns the mind is still awake. The signal disguises itself: on your back it sits in the <strong>chest</strong>; on your side it becomes an urge to <strong>move your legs</strong>. Keep legs perfectly still — don't fall for it.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= SLEEP COMMANDS ================= -->
+  <section id="commands" class="fade">
+    <p class="secnum">05 — THE TOOLKIT</p>
+    <h2>The 5 sleep commands</h2>
+    <p>Commands come in two kinds. <strong>Starters</strong> make the body ask permission to sleep; <strong>triggers</strong> say "yes, now." Start with starters, finish with triggers.</p>
+
+    <div class="tech">
+      <div class="t">
+        <div class="n">STARTER · 1</div>
+        <h4>Sleep breathing</h4>
+        <p>Breathe exactly as you do when asleep; the body reads it as proof it's asleep. The single most powerful command once the rhythm is right — but it has a learning curve.</p>
+      </div>
+      <div class="t">
+        <div class="n">STARTER · 2</div>
+        <h4>Stop eye micromovements</h4>
+        <p>Awake eyes constantly twitch. Hold them fully still for several minutes and the body reads sleep — it'll often drop off even if other muscles are tense.</p>
+      </div>
+      <div class="t">
+        <div class="n">TRIGGER · ~90%</div>
+        <h4>Pause breaths</h4>
+        <p>At ~90% paralysis, add a 2–3 second pause to the breath. The extra relaxation tips the body into full paralysis.</p>
+      </div>
+      <div class="t">
+        <div class="n">TRIGGER · ~95%</div>
+        <h4>Muscle twitching</h4>
+        <p>A small twitch convinces the body the mind has gone, pushing partial paralysis to full.</p>
+      </div>
+      <div class="t full">
+        <div class="n">TRIGGER · ~99%</div>
+        <h4>Up-and-down eye movements</h4>
+        <p>The deepest trigger — only works at ~99% paralysis. Useful as the very last nudge into full lock.</p>
+      </div>
+    </div>
+
+    <div class="callout c-warn">
+      <span class="tag">Two gotchas with sleep breathing</span>
+      <p><strong>Blackout breathing:</strong> it feels like nothing's working, then you suddenly black out and wake up the next morning — so always use a timer. <strong>Narcotic breathing:</strong> a deeply pleasant don't-want-to-get-up feeling; it's a sign sleep is near (and a cure for insomnia).</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= RELAXATION ================= -->
+  <section id="relax" class="fade">
+    <p class="secnum">06 — THE ROUTINE</p>
+    <h2>Fast relaxation, in order</h2>
+    <p>Newport's full pre-sleep sequence chains stretches into Stop·Drop·Roll. Don't fixate on it — it's a checklist to run once, not a meditation.</p>
+    <ol class="clean">
+      <li>Jaw massage → jaw palm-squeeze → jaw stretch</li>
+      <li>Horizontal &amp; vertical chest stretches</li>
+      <li>Stretch feet, then hands; relax shoulders</li>
+      <li>"Pre-roll": roll side to side to dissipate overall tension</li>
+      <li>Begin Stop·Drop·Roll — hands above head, daydream</li>
+      <li>Begin sleep breathing</li>
+      <li>Roll eyes in wide circles, then rest them</li>
+      <li>Count ~150 heartbeats to forget about the eyes (to ~450)</li>
+      <li>Bring arms down ("Drop" mode); tense &amp; release any still-tense muscle</li>
+      <li>Roll — then don't move</li>
+    </ol>
+    <div class="callout c-cool">
+      <span class="tag">Cheap gear that helps a lot</span>
+      <p><strong>Warm socks</strong> — feet cool more than you think when falling asleep, and cold feet block relaxation. <strong>Silicone putty earplugs</strong> — wash with soap to reuse. Both meaningfully speed things up.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= TIMER METHOD ================= -->
+  <section id="timer" class="fade">
+    <p class="secnum">07 — THE ENGINE</p>
+    <h2>The timer method (hypnotic fractionation)</h2>
+    <p>The do-tonight technique. Wake and re-sleep <strong>4–5 times in an hour without moving at all</strong>. Short intervals keep you hovering on the awake/asleep threshold so that on a beep you're poised for paralysis or an OBE — rather than sunk in deep sleep.</p>
+
+    <figure>
+      <svg width="700" height="250" viewBox="0 0 700 250" role="img" aria-label="The ramp timer schedule plotted as interval length over the session">
+        <line x1="55" y1="200" x2="665" y2="200" stroke="#2b3168" stroke-width="1.5"/>
+        <line x1="55" y1="30" x2="55" y2="200" stroke="#2b3168" stroke-width="1.5"/>
+        <text x="30" y="120" font-family="system-ui" font-size="10" fill="#6f76a0" transform="rotate(-90 30 120)" text-anchor="middle">interval (min)</text>
+        <text x="360" y="232" font-family="system-ui" font-size="10" fill="#6f76a0" text-anchor="middle">beep number →</text>
+        <!-- ramp bars: 8,4,8,12,16,20,20,6,6,6 -->
+        <g fill="#5ed0d6">
+          <rect x="80"  y="136" width="34" height="64"  rx="3"/>
+          <rect x="124" y="168" width="34" height="32"  rx="3"/>
+          <rect x="168" y="136" width="34" height="64"  rx="3"/>
+          <rect x="212" y="104" width="34" height="96"  rx="3"/>
+          <rect x="256" y="72"  width="34" height="128" rx="3"/>
+          <rect x="300" y="44"  width="34" height="156" rx="3" fill="#ff9e5e"/>
+          <rect x="344" y="44"  width="34" height="156" rx="3" fill="#ff9e5e"/>
+          <rect x="388" y="152" width="34" height="48"  rx="3"/>
+          <rect x="432" y="152" width="34" height="48"  rx="3"/>
+          <rect x="476" y="152" width="34" height="48"  rx="3"/>
+        </g>
+        <text x="317" y="36" font-family="system-ui" font-size="10" fill="#ff9e5e" text-anchor="middle" font-weight="700">deep paralysis likely here</text>
+        <g font-family="system-ui" font-size="9" fill="#6f76a0" text-anchor="middle">
+          <text x="97"  y="214">8</text><text x="141" y="214">4</text><text x="185" y="214">8</text>
+          <text x="229" y="214">12</text><text x="273" y="214">16</text><text x="317" y="214">20</text>
+          <text x="361" y="214">20</text><text x="405" y="214">6</text><text x="449" y="214">6</text><text x="493" y="214">6</text>
+        </g>
+      </svg>
+      <figcaption>A sample "ramp": 8, 4, 8, 12, 16, 20, 20, 6, 6, 6 minutes. The long 20-minute intervals are where deep paralysis usually lands; the short tail keeps you on the threshold.</figcaption>
+    </figure>
+
+    <h3>How to handle the beep</h3>
+    <p>First couple of beeps: just fall right back to sleep, do nothing. By the 3rd or 4th you'll notice obvious paralysis, rushing noises, or vibrations. Then use a sleep trigger to convert partial → full paralysis, and run an exit technique. <strong>Move only your thumb</strong> to reset a cooking timer so the rest of the body stays in paralysis.</p>
+
+    <div class="callout c-warn">
+      <span class="tag">Two drawbacks</span>
+      <p>It disrupts your <strong>sleep cycle</strong>, and it can produce <strong>false awakenings</strong> (you "wake," reset the timer, but were actually still dreaming). The fix for false awakenings is the next section.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= REALITY CHECKS ================= -->
+  <section id="checks" class="fade">
+    <p class="secnum">08 — TAKE THE RED PILL</p>
+    <h2>4 movement-free reality checks</h2>
+    <p>OBEs can be hyper-realistic — more detailed than waking life — so you need to verify you've shifted into a nonphysical focus <strong>without moving</strong> and breaking trance. No single check is reliable; use several.</p>
+
+    <div class="tech">
+      <div class="t">
+        <div class="n">CHECK · 1</div>
+        <h4>Blindfold test</h4>
+        <p>The simplest. With a sleep mask on, if you can "see" your room, you're seeing nonphysically.</p>
+      </div>
+      <div class="t">
+        <div class="n">CHECK · 2</div>
+        <h4>Transparent eyelids</h4>
+        <p>Seeing through closed lids. Often after-the-fact — you realize you saw, then wake. Can open eyes twice without closing between.</p>
+      </div>
+      <div class="t">
+        <div class="n">CHECK · 3</div>
+        <h4>Overlaid sight</h4>
+        <p>Physical and nonphysical surroundings layered like two projections, usually from a slightly different angle. Very fleeting; flickers then stabilizes.</p>
+      </div>
+      <div class="t">
+        <div class="n">CHECK · 4</div>
+        <h4>Spoon bending</h4>
+        <p>The longer-lasting check: try to bend a "spoon" or push a hand through a solid object. Nonphysical matter yields where physical wouldn't.</p>
+      </div>
+    </div>
+    <div class="callout c-cool">
+      <span class="tag">Bonus checks built into exits</span>
+      <p>The <strong>gravity-press</strong> ("transparent bed" — sink toward the floor while watching the ceiling) and the <strong>safety-cap</strong> exit double as reality checks. See exit techniques below.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= SIGNALS ================= -->
+  <section id="signals" class="fade">
+    <p class="secnum">09 — ROAD SIGNS</p>
+    <h2>3 signals: how close you are</h2>
+    <p>Before your first OBE it's hard to tell if you're progressing. These three sensations are road signs in order of how often they show up.</p>
+
+    <div class="meter">
+      <div class="row">
+        <div class="dot" style="background:#5ed0d6">1</div>
+        <div class="txt"><b>Sleep-paralysis wave</b> — your primary signal. Feels like a heavy lead blanket lowered onto the body. Unmistakable; means you're very close.</div>
+      </div>
+      <div class="row">
+        <div class="dot" style="background:#7ec0d8">2</div>
+        <div class="txt"><b>Pre-OBE rushing noises</b> — like radio static between stations. You're in a "no man's land," not quite conscious, not quite subconscious.</div>
+      </div>
+      <div class="row">
+        <div class="dot" style="background:#9d8cff">3</div>
+        <div class="txt"><b>Vibrations</b> — a buzzing feeling and noise. Often no stronger than a vibrating phone. Once you've felt them, you'll never doubt what they are.</div>
+      </div>
+    </div>
+
+    <figure>
+      <svg width="700" height="210" viewBox="0 0 700 210" role="img" aria-label="Two signals combining into a double-energy phase during transition">
+        <line x1="40" y1="105" x2="220" y2="105" stroke="#2b3168"/>
+        <path d="M40 105 q22 -38 44 0 q22 38 44 0 q22 -38 44 0 q22 38 44 0" fill="none" stroke="#5ed0d6" stroke-width="2.5"/>
+        <text x="130" y="170" font-family="system-ui" font-size="10" fill="#5ed0d6" text-anchor="middle">physical signal</text>
+
+        <path d="M40 105 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0" fill="none" stroke="#9d8cff" stroke-width="2.5" transform="translate(0,0)" opacity="0"/>
+
+        <text x="250" y="110" font-family="system-ui" font-size="22" fill="#6f76a0" text-anchor="middle">+</text>
+
+        <line x1="290" y1="105" x2="470" y2="105" stroke="#2b3168"/>
+        <path d="M290 105 q11 -34 22 0 q11 34 22 0 q11 -34 22 0 q11 34 22 0 q11 -34 22 0 q11 34 22 0 q11 -34 22 0 q11 34 22 0" fill="none" stroke="#9d8cff" stroke-width="2.5"/>
+        <text x="380" y="170" font-family="system-ui" font-size="10" fill="#9d8cff" text-anchor="middle">nonphysical signal</text>
+
+        <text x="500" y="110" font-family="system-ui" font-size="22" fill="#6f76a0" text-anchor="middle">=</text>
+
+        <line x1="540" y1="105" x2="680" y2="105" stroke="#2b3168"/>
+        <path d="M540 105 q16 -52 32 0 q16 52 32 0 q16 -52 32 0 q16 52 32 0" fill="none" stroke="#ff9e5e" stroke-width="3"/>
+        <text x="610" y="170" font-family="system-ui" font-size="10" fill="#ff9e5e" text-anchor="middle">double energy</text>
+      </svg>
+      <figcaption>Newport's model: vibrations are two signals — physical and nonphysical — briefly out of phase, doubling the energy running through you.</figcaption>
+    </figure>
+
+    <div class="callout c-key">
+      <span class="tag">Why "books are wrong" about vibrations</span>
+      <p>Most books say vibrations mean you're <em>ready to exit</em>. Newport argues the opposite: vibrations mean you're <strong>not</strong> ready — they only occur when energy exceeds what your nonphysical body can conduct. The <strong>more OBEs you have, the wider that range gets</strong>, so vibrations fade. Eventually most exits are vibration-free — a quiet, subtle transition with no wasted energy and a brighter, clearer OBE.</p>
+    </div>
+    <div class="callout c-cool">
+      <span class="tag">Relevant to a buzzing-heavy practice</span>
+      <p>If you reliably get strong vibrations, this reframe predicts they'll diminish with reps — and that chasing/amplifying them may be working against a cleaner "quiet zone" exit. Worth testing alongside the energy-building approach.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= EXIT BLINDNESS ================= -->
+  <section id="blind" class="fade">
+    <p class="secnum">10 — A COMMON SNAG</p>
+    <h2>Exit blindness — 3 fixes</h2>
+    <p>You separate successfully but can't see in the nonphysical environment. Three solutions, in rising power:</p>
+    <ol class="clean">
+      <li><strong>Wait / demand sight</strong> — sometimes vision simply arrives or can be commanded.</li>
+      <li><strong>Feel your way</strong> — navigate by touch until sight kicks in.</li>
+      <li><strong>Mental projections</strong> — the advanced fix Newport relies on most: "see without seeing." 100% sidesteps exit blindness because no actual seeing is involved. Covered in depth in 102.</li>
+    </ol>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= EXIT TECHNIQUES ================= -->
+  <section id="exits" class="fade">
+    <p class="secnum">11 — SEPARATION</p>
+    <h2>The 5 movement-free exit techniques</h2>
+    <p>Once in deep paralysis, these convert it into a full OBE — all without moving physical muscles. The key insight throughout: <strong>movement in your already-nonphysical parts (eyes, face) draws the rest of your focus across.</strong></p>
+
+    <div class="tech">
+      <div class="t full">
+        <div class="n">EXIT · 1 · the initiator</div>
+        <h4>Open-mouth exit <span style="color:var(--ink-faint);font-weight:400">(by forum poster tsunaH)</span></h4>
+        <p>In paralysis, ~99% of the time you can still move eyes and mouth. Open your mouth and take a few <strong>slow, gentle</strong> sleep-breaths (not too hard or you break paralysis). Separation begins at the head. Often gets you halfway — then switch to another exit.</p>
+      </div>
+      <div class="t">
+        <div class="n">EXIT · 2</div>
+        <h4>Gravity press</h4>
+        <p>Focus on gravity pulling your body down; you sink through the bed. Don't press too far (a too-heavy feeling makes the OBE dark). Doubles as the "transparent bed" reality check.</p>
+      </div>
+      <div class="t">
+        <div class="n">EXIT · 3</div>
+        <h4>Safety cap</h4>
+        <p>Gravity-press <em>down</em>, then add a <em>twist</em> — rotate around your navel so your head swings 180°. Press + twist = certainty you've exited. It's an exit <em>and</em> a reality check.</p>
+      </div>
+      <div class="t">
+        <div class="n">EXIT · 4</div>
+        <h4>Magnetic spheres</h4>
+        <p>Imagine a magnetic ball above your hands and move it; you'll feel a fuzzy ball of awareness pulling your nonphysical body. Trains directed focus for steering.</p>
+      </div>
+      <div class="t">
+        <div class="n">EXIT · 5 · salvage</div>
+        <h4>Limb creation</h4>
+        <p>Half-out but legs stuck? Don't pull. <strong>Imagine an entirely new set of limbs</strong> beneath you — feel the socks, the pressure, wiggling toes. Focus refocuses into the copies and you're free in seconds.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg width="700" height="220" viewBox="0 0 700 220" role="img" aria-label="Safety cap exit: press down then twist to rotate out of the body">
+        <g font-family="system-ui" text-anchor="middle">
+          <!-- press -->
+          <text x="110" y="40" fill="#5ed0d6" font-size="13" font-weight="700">PRESS DOWN</text>
+          <line x1="110" y1="55" x2="110" y2="120" stroke="#5ed0d6" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+          <ellipse cx="110" cy="150" rx="55" ry="16" fill="#1f2552"/>
+          <ellipse cx="110" cy="150" rx="40" ry="10" fill="#2b3168"/>
+          <text x="110" y="195" fill="#6f76a0" font-size="10">sink through bed</text>
+
+          <text x="350" y="110" fill="#6f76a0" font-size="22">+</text>
+
+          <!-- twist -->
+          <text x="350" y="40" fill="#9d8cff" font-size="13" font-weight="700">&amp; TWIST</text>
+          <path d="M310 90 a40 24 0 1 1 80 6" fill="none" stroke="#9d8cff" stroke-width="3" marker-end="url(#arrow)"/>
+          <circle cx="350" cy="150" r="13" fill="#3a4180"/>
+          <path d="M338 150 q12 -20 24 0" stroke="#9d8cff" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <text x="350" y="195" fill="#6f76a0" font-size="10">rotate 180° around navel</text>
+
+          <text x="560" y="110" fill="#6f76a0" font-size="22">=</text>
+
+          <!-- OBE -->
+          <text x="630" y="40" fill="#ff9e5e" font-size="13" font-weight="700">O.B.E.</text>
+          <circle cx="630" cy="95" r="11" fill="url(#riseG)"/>
+          <line x1="630" y1="106" x2="630" y2="150" stroke="url(#riseG)" stroke-width="6" stroke-linecap="round"/>
+          <line x1="630" y1="120" x2="612" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="630" y1="120" x2="648" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
+          <text x="630" y="195" fill="#6f76a0" font-size="10">stand up, no doubt</text>
+        </g>
+      </svg>
+      <figcaption>The safety-cap exit. Because the press and the twist each test your state, it's far higher-success than the all-or-nothing "roll over" exit most books recommend.</figcaption>
+    </figure>
+
+    <div class="callout c-warn">
+      <span class="tag">Avoid the roll-over exit</span>
+      <p>Rolling onto your side to "complete" the exit is an all-or-nothing <strong>gamble</strong> — succeed, or move physically and start over. Safety-cap is a test first, so a failed press/twist just tells you to relax deeper, trance intact.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= QUICK START ================= -->
+  <section id="quickstart" class="fade">
+    <p class="secnum">12 — DO TONIGHT</p>
+    <h2>The one-page protocol</h2>
+    <p class="lead">The single induction Newport says he'd keep if allowed only one. Print this; the theory above is the "why."</p>
+    <ol class="steps">
+      <li><b>9:00 PM</b> — to bed. Dim lights an hour before; no TV.</li>
+      <li><b>4:30 AM</b> — get up.</li>
+      <li><b>Stay up to 5:15 AM</b> (~45 min). Avoid light. Wait for yawning.</li>
+      <li><b>Back to bed</b> — run Stop·Drop·Roll to start falling asleep.</li>
+      <li><b>Set the ramp timer</b> (8·4·8·12·16·20·20·6·6·6). Fall asleep; let beeps wake you.</li>
+      <li><b>On early beeps</b> — don't move, fall right back to sleep. Do nothing.</li>
+      <li><b>By beep 3–4</b> — feel paralysis / rushing noises / vibrations. Use a trigger (pause breath → twitch → eye movement) to reach full paralysis.</li>
+      <li><b>Reality check</b> — blindfold / overlaid sight / spoon bending to confirm nonphysical focus.</li>
+      <li><b>Exit</b> — open-mouth initiator, then safety-cap (press + twist). Salvage stuck limbs with limb creation.</li>
+      <li><b>You're out</b> — if blind, drop into a mental projection. Stand up in the nonphysical bedroom.</li>
+    </ol>
+    <div class="callout c-cool">
+      <span class="tag">Daily, in the background</span>
+      <p>Get sunlight at dawn/dusk for serotonin. Practice sleep breathing on ordinary nights so the rhythm is automatic. Wear socks; use earplugs.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ================= BEYOND ================= -->
+  <section id="beyond" class="fade">
+    <p class="secnum">13 — WHERE 101 ENDS</p>
+    <h2>Lucidology 102 &amp; 103</h2>
+    <p>101 is the free, visualization-free foundation. The later courses add visualization to remove 101's biggest limits — chiefly the need for <strong>deep</strong> paralysis and the timer's disruption to your sleep cycle.</p>
+
+    <div class="tier">
+      <span><b>101</b> · visualization-free · needs deep paralysis</span>
+      <span><b>102</b> · visualization-powered · little/no paralysis</span>
+      <span><b>103</b> · referenced add-ons (eye-pry, Q&amp;A)</span>
+    </div>
+
+    <h3>What 102 adds</h3>
+    <ul class="clean">
+      <li><strong>Waking OBEs</strong> — separate while the body stays <em>fully awake</em> (distinct from a WILD, where the body sleeps). Far more OBEs, far less time in boring relaxation stages.</li>
+      <li><strong>Memory impressions &amp; "stickiness"</strong> — the channel you read information through in an OBE without seeing; wait for impressions to feel "sticky" before visualizing.</li>
+      <li><strong>The shifted-blackboard / number-5 trick</strong> — bridge physical eyelid-space to nonphysical dream-space by holding the memory of a "5" that's half inside, half outside your field of view, then shift awareness (not eyeballs) to the unseen part.</li>
+      <li><strong>Teleporting OBE</strong> — skip the hard "unlocking" separation entirely; project straight to a target location. Newport's recommended fix when you get vibrations/noise but can't separate.</li>
+      <li><strong>Mental projections</strong> — the "see without seeing" method that defeats exit blindness.</li>
+    </ul>
+
+    <h3>Useful 102 Q&amp;A answers</h3>
+    <ul class="clean">
+      <li><strong>Can't separate in full paralysis?</strong> You're likely in paralysis <em>without</em> a subconscious focus. Use the timer (fractionation) to go deeper, then teleport out rather than peel out.</li>
+      <li><strong>Vibrations + noise but stuck?</strong> Don't peel away — do a teleporting / phasing OBE; the unlocking phase is what amplifies the vibrations and wastes energy.</li>
+      <li><strong>Graveyard shift / no sun?</strong> A full-spectrum lamp substitutes for sunlight.</li>
+      <li><strong>Lucid dream → OBE?</strong> Set the intent to get a focus on your physical body; when the dream ends you'll come to in paralysis, then run an exit.</li>
+      <li><strong>OBE length?</strong> Short — ~15 min is long. The system is built around having <em>many</em>, not long ones.</li>
+      <li><strong>Psychedelics a shortcut?</strong> Addressed directly in the 102 "Before the OBE" Q&amp;A — Newport's system is built to need no substances; the timer + brain-chemistry timing is the engine.</li>
+    </ul>
+
+    <div class="callout c-key">
+      <span class="tag">The honest framing</span>
+      <p>101 is complete enough to get a first OBE. 102/103 are paid accelerators — most of their value is <em>format and speed</em> (visualization shortcuts), not secret theory. The free 101 already contains the working engine: WBTB timing + timer fractionation + an exit technique.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Notes compiled from Lucidology 101 (parts 2–12), the OBE Quick-Start, and Lucidology 102 Q&amp;A.<br>
+    Original course by Nicholas Newport · diagrams redrawn for this reference.<br>
+    A personal study aid — claims are the author's; hold the metaphysics lightly.</p>
+  </footer>
+
+</div>
+
+<script>
+  // gentle scroll reveal (respects reduced-motion via CSS class gating)
+  const io=new IntersectionObserver((es)=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+  },{threshold:.08});
+  document.querySelectorAll('.fade').forEach(el=>io.observe(el));
+
+  // hamburger drawer
+  const hbtn=document.getElementById('hbtn');
+  const overlay=document.getElementById('overlay');
+  const drawer=document.getElementById('drawer');
+  const open=()=>{hbtn.classList.add('open');overlay.classList.add('open');drawer.classList.add('open');hbtn.setAttribute('aria-expanded','true');};
+  const close=()=>{hbtn.classList.remove('open');overlay.classList.remove('open');drawer.classList.remove('open');hbtn.setAttribute('aria-expanded','false');};
+  hbtn.addEventListener('click',()=>hbtn.classList.contains('open')?close():open());
+  overlay.addEventListener('click',close);
+  document.addEventListener('keydown',e=>e.key==='Escape'&&close());
+  drawer.querySelectorAll('a[data-a]').forEach(link=>{
+    link.addEventListener('click',e=>{
+      e.preventDefault();
+      const id=link.getAttribute('data-a');
+      close();
+      setTimeout(()=>{
+        const t=document.getElementById(id);
+        if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'});
+      },400);
+    });
+  });
+</script>
+</body>
+</html>
