@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Footprint — Order-Flow Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<style>
+:root {
+  --bg:        #08090b;
+  --bg2:       #0f1114;
+  --bgc:       #111418;
+  --border:    rgba(255,255,255,0.07);
+  --bora:      rgba(52,211,196,0.22);
+  --tp:        #e7eceb;
+  --ts:        #94a0a0;
+  --tm:        #57625f;
+  --acc:       #34d3c4;
+  --accdim:    rgba(52,211,196,0.1);
+  --red:       #ff5d6c;
+  --reddim:    rgba(255,93,108,0.1);
+  --green:     #4ade80;
+  --greendim:  rgba(74,222,128,0.1);
+  --gold:      #c9a96e;
+  --golddim:   rgba(201,169,110,0.1);
+  --blue:      #6f9fff;
+  --purple:    #a78bfa;
+  --serif:     'Lora', Georgia, serif;
+  --sans:      'Inter', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', ui-monospace, monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tp);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3}
+
+/* progress */
+#prog{position:fixed;top:52px;left:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--green));z-index:101;width:0;opacity:.7;transition:width .1s linear}
+
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(8,9,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.brand{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--tm)}
+.brand span{color:var(--acc)}
+.hbtn{display:flex;flex-direction:column;gap:5px;width:40px;height:40px;padding:11px 7px;cursor:pointer;background:none;border:1px solid var(--border);border-radius:8px;justify-content:center;transition:border-color .2s}
+.hline{display:block;width:100%;height:1.5px;background:var(--ts);transition:all .3s cubic-bezier(.23,1,.32,1);transform-origin:center}
+.hbtn.open .hline:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hbtn.open .hline:nth-child(2){opacity:0;transform:scaleX(0)}
+.hbtn.open .hline:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* toc */
+.overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(290px,85vw);z-index:95;background:var(--bg2);border-left:1px solid var(--border);padding:64px 20px 32px;transform:translateX(100%);transition:transform .4s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.toc-label{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--tm);margin-bottom:16px}
+.toc-list{list-style:none}
+.toc-list a{display:flex;align-items:center;gap:14px;padding:14px 0;text-decoration:none;color:var(--ts);font-family:var(--sans);font-size:14.5px;border-bottom:1px solid var(--border);transition:color .2s;-webkit-tap-highlight-color:transparent}
+.toc-list a:active{color:var(--tp)}
+.toc-tag{font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:3px 8px;border:1px solid var(--bora);border-radius:2px;color:var(--acc);background:var(--accdim);white-space:nowrap}
+.toc-back{margin-top:20px}
+.toc-back a{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--sans);font-size:12px;letter-spacing:.04em;color:var(--tm);transition:color .2s}
+.toc-back a:active{color:var(--acc)}
+
+/* main */
+main{padding-top:52px}
+
+/* hero */
+.hero{padding:34px 16px 28px;max-width:720px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:420px;height:420px;background:radial-gradient(ellipse,rgba(52,211,196,.07) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(36px,11vw,66px);font-weight:600;line-height:1.08;letter-spacing:-.015em;margin-bottom:10px}
+h1 em{font-style:italic;color:var(--acc)}
+.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.06em;color:var(--ts);line-height:1.7;margin-bottom:20px;max-width:560px}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:6px 11px;border:1px solid var(--acc);border-radius:2px;color:var(--acc);background:var(--accdim)}
+.badge.r{border-color:var(--red);color:var(--red);background:var(--reddim)}
+.badge.g{border-color:var(--green);color:var(--green);background:var(--greendim)}
+.arrow{color:var(--tm);font-size:12px}
+
+/* content */
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+
+/* technique / section */
+.technique{margin-bottom:46px;animation:fu .5s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--tm);display:block;margin-bottom:8px}
+.tech-title{font-family:var(--serif);font-size:clamp(23px,7vw,36px);font-weight:600;line-height:1.12;letter-spacing:-.01em}
+.tech-title em{font-style:italic;color:var(--acc)}
+.tech-body p{font-family:var(--serif);font-size:clamp(16px,4.4vw,18px);line-height:1.8;color:#c2c9c8;margin-bottom:16px}
+.tech-body p strong{color:#eaf0ef;font-weight:600}
+.tech-body p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.86em;background:var(--accdim);color:var(--acc);padding:1px 6px;border-radius:3px;white-space:nowrap}
+
+/* split cards */
+.split{display:flex;flex-direction:column;gap:12px;margin:18px 0}
+.scard{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:16px}
+.scard.up{border-top:2px solid var(--green)}
+.scard.dn{border-top:2px solid var(--red)}
+.scard.a{border-top:2px solid var(--red)}
+.scard.b{border-top:2px solid var(--blue)}
+.scard-k{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:8px}
+.scard.up .scard-k{color:var(--green)}
+.scard.dn .scard-k{color:var(--red)}
+.scard.a .scard-k{color:var(--red)}
+.scard.b .scard-k{color:var(--blue)}
+.scard h3{font-family:var(--serif);font-size:21px;font-weight:600;margin-bottom:8px;color:var(--tp)}
+.scard p{font-family:var(--sans);font-size:13.5px;line-height:1.7;color:var(--ts);margin:0}
+.scard p strong{color:var(--tp);font-weight:600}
+.scard .result{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--acc)}
+.scard ul{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.scard li{font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ts);padding-left:16px;position:relative}
+.scard li::before{content:'';position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:1px}
+.scard.a li::before{background:var(--red)}
+.scard.b li::before{background:var(--blue)}
+.scard.up li::before{background:var(--green)}
+.scard.dn li::before{background:var(--red)}
+
+/* takeaway banner */
+.takeaway{border-left:3px solid var(--acc);background:linear-gradient(90deg,var(--accdim),transparent);border-radius:0 4px 4px 0;padding:16px 18px;margin:18px 0}
+.takeaway .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.takeaway p{font-family:var(--serif);font-size:clamp(18px,5vw,22px);font-weight:600;line-height:1.35;color:var(--tp);margin:0}
+.takeaway p em{font-style:italic;color:var(--acc)}
+.takeaway p code{font-size:.8em}
+.takeaway.p{border-left-color:var(--purple);background:linear-gradient(90deg,rgba(167,139,250,.1),transparent)}
+.takeaway.p .k{color:var(--purple)}
+.takeaway.p p em{color:var(--purple)}
+
+/* note / tip / risk */
+.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:4px;padding:14px 16px;margin:16px 0}
+.note .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.note p{font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts);margin:0}
+.note p strong{color:var(--tp);font-weight:600}
+.note p + p{margin-top:8px}
+.risk{background:linear-gradient(90deg,var(--golddim),transparent);border:1px solid rgba(201,169,110,.2);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
+.risk .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.risk p{font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts);margin:0}
+.risk p strong{color:var(--gold);font-weight:600}
+
+/* 2x2 matrix */
+.matrix{display:grid;grid-template-columns:1fr;gap:10px;margin:18px 0}
+.mcell{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:16px;position:relative}
+.mcell.hi{border-color:var(--bora);background:linear-gradient(160deg,rgba(52,211,196,.07),var(--bgc))}
+.mcell .mlabel{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--tm);margin-bottom:8px}
+.mcell .mcode{font-family:var(--mono);font-size:15px;color:var(--tp);margin-bottom:6px;letter-spacing:.04em}
+.mcell.hi .mcode{color:var(--acc)}
+.mcell h3{font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px;color:var(--tp)}
+.mcell.hi h3{color:var(--acc)}
+.mcell p{font-family:var(--sans);font-size:13px;line-height:1.65;color:var(--ts);margin:0}
+
+/* checklist */
+.checklist{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:18px 16px;margin:18px 0}
+.checklist h4{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--tp);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.checklist h4 .cbi{width:22px;height:22px;border:1.5px solid var(--bora);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.checklist h4 .cbi svg{width:13px;height:13px;color:var(--acc)}
+.cl-grid{display:grid;grid-template-columns:1fr;gap:2px}
+.cl-item{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--border);font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--ts)}
+.cl-item svg{width:16px;height:16px;color:var(--acc);flex-shrink:0;margin-top:1px}
+.cl-item strong{color:var(--tp);font-weight:600}
+
+/* location / list grid */
+.loc-grid{display:grid;grid-template-columns:1fr;gap:8px;margin:18px 0}
+.loc{display:flex;align-items:flex-start;gap:12px;background:var(--bgc);border:1px solid var(--border);border-radius:4px;padding:12px 14px;font-family:var(--sans);font-size:13.5px;line-height:1.55;color:var(--tp)}
+.loc .ln{font-family:var(--mono);font-size:11px;color:var(--acc);flex-shrink:0;width:20px;margin-top:2px}
+.loc strong{color:var(--tp);font-weight:600}
+.loc span.t{color:var(--ts)}
+
+/* confirmation flow */
+.flow{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+.frow{display:flex;align-items:center;gap:10px}
+.fnode{flex:1;background:var(--bgc);border:1px solid var(--border);border-radius:5px;padding:12px 14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;line-height:1.4;text-align:center}
+.fnode.b{border-color:rgba(111,159,255,.35);color:var(--blue)}
+.fnode.t{border-color:var(--bora);color:var(--acc)}
+.fnode.g{border-color:rgba(74,222,128,.35);color:var(--green)}
+.fnode.r{border-color:rgba(255,93,108,.3);color:var(--red)}
+.fdown{display:flex;justify-content:center;color:var(--tm);font-size:14px;margin:-2px 0}
+
+/* cheat-sheet rows */
+.rows{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+.row{display:grid;grid-template-columns:1fr;gap:8px;background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:13px 15px}
+.row .rk{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)}
+.row .rb,.row .rr{font-family:var(--sans);font-size:13px;line-height:1.55;position:relative;padding-left:16px}
+.row .rb::before,.row .rr::before{position:absolute;left:0;top:0;font-family:var(--mono);font-size:12px}
+.row .rb{color:#bfe9cf}.row .rb::before{content:'▲';color:var(--green);font-size:8px;top:4px}
+.row .rr{color:#f0c2c8}.row .rr::before{content:'▼';color:var(--red);font-size:8px;top:4px}
+.row code{font-size:.84em}
+
+/* figures (svg diagrams) */
+.fig{background:var(--bgc);border:1px solid var(--border);border-radius:8px;padding:16px 14px;margin:18px 0;overflow:hidden}
+.fig-cap{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm);margin-bottom:14px}
+.fig-cap::before{content:'';width:18px;height:1px;background:var(--acc);opacity:.6;flex-shrink:0}
+.fig svg{width:100%;height:auto;display:block}
+.fig svg text{font-family:'JetBrains Mono',ui-monospace,monospace}
+.fig-key{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--ts)}
+.fig-key span{display:inline-flex;align-items:center;gap:6px}
+.fig-key i{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+
+/* divider */
+.div{display:flex;align-items:center;gap:14px;margin:8px 0 46px}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.4}
+
+/* closing */
+.closing{text-align:center;padding:8px 0 4px}
+.closing .mark{font-family:var(--serif);font-size:48px;font-style:italic;color:var(--acc);line-height:1;margin-bottom:8px}
+.closing .lead{font-family:var(--serif);font-style:italic;font-size:clamp(17px,4.6vw,20px);line-height:1.6;color:var(--ts);margin-bottom:24px;max-width:520px;margin-left:auto;margin-right:auto}
+.closing .lead em{color:var(--acc);font-style:italic}
+.closing .punch{font-family:var(--serif);font-style:italic;font-weight:600;font-size:clamp(22px,6.5vw,34px);line-height:1.2;color:var(--tp)}
+.closing .attr{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tm);margin-top:18px}
+
+/* back to top */
+#btt{position:fixed;bottom:20px;right:16px;z-index:80;width:42px;height:42px;border-radius:50%;background:var(--bgc);border:1px solid var(--bora);color:var(--acc);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;-webkit-tap-highlight-color:transparent}
+#btt.vis{opacity:1;pointer-events:all}
+#btt:active{transform:scale(.92)}
+
+footer{border-top:1px solid var(--border);padding:22px 16px;text-align:center;margin-top:12px}
+footer p{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm)}
+footer a{color:var(--acc);text-decoration:none}
+
+@media(min-width:640px){
+  .toc-list a:hover{color:var(--tp)}
+  .split{flex-direction:row}
+  .split .scard{flex:1}
+  .matrix{grid-template-columns:1fr 1fr}
+  .cl-grid{grid-template-columns:1fr 1fr;column-gap:24px}
+  .cl-grid .cl-item:nth-child(2){border-top:1px solid var(--border)}
+  .loc-grid{grid-template-columns:1fr 1fr}
+  .row{grid-template-columns:0.85fr 1.1fr 1.1fr;align-items:center;gap:16px}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">Orderflow <span>/ Footprint</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#bidask" data-a="bidask"><span class="toc-tag">01</span>The bid × ask convention</a></li>
+    <li><a href="#extremes" data-a="extremes"><span class="toc-tag">02</span>Four extreme-tick patterns</a></li>
+    <li><a href="#auction" data-a="auction"><span class="toc-tag">03</span>Finished vs unfinished</a></li>
+    <li><a href="#delta" data-a="delta"><span class="toc-tag">04</span>Delta</a></li>
+    <li><a href="#imbalance" data-a="imbalance"><span class="toc-tag">05</span>Diagonal imbalance</a></li>
+    <li><a href="#phantom" data-a="phantom"><span class="toc-tag">06</span>The phantom check</a></li>
+    <li><a href="#profile" data-a="profile"><span class="toc-tag">07</span>Delta profile</a></li>
+    <li><a href="#cheat" data-a="cheat"><span class="toc-tag">✦</span>Cheat sheet</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← Back to all notes</a></p>
+</aside>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Order Flow · Gold Futures (MGC/GC)</p>
+    <h1>The <em>footprint</em>,<br>decoded</h1>
+    <p class="subtitle">The footprint shows aggressors — who initiated. Behind every aggressive trade sits a passive resting order on the other side. A 0 means no aggressor showed up there; it says nothing about whether passive orders were resting.</p>
+    <div class="seq">
+      <span class="badge g">Aggressor (visible)</span>
+      <span class="arrow">↔</span>
+      <span class="badge">Passive (inferred)</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- 01 bid x ask -->
+    <article id="bidask" class="technique">
+      <div class="tech-head">
+        <span class="kicker">01 / 07</span>
+        <h2 class="tech-title">The <em>bid × ask</em> convention</h2>
+      </div>
+      <div class="tech-body">
+        <p>Every footprint cell reads <strong>bid × ask</strong>. The number is <strong>traded volume on each side</strong> — and each side's volume was put up by the <em>aggressor</em>, leaving the passive counterparty invisible.</p>
+      </div>
+
+      <div class="split">
+        <div class="scard dn">
+          <p class="scard-k">BID · left</p>
+          <h3>Volume at the bid</h3>
+          <ul>
+            <li>Aggressive <strong>sellers</strong> hit the bid</li>
+            <li>Passive counterparty = resting buyers</li>
+          </ul>
+        </div>
+        <div class="scard up">
+          <p class="scard-k">ASK · right</p>
+          <h3>Volume at the ask</h3>
+          <ul>
+            <li>Aggressive <strong>buyers</strong> lift the offer</li>
+            <li>Passive counterparty = resting sellers</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="takeaway">
+        <p class="k">// Read it</p>
+        <p><code>0 × 68</code> = zero aggressive sells, <em>68 aggressive buys.</em></p>
+      </div>
+
+      <figure class="fig">
+        <figcaption class="fig-cap">Fig · 01 — One cell, two sides</figcaption>
+        <svg viewBox="0 0 500 250" role="img" aria-label="A single footprint cell split into bid on the left and ask on the right, with aggressor and passive labels">
+          <!-- price tag -->
+          <text x="14" y="60" fill="#57625f" font-size="11" letter-spacing="1">PRICE 5012.50</text>
+          <!-- the cell -->
+          <rect x="120" y="74" width="260" height="72" rx="6" fill="#0f1114" stroke="rgba(255,255,255,0.12)"/>
+          <line x1="250" y1="74" x2="250" y2="146" stroke="rgba(255,255,255,0.12)"/>
+          <rect x="120" y="74" width="130" height="72" rx="6" fill="#ff5d6c" opacity=".09"/>
+          <rect x="250" y="74" width="130" height="72" rx="6" fill="#34d3c4" opacity=".1"/>
+          <text x="185" y="120" fill="#ff5d6c" font-size="26" text-anchor="middle" font-weight="500">45</text>
+          <text x="315" y="120" fill="#34d3c4" font-size="26" text-anchor="middle" font-weight="500">117</text>
+          <text x="185" y="66" fill="#ff5d6c" font-size="10" text-anchor="middle" letter-spacing="1">BID</text>
+          <text x="315" y="66" fill="#34d3c4" font-size="10" text-anchor="middle" letter-spacing="1">ASK</text>
+          <text x="250" y="66" fill="#57625f" font-size="13" text-anchor="middle">×</text>
+
+          <!-- aggressor labels -->
+          <line x1="185" y1="146" x2="185" y2="172" stroke="#ff5d6c" stroke-width="1" opacity=".5"/>
+          <text x="185" y="188" fill="#ff5d6c" font-size="10" text-anchor="middle">aggressive SELLERS</text>
+          <text x="185" y="202" fill="#94a0a0" font-size="9" text-anchor="middle" font-style="italic">hit the bid</text>
+          <text x="185" y="224" fill="#57625f" font-size="9" text-anchor="middle">passive buyers rest here</text>
+
+          <line x1="315" y1="146" x2="315" y2="172" stroke="#34d3c4" stroke-width="1" opacity=".5"/>
+          <text x="315" y="188" fill="#34d3c4" font-size="10" text-anchor="middle">aggressive BUYERS</text>
+          <text x="315" y="202" fill="#94a0a0" font-size="9" text-anchor="middle" font-style="italic">lift the offer</text>
+          <text x="315" y="224" fill="#57625f" font-size="9" text-anchor="middle">passive sellers rest here</text>
+        </svg>
+        <div class="fig-key">
+          <span><i style="background:#ff5d6c"></i>Bid = aggressive sells</span>
+          <span><i style="background:#34d3c4"></i>Ask = aggressive buys</span>
+        </div>
+      </figure>
+
+      <div class="risk">
+        <p class="k">! The trap</p>
+        <p><code>bid = 0</code> only proves <strong>no aggressive seller</strong> traded there. Passive buy orders may or may not have been resting — they leave <strong>no trace</strong> unless someone hits them.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 02 extremes -->
+    <article id="extremes" class="technique">
+      <div class="tech-head">
+        <span class="kicker">02 / 07</span>
+        <h2 class="tech-title">The four <em>extreme-tick</em> patterns</h2>
+      </div>
+      <div class="tech-body">
+        <p>Judge <strong>finished vs rejected</strong> at the <em>extreme</em> tick — the top of an up-move, the bottom of a down-move. One rule does the work: <strong>the <code>0</code> sits on the side that gave up.</strong></p>
+      </div>
+
+      <div class="matrix">
+        <div class="mcell">
+          <p class="mlabel">Top · finished (passive)</p>
+          <p class="mcode">0 × N</p>
+          <h3>Buyers faded</h3>
+          <p>Demand exhausted on its own. Weaker signal.</p>
+        </div>
+        <div class="mcell hi">
+          <p class="mlabel">Top · rejected (aggressive)</p>
+          <p class="mcode">N × 0</p>
+          <h3>Sellers slammed it</h3>
+          <p>The opposite side actively took over. <strong>Stronger reversal.</strong></p>
+        </div>
+        <div class="mcell">
+          <p class="mlabel">Bottom · finished (passive)</p>
+          <p class="mcode">N × 0</p>
+          <h3>Sellers faded</h3>
+          <p>Supply exhausted on its own. Weaker signal.</p>
+        </div>
+        <div class="mcell hi">
+          <p class="mlabel">Bottom · rejected (aggressive)</p>
+          <p class="mcode">0 × N</p>
+          <h3>Buyers grabbed it</h3>
+          <p>The opposite side actively took over. <strong>Stronger reversal.</strong></p>
+        </div>
+      </div>
+
+      <div class="note">
+        <p class="k">Quick check</p>
+        <p>Find the <code>0</code> — that's who gave up. If the give-up side is the one you'd <strong>expect</strong> to dominate at that extreme (sellers at a bottom, buyers at a top) → passive <strong>finish</strong>. If the <em>opposite</em> side gave up and the aggressor is the reversal side → active <strong>rejection</strong>.</p>
+      </div>
+
+      <div class="takeaway">
+        <p class="k">// Why rejection beats exhaustion</p>
+        <p>An <em>active takeover</em> is stronger evidence than the dominant side merely running out of steam.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 03 auction -->
+    <article id="auction" class="technique">
+      <div class="tech-head">
+        <span class="kicker">03 / 07</span>
+        <h2 class="tech-title">Finished vs <em>unfinished</em> auction</h2>
+      </div>
+      <div class="tech-body">
+        <p>A separate question from the four patterns. Look <strong>only at the extreme tick</strong> and ask whether one side printed a zero.</p>
+      </div>
+
+      <div class="split">
+        <div class="scard up">
+          <p class="scard-k">Zero on one side</p>
+          <h3>Finished auction</h3>
+          <p>Move completed. No unfinished business — the auction did its job at that extreme.</p>
+        </div>
+        <div class="scard a">
+          <p class="scard-k">Both sides printed</p>
+          <h3>Unfinished auction</h3>
+          <p>e.g. <code>45 × 117</code>. The move was cut off mid-process. Price tends to <strong>return to that exact level</strong> to finish it.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <p class="k">The magnet behaves directionally</p>
+        <p>Unfinished at a <strong>top</strong> pulls price back <strong>up</strong> to the high. Unfinished at a <strong>bottom</strong> pulls price back <strong>down</strong> to the low. It returns to the <em>one unfinished tick</em> — not "above and below."</p>
+      </div>
+
+      <div class="note">
+        <p class="k">Platform</p>
+        <p>MotiveWave sometimes labels this <strong>"unfinished business."</strong></p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 04 delta -->
+    <article id="delta" class="technique">
+      <div class="tech-head">
+        <span class="kicker">04 / 07</span>
+        <h2 class="tech-title">Delta — net <em>aggression</em></h2>
+      </div>
+      <div class="tech-body">
+        <p><strong>Delta = Σask − Σbid</strong> for a bar. It measures who was the net aggressor — but it does <strong>not</strong> tell you who won. <em>Price does.</em> The signal lives in the <strong>mismatch</strong> between delta and price.</p>
+      </div>
+
+      <div class="split">
+        <div class="scard up">
+          <p class="scard-k">Positive delta</p>
+          <p>Aggressive <strong>buyers</strong> were the net aggressors.</p>
+        </div>
+        <div class="scard dn">
+          <p class="scard-k">Negative delta</p>
+          <p>Aggressive <strong>sellers</strong> were the net aggressors.</p>
+        </div>
+      </div>
+
+      <h3 style="font-family:var(--serif);font-size:20px;font-weight:600;color:var(--tp);margin:22px 0 4px">Divergence vs absorption</h3>
+      <div class="split">
+        <div class="scard a">
+          <p class="scard-k">Divergence — hollow / weak</p>
+          <ul>
+            <li>New <strong>high</strong> on <strong>negative</strong> delta → buyers weren't behind it. Hollow high → bearish.</li>
+            <li>New <strong>low</strong> on <strong>positive</strong> delta → sellers weren't behind it. Hollow low → bullish.</li>
+          </ul>
+        </div>
+        <div class="scard b">
+          <p class="scard-k">Absorption — strong (opposite read)</p>
+          <ul>
+            <li>Price holds/rises <strong>despite heavy negative delta</strong> → selling soaked up by passive buyers → bullish.</li>
+            <li>Price holds/falls <strong>despite heavy positive delta</strong> → buying absorbed by passive sellers → bearish.</li>
+          </ul>
+        </div>
+      </div>
+
+      <figure class="fig">
+        <figcaption class="fig-cap">Fig · 02 — Same numbers, opposite meaning</figcaption>
+        <svg viewBox="0 0 500 230" role="img" aria-label="Negative delta with price up means a hollow weak high at a high, but bullish absorption at a low">
+          <!-- shared caption -->
+          <text x="250" y="16" fill="#94a0a0" font-size="10" text-anchor="middle" letter-spacing="1">INPUT · NEGATIVE DELTA + PRICE UP</text>
+
+          <!-- LEFT: at a high -->
+          <text x="20" y="40" fill="#ff5d6c" font-size="10" letter-spacing="1">// AT A HIGH</text>
+          <line x1="20" y1="58" x2="230" y2="58" stroke="#ff5d6c" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+          <polyline points="24,150 60,128 96,104 132,82 168,66 226,60" fill="none" stroke="#94a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="226" cy="60" r="3.5" fill="#ff5d6c"/>
+          <rect x="20" y="166" width="150" height="16" rx="2" fill="#ff5d6c" opacity=".8"/>
+          <text x="28" y="178" fill="#08090b" font-size="10" font-weight="500">−1,820 Δ</text>
+          <rect x="20" y="194" width="210" height="22" rx="3" fill="rgba(255,93,108,0.08)" stroke="rgba(255,93,108,0.3)"/>
+          <text x="30" y="209" fill="#ff5d6c" font-size="9" letter-spacing="1">HOLLOW · WEAK</text>
+          <text x="135" y="209" fill="#94a0a0" font-size="9">no buyers behind it</text>
+
+          <line x1="250" y1="28" x2="250" y2="216" stroke="rgba(255,255,255,0.07)"/>
+
+          <!-- RIGHT: at a low / holding -->
+          <text x="270" y="40" fill="#34d3c4" font-size="10" letter-spacing="1">// AT A LOW / HOLDING</text>
+          <line x1="270" y1="150" x2="480" y2="150" stroke="#34d3c4" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+          <polyline points="274,150 300,150 326,146 360,128 404,104 478,84" fill="none" stroke="#94a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="300" cy="150" r="3.5" fill="#34d3c4"/>
+          <rect x="270" y="166" width="150" height="16" rx="2" fill="#ff5d6c" opacity=".8"/>
+          <text x="278" y="178" fill="#08090b" font-size="10" font-weight="500">−1,820 Δ</text>
+          <rect x="270" y="194" width="210" height="22" rx="3" fill="rgba(52,211,196,0.1)" stroke="rgba(52,211,196,0.22)"/>
+          <text x="280" y="209" fill="#34d3c4" font-size="9" letter-spacing="1">ABSORPTION · STRONG</text>
+          <text x="400" y="209" fill="#94a0a0" font-size="9">buyers ate it</text>
+        </svg>
+        <div class="fig-key">
+          <span><i style="background:#ff5d6c"></i>At a high → hollow</span>
+          <span><i style="background:#34d3c4"></i>At a low → absorption</span>
+        </div>
+      </figure>
+
+      <div class="takeaway p">
+        <p class="k">// Location breaks the tie</p>
+        <p>Same numbers, <em>opposite</em> meaning. Never read delta in isolation — location + what price actually did decides.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 05 imbalance -->
+    <article id="imbalance" class="technique">
+      <div class="tech-head">
+        <span class="kicker">05 / 07</span>
+        <h2 class="tech-title">Diagonal <em>imbalance</em></h2>
+      </div>
+      <div class="tech-body">
+        <p>Imbalance is <strong>diagonal</strong>, not same-row. You compare each side against the <em>other</em> side one tick away.</p>
+      </div>
+
+      <div class="split">
+        <div class="scard up">
+          <p class="scard-k">Buy imbalance</p>
+          <p>Ask at price <strong>P</strong> vs the <strong>bid one tick below</strong> P.</p>
+        </div>
+        <div class="scard dn">
+          <p class="scard-k">Sell imbalance</p>
+          <p>Bid at price <strong>P</strong> vs the <strong>ask one tick above</strong> P.</p>
+        </div>
+      </div>
+
+      <div class="takeaway">
+        <p class="k">// Flag threshold</p>
+        <p>Mark it when the ratio is <em>≥ 3:1.</em></p>
+      </div>
+
+      <figure class="fig">
+        <figcaption class="fig-cap">Fig · 03 — Stacked buy imbalances · diagonal compare</figcaption>
+        <svg viewBox="0 0 500 290" role="img" aria-label="A footprint ladder with diagonal arrows comparing ask at each price to the bid one tick below, four stacked buy imbalances above a base">
+          <!-- headers -->
+          <text x="14" y="20" fill="#57625f" font-size="10" letter-spacing="1">PRICE</text>
+          <text x="190" y="20" fill="#57625f" font-size="10" letter-spacing="1" text-anchor="end">BID</text>
+          <text x="250" y="20" fill="#57625f" font-size="10" letter-spacing="1">ASK</text>
+          <text x="420" y="20" fill="#57625f" font-size="10" letter-spacing="1">DIAGONAL ≥3:1</text>
+
+          <!-- rows: y=58,98,138,178,218 ; bid at x~170, ask box x250 -->
+          <!-- P4 12.50 bid22 ask110 -->
+          <text x="14" y="63" fill="#e7eceb" font-size="12">5012.50</text>
+          <text x="190" y="63" fill="#94a0a0" font-size="12" text-anchor="end">22</text>
+          <rect x="250" y="50" width="120" height="18" rx="2" fill="#34d3c4" opacity=".85"/>
+          <text x="258" y="63" fill="#08090b" font-size="12" font-weight="500">110</text>
+          <!-- P3 12.25 bid18 ask130 -->
+          <text x="14" y="103" fill="#e7eceb" font-size="12">5012.25</text>
+          <text x="190" y="103" fill="#94a0a0" font-size="12" text-anchor="end">18</text>
+          <rect x="250" y="90" width="140" height="18" rx="2" fill="#34d3c4" opacity=".95"/>
+          <text x="258" y="103" fill="#08090b" font-size="12" font-weight="500">130</text>
+          <!-- P2 12.00 bid12 ask96 -->
+          <text x="14" y="143" fill="#e7eceb" font-size="12">5012.00</text>
+          <text x="190" y="143" fill="#94a0a0" font-size="12" text-anchor="end">12</text>
+          <rect x="250" y="130" width="104" height="18" rx="2" fill="#34d3c4" opacity=".7"/>
+          <text x="258" y="143" fill="#08090b" font-size="12" font-weight="500">96</text>
+          <!-- P1 11.75 bid30 ask140 (base) -->
+          <text x="14" y="183" fill="#e7eceb" font-size="12">5011.75</text>
+          <text x="190" y="183" fill="#94a0a0" font-size="12" text-anchor="end">30</text>
+          <rect x="250" y="170" width="150" height="18" rx="2" fill="#34d3c4"/>
+          <text x="258" y="183" fill="#08090b" font-size="12" font-weight="500">140</text>
+          <!-- P0 11.50 bid28 ask40 -->
+          <text x="14" y="223" fill="#94a0a0" font-size="12">5011.50</text>
+          <text x="190" y="223" fill="#94a0a0" font-size="12" text-anchor="end">28</text>
+          <rect x="250" y="210" width="44" height="18" rx="2" fill="#34d3c4" opacity=".4"/>
+          <text x="300" y="223" fill="#94a0a0" font-size="12">40</text>
+
+          <!-- diagonal compare arrows: ask[P] vs bid[P-1] -->
+          <g stroke="#34d3c4" stroke-width="1.3" opacity=".7" fill="none">
+            <path d="M408 60 q34 18 0 38" marker-end="url(#ia)"/>
+            <path d="M408 100 q34 18 0 38" marker-end="url(#ia)"/>
+            <path d="M408 140 q34 18 0 38" marker-end="url(#ia)"/>
+          </g>
+          <defs>
+            <marker id="ia" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L6 4 L0 8 Z" fill="#34d3c4"/></marker>
+          </defs>
+          <text x="446" y="84" fill="#34d3c4" font-size="10">6:1</text>
+          <text x="446" y="124" fill="#34d3c4" font-size="10">11:1</text>
+          <text x="446" y="164" fill="#34d3c4" font-size="10">3:1</text>
+
+          <!-- base marker -->
+          <line x1="240" y1="179" x2="240" y2="179"/>
+          <rect x="6" y="170" width="3" height="18" fill="#c9a96e"/>
+          <text x="14" y="252" fill="#c9a96e" font-size="9" letter-spacing="1">↑ STACK STARTS HERE = BASE / INITIATION</text>
+          <text x="14" y="268" fill="#57625f" font-size="9" letter-spacing="1">often becomes support on a later retest</text>
+        </svg>
+        <div class="fig-key">
+          <span><i style="background:#34d3c4"></i>Ask (aggressive buys)</span>
+          <span><i style="background:#c9a96e"></i>Base / initiation</span>
+        </div>
+      </figure>
+
+      <div class="note">
+        <p class="k">Stacked imbalances</p>
+        <p>Several in a row = a strong directional thrust. Where stacking <strong>starts</strong> = the <strong>base / initiation</strong> point (often later support for a buy stack, resistance for a sell stack). Where stacking <strong>stops</strong> = the exhaustion point. <strong>Check every level in a stack</strong>, not just the obvious one.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 06 phantom -->
+    <article id="phantom" class="technique">
+      <div class="tech-head">
+        <span class="kicker">06 / 07</span>
+        <h2 class="tech-title">The <em>phantom</em> check</h2>
+      </div>
+      <div class="tech-body">
+        <p>A single-sided print (<code>N × 0</code> or <code>0 × N</code>) at an extreme is only <strong>real</strong> if two things hold.</p>
+      </div>
+
+      <div class="checklist">
+        <h4><span class="cbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Confirm before you trust it</h4>
+        <div class="cl-grid">
+          <div class="cl-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span><strong>Enough volume</strong> at that tick for the missing side to mean something — not 1–2 trades by chance.</span></div>
+          <div class="cl-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Price <strong>respected it</strong> — the next bar <strong>fails to trade through</strong> the extreme.</span></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="frow">
+          <div class="fnode t">Single-sided print</div>
+          <div class="fnode b">Next bar reaction?</div>
+        </div>
+        <div class="fdown">↓</div>
+        <div class="frow">
+          <div class="fnode g">No follow-through → REAL</div>
+          <div class="fnode r">Trades through → PHANTOM</div>
+        </div>
+      </div>
+
+      <div class="risk">
+        <p class="k">! When a × 0 lies</p>
+        <p>It's a <strong>phantom</strong> when the bar simply closed before any trade printed on that side (bar-boundary timing), or the tick was too thin to matter. Follow-through aggression straight through it = noise, not rejection.</p>
+      </div>
+
+      <div class="takeaway">
+        <p class="k">// Rule</p>
+        <p>No follow-through in the signal direction = <em>real.</em> Trade-through = <span style="color:var(--red)">phantom.</span></p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- 07 delta profile -->
+    <article id="profile" class="technique">
+      <div class="tech-head">
+        <span class="kicker">07 / 07</span>
+        <h2 class="tech-title">The delta <em>profile</em></h2>
+      </div>
+      <div class="tech-body">
+        <p>The right-side histogram — Summary Profile with <strong>Type = Delta</strong> over a custom time span. Each horizontal bar is the <strong>net delta at that price level</strong>, summed over the window. It's the bar-delta concept rotated onto the <em>price axis</em>: <strong>where</strong> aggression clustered, not <strong>when</strong>.</p>
+      </div>
+
+      <div class="split">
+        <div class="scard b">
+          <p class="scard-k">Blue / purple bar</p>
+          <p>Positive net delta at that level — buyers were net aggressors there.</p>
+        </div>
+        <div class="scard dn">
+          <p class="scard-k">Red / salmon bar</p>
+          <p>Negative net delta at that level — sellers were net aggressors there.</p>
+        </div>
+      </div>
+      <div class="note">
+        <p class="k">Reading the bars</p>
+        <p><strong>Bar length</strong> = magnitude. Flagged numbers (<code>23</code>, <code>-55</code>) = net delta at that level.</p>
+      </div>
+
+      <h3 style="font-family:var(--serif);font-size:20px;font-weight:600;color:var(--tp);margin:22px 0 4px">How to trade it</h3>
+      <div class="split">
+        <div class="scard up">
+          <p class="scard-k">Support (bullish)</p>
+          <p>Heavy <strong>sell</strong>-delta level that price <strong>holds above</strong> → absorption.</p>
+        </div>
+        <div class="scard dn">
+          <p class="scard-k">Resistance (bearish)</p>
+          <p>Heavy <strong>buy</strong>-delta level that price <strong>falls below</strong> → exhaustion.</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <p class="k">// The signal</p>
+        <p>The mismatch between <em>where the aggression happened</em> and <em>where price ended up.</em></p>
+      </div>
+
+      <h3 style="font-family:var(--serif);font-size:20px;font-weight:600;color:var(--tp);margin:22px 0 4px">MotiveWave settings</h3>
+      <div class="loc-grid">
+        <div class="loc"><span class="ln">▸</span><span class="t"><strong>Type: Delta</strong> is the load-bearing setting. <em>Volume</em> → total per level (volume profile / HVN-LVN). <em>Bid/Ask</em> → two-sided back-to-back layout.</span></div>
+        <div class="loc"><span class="ln">▸</span><span class="t"><strong>Align: Right</strong> is cosmetic.</span></div>
+        <div class="loc"><span class="ln">▸</span><span class="t"><strong>Custom Time Span: 30 min</strong> = rolling window. The profile <strong>shifts as old prints age out</strong> — a level that looks imbalanced now may be one big trade about to drop off.</span></div>
+        <div class="loc"><span class="ln">▸</span><span class="t"><strong>Toggle Delta ↔ Volume live.</strong> Delta = who won the aggression fight per price; Volume = where the most trading happened (HVNs act as magnets / S-R). Pros watch both.</span></div>
+      </div>
+
+      <div class="note">
+        <p class="k">Same spirit as the phantom check</p>
+        <p>Confirm <strong>sustained activity</strong> vs a single print — the rolling window can flatter a level that's really one large trade about to expire.</p>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- cheat sheet -->
+    <article id="cheat" class="technique">
+      <div class="tech-head">
+        <span class="kicker">✦ · Closing</span>
+        <h2 class="tech-title">The <em>cheat sheet</em></h2>
+      </div>
+      <div class="tech-body">
+        <p>Every signal, both reads. The column you act on depends on <strong>location</strong> and <strong>what price actually did.</strong></p>
+      </div>
+
+      <div class="rows">
+        <div class="row"><div class="rk">Finished extreme</div><div class="rb"><code>N × 0</code> bottom — sellers exhausted</div><div class="rr"><code>0 × N</code> top — buyers exhausted</div></div>
+        <div class="row"><div class="rk">Rejected extreme</div><div class="rb"><code>0 × N</code> bottom — buyers took over</div><div class="rr"><code>N × 0</code> top — sellers took over</div></div>
+        <div class="row"><div class="rk">Delta divergence</div><div class="rb">new low + positive delta</div><div class="rr">new high + negative delta</div></div>
+        <div class="row"><div class="rk">Absorption</div><div class="rb">price holds up vs heavy neg delta</div><div class="rr">price holds down vs heavy pos delta</div></div>
+        <div class="row"><div class="rk">Stacked imbalance</div><div class="rb">buy stack up from a base</div><div class="rr">sell stack down from a base</div></div>
+        <div class="row"><div class="rk">Delta-profile level</div><div class="rb">sell-delta level held above</div><div class="rr">buy-delta level fell below</div></div>
+      </div>
+
+      <div class="takeaway p">
+        <p class="k">// A+ confluence</p>
+        <p>Order-flow exhaustion/rejection + delta divergence + <em>no fuel</em> (no stacked imbalances on the last push) — all at a key level.</p>
+      </div>
+
+      <div class="risk">
+        <p class="k">! Permission to enter</p>
+        <p>Wait for the next bar to <strong>fail to make a new extreme</strong> — that's the permission. <strong>Imbalances in the new direction</strong> are the go signal.</p>
+      </div>
+
+      <div class="closing">
+        <div class="mark">"</div>
+        <p class="lead">The footprint shows aggressors. The edge is reading the <em>passive side you can't see</em> — and waiting for price to confirm it.</p>
+        <p class="punch">Effort is visible.<br>Result is the truth.</p>
+        <p class="attr">— Footprint &amp; Order-Flow Reference</p>
+      </div>
+    </article>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <p>Orderflow · Footprint · <a href="index.html">All Notes</a></p>
+  </footer>
+
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+  // progress
+  const prog = document.getElementById('prog');
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const s = el.scrollTop || document.body.scrollTop;
+    const h = el.scrollHeight - el.clientHeight;
+    if (h > 0) prog.style.width = (s / h * 100) + '%';
+  }, {passive:true});
+
+  // nav
+  const hbtn = document.getElementById('hbtn');
+  const overlay = document.getElementById('overlay');
+  const drawer = document.getElementById('drawer');
+
+  const open = () => { hbtn.classList.add('open'); overlay.classList.add('open'); drawer.classList.add('open'); hbtn.setAttribute('aria-expanded','true'); };
+  const close = () => { hbtn.classList.remove('open'); overlay.classList.remove('open'); drawer.classList.remove('open'); hbtn.setAttribute('aria-expanded','false'); };
+
+  hbtn.addEventListener('click', () => hbtn.classList.contains('open') ? close() : open());
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', e => e.key === 'Escape' && close());
+
+  drawer.querySelectorAll('a[data-a]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-a');
+      close();
+      setTimeout(() => {
+        const t = document.getElementById(id);
+        if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 64, behavior:'smooth'});
+      }, 400);
+    });
+  });
+
+  // back to top
+  const btt = document.getElementById('btt');
+  window.addEventListener('scroll', () => {
+    btt.classList.toggle('vis', window.scrollY > 280);
+  }, {passive:true});
+  btt.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>

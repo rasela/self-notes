@@ -177,6 +177,80 @@
     gap: 16px;
   }
 
+  /* COLLAPSIBLE GROUPS */
+  .group {
+    margin-bottom: 10px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .group-head {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 4px;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .group-head .gdot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .group-head .gt {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .group-head .gline {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .group-head .gc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  .group-head .chev {
+    color: var(--muted);
+    font-size: 10px;
+    transition: transform 0.25s ease;
+  }
+
+  .group.collapsed .chev { transform: rotate(-90deg); }
+
+  .group-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 4px 0 8px;
+  }
+
+  .group.collapsed .group-body { display: none; }
+
+  /* per-group card subheading + hover accent */
+  .group[data-group="obe"]  .card-tag { color: #4d9fff; }
+  .group[data-group="obe"]  .note-card:hover { border-color: #4d9fff; }
+  .group[data-group="obe"]  .note-card::before { background: #4d9fff; }
+  .group[data-group="obe"]  .note-card:hover .card-arrow { color: #4d9fff; }
+
+  .group[data-group="mind"] .card-tag { color: #f5c400; }
+  .group[data-group="mind"] .note-card:hover { border-color: #f5c400; }
+  .group[data-group="mind"] .note-card::before { background: #f5c400; }
+  .group[data-group="mind"] .note-card:hover .card-arrow { color: #f5c400; }
+
   /* NOTE CARD */
   .note-card {
     background: var(--card);
@@ -324,74 +398,124 @@
     <span class="note-count" id="noteCount">1 FILE</span>
   </div>
 
-  <div class="notes-grid" id="notesGrid">
+  <div id="notesGrid">
 
     <!-- =============================================
-         ADD NEW NOTES BELOW — copy one <a> block
-         and update: href, data-title, data-tag, data-desc
+         GROUPS — each <section class="group"> has a
+         header + a .group-body holding <a.note-card>s.
+         To add a note: copy an <a> block into the right
+         group and set href/data-title/data-tag/data-desc.
+         The card inner HTML + search + collapse are
+         handled by the script at the bottom.
          ============================================= -->
 
-    <a class="note-card" href="morning-routine.html"
-        data-title="Morning System"
-        data-tag="Neuroscience · Daily Routine"
-        data-desc="A 1-hour morning routine built on dopamine regulation, circadian anchoring, and neuroplasticity — with the science behind each step, a BDNF supplement stack, and protein strategy.">
-    </a>
-    
-    <a class="note-card" href="options-mm-guide.html"
-        data-title="Options Gamma"
-        data-tag="Options · Market Structure"
-        data-desc="Market maker playbook — gamma, GEX, the gamma flip, vanna and charm flows.">
-    </a>
+    <!-- ===== TRADING & ORDER FLOW ===== -->
+    <section class="group" data-group="trading">
+      <button class="group-head" type="button">
+        <span class="gdot" style="background:#00ff9d"></span>
+        <span class="gt">Trading &amp; Order Flow</span>
+        <span class="gline"></span>
+        <span class="gc"></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="group-body">
 
-    <a class="note-card" href="dark-psychology.html"
-        data-title="Dark Psychology"
-        data-tag="Dark Psychology · Manipulations"
-        data-desc="11 manipulation techniques decoded — gaslighting, love bombing, anchoring, the halo effect, and more. With warning signs and defences for each.">
-    </a>
+        <a class="note-card" href="footprint.html"
+          data-title="Footprint"
+          data-tag="Order Flow · Footprint Reference"
+          data-desc="Reading the footprint on gold futures — the bid×ask convention, the four extreme-tick patterns, finished vs unfinished auctions, delta divergence vs absorption, diagonal imbalance and stacking, the phantom check, the delta profile, and a full cheat sheet.">
+        </a>
 
-    <a class="note-card" href="focus-10.html"
-      data-title="Focus 10"
-      data-tag="Gateway Tapes · Monroe Institute"
-      data-desc="The four core techniques decoded — Energy Conversion Box, Resonant Tuning, REBAL, and the Gateway Affirmation. With purpose and practice notes for each.">
-    </a>
+        <a class="note-card" href="absorption.html"
+          data-title="Absorption"
+          data-tag="Orderflow · Footprint Reading"
+          data-desc="Reading absorption on the footprint — effort vs result, aggressive vs passive sides, the signature checklist, why location matters, confirmation, the reversal sequence, and common mistakes.">
+        </a>
 
-    <a class="note-card" href="protocol.html"
-      data-title="4-Week Protocol"
-      data-tag="Gateway Tapes · WBTB Schedule"
-      data-desc="Block-style WBTB + Focus 10 — a two-vector, 4-week schedule with a nightly checklist, in-the-moment cue cards, guardrails, and a journal prompt.">
-    </a>
+        <a class="note-card" href="options-mm-guide.html"
+          data-title="Options Gamma"
+          data-tag="Options · Market Structure"
+          data-desc="Market maker playbook — gamma, GEX, the gamma flip, vanna and charm flows.">
+        </a>
 
-    <a class="note-card" href="abtb.html"
-      data-title="Beyond the Body"
-      data-tag="William Buhlman · OBE Field Guide"
-      data-desc="Practical field guide to Adventures Beyond the Body — the four stages, four steps to success, vibrational signals, induction techniques, and Buhlman's affirmations.">
-    </a>
+      </div>
+    </section>
 
-    <a class="note-card" href="absorption.html"
-      data-title="Absorption"
-      data-tag="Orderflow · Footprint Reading"
-      data-desc="Reading absorption on the footprint — effort vs result, aggressive vs passive sides, the signature checklist, why location matters, confirmation, the reversal sequence, and common mistakes.">
-    </a>
+    <!-- ===== MIND & SELF ===== -->
+    <section class="group" data-group="mind">
+      <button class="group-head" type="button">
+        <span class="gdot" style="background:#f5c400"></span>
+        <span class="gt">Mind &amp; Self</span>
+        <span class="gline"></span>
+        <span class="gc"></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="group-body">
 
-    <a class="note-card" href="obe-taxonomy.html"
-      data-title="OBE Taxonomy"
-      data-tag="Monroe · Bruce · Buhlman · Staged Map"
-      data-desc="A unified OBE induction map organised by stage, not author — Relax, Raise, Vibrate, Separate. Technique tables per stage, failure-mode diagnostics, author roles, the Bruce 13-week index, and a derived next-fortnight protocol.">
-    </a>
+        <a class="note-card" href="morning-routine.html"
+          data-title="Morning System"
+          data-tag="Neuroscience · Daily Routine"
+          data-desc="A 1-hour morning routine built on dopamine regulation, circadian anchoring, and neuroplasticity — with the science behind each step, a BDNF supplement stack, and protein strategy.">
+        </a>
 
-    <a class="note-card" href="phasing.html"
-      data-title="Phasing"
-      data-tag="Kepple · Tasker · The Noticing Path"
-      data-desc="The Kepple/Tasker phasing track — shift focus instead of separating. The consciousness continuum, Monroe-vs-Kepple Focus model, Noticing &amp; Mental Rundown, the vibrational bridge, the two big hurdles, and a low-commitment entry plan.">
-    </a>
+        <a class="note-card" href="dark-psychology.html"
+          data-title="Dark Psychology"
+          data-tag="Dark Psychology · Manipulations"
+          data-desc="11 manipulation techniques decoded — gaslighting, love bombing, anchoring, the halo effect, and more. With warning signs and defences for each.">
+        </a>
 
-    <a class="note-card" href="lucidology.html"
-      data-title="Lucidology 101"
-      data-tag="Nicholas Newport · Sleep-Paralysis OBE"
-      data-desc="Newport's visualization-free system for inducing waking sleep paralysis and converting it into an OBE — the two-transition model, 4–5:30 AM brain-chemistry timing, Stop·Drop·Roll, sleep commands, the ramp timer method, reality checks, signals, and the 5 movement-free exits.">
-    </a>
+      </div>
+    </section>
 
-    <!-- ADD MORE NOTES — copy the <a> block above, update href + data-title + data-tag + data-desc -->
+    <!-- ===== OBE & ASTRAL PRACTICE ===== -->
+    <section class="group" data-group="obe">
+      <button class="group-head" type="button">
+        <span class="gdot" style="background:#4d9fff"></span>
+        <span class="gt">OBE &amp; Astral Practice</span>
+        <span class="gline"></span>
+        <span class="gc"></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="group-body">
+
+        <a class="note-card" href="abtb.html"
+          data-title="Beyond the Body"
+          data-tag="William Buhlman · OBE Field Guide"
+          data-desc="Practical field guide to Adventures Beyond the Body — the four stages, four steps to success, vibrational signals, induction techniques, and Buhlman's affirmations.">
+        </a>
+
+        <a class="note-card" href="obe-taxonomy.html"
+          data-title="OBE Taxonomy"
+          data-tag="Monroe · Bruce · Buhlman · Staged Map"
+          data-desc="A unified OBE induction map organised by stage, not author — Relax, Raise, Vibrate, Separate. Technique tables per stage, failure-mode diagnostics, author roles, the Bruce 13-week index, and a derived next-fortnight protocol.">
+        </a>
+
+        <a class="note-card" href="phasing.html"
+          data-title="Phasing"
+          data-tag="Kepple · Tasker · The Noticing Path"
+          data-desc="The Kepple/Tasker phasing track — shift focus instead of separating. The consciousness continuum, Monroe-vs-Kepple Focus model, Noticing &amp; Mental Rundown, the vibrational bridge, the two big hurdles, and a low-commitment entry plan.">
+        </a>
+
+        <a class="note-card" href="lucidology.html"
+          data-title="Lucidology 101"
+          data-tag="Nicholas Newport · Sleep-Paralysis OBE"
+          data-desc="Newport's visualization-free system for inducing waking sleep paralysis and converting it into an OBE — the two-transition model, 4–5:30 AM brain-chemistry timing, Stop·Drop·Roll, sleep commands, the ramp timer method, reality checks, signals, and the 5 movement-free exits.">
+        </a>
+
+        <a class="note-card" href="focus-10.html"
+          data-title="Focus 10"
+          data-tag="Gateway Tapes · Monroe Institute"
+          data-desc="The four core techniques decoded — Energy Conversion Box, Resonant Tuning, REBAL, and the Gateway Affirmation. With purpose and practice notes for each.">
+        </a>
+
+        <a class="note-card" href="protocol.html"
+          data-title="4-Week Protocol"
+          data-tag="Gateway Tapes · WBTB Schedule"
+          data-desc="Block-style WBTB + Focus 10 — a two-vector, 4-week schedule with a nightly checklist, in-the-moment cue cards, guardrails, and a journal prompt.">
+        </a>
+
+      </div>
+    </section>
 
     <div class="empty-state" id="emptyState">NO NOTES MATCH — TRY ANOTHER SEARCH</div>
   </div>
@@ -421,6 +545,18 @@
     card.style.animationDelay = (0.5 + i * 0.08) + 's';
   });
 
+  // Per-group counts + collapse toggles
+  const groups = document.querySelectorAll('.group');
+  groups.forEach(group => {
+    const total = group.querySelectorAll('.note-card').length;
+    group.querySelector('.gc').textContent = total + (total === 1 ? ' FILE' : ' FILES');
+    group.querySelector('.group-head').addEventListener('click', () => {
+      // don't toggle while searching (groups are forced open)
+      if (searchInput.value.trim()) return;
+      group.classList.toggle('collapsed');
+    });
+  });
+
   // Scroll progress
   window.addEventListener('scroll', () => {
     const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
@@ -445,6 +581,12 @@
       const match = !q || text.toLowerCase().includes(q);
       card.style.display = match ? '' : 'none';
       if (match) visible++;
+    });
+    // While searching, force every group open and hide the ones with no hits
+    groups.forEach(group => {
+      const hits = [...group.querySelectorAll('.note-card')].some(c => c.style.display !== 'none');
+      group.classList.toggle('collapsed', q ? false : group.classList.contains('collapsed'));
+      group.style.display = (q && !hits) ? 'none' : '';
     });
     emptyState.style.display = visible === 0 ? 'block' : 'none';
     updateCount(visible);
