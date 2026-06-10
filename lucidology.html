@@ -776,44 +776,64 @@
     </div>
 
     <figure>
-      <svg width="700" height="220" viewBox="0 0 700 220" role="img" aria-label="Safety cap exit: press down then twist to rotate out of the body">
+      <svg width="700" height="248" viewBox="0 0 700 248" role="img" aria-label="Safety-cap exit in three steps: first press the body straight down so it sinks through the bed; then rotate the whole body a full 180 degrees around the navel as a fixed pivot, so the head swings from the top position around to the bottom; the result is standing up out of body.">
+        <defs>
+          <marker id="arrowC" markerWidth="12" markerHeight="12" refX="7" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 Z" fill="#5ed0d6"/></marker>
+          <marker id="arrowP" markerWidth="13" markerHeight="13" refX="7" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 Z" fill="#9d8cff"/></marker>
+        </defs>
         <g font-family="system-ui" text-anchor="middle">
-          <!-- press -->
-          <text x="110" y="42" fill="#5ed0d6" font-size="14" font-weight="700">PRESS DOWN</text>
+
+          <!-- ============ ① PRESS DOWN ============ -->
+          <text x="120" y="36" fill="#5ed0d6" font-size="14" font-weight="700">① PRESS DOWN</text>
           <!-- mattress surface -->
-          <ellipse cx="110" cy="158" rx="58" ry="16" fill="#1f2552"/>
-          <ellipse cx="110" cy="158" rx="44" ry="11" fill="#2b3168"/>
-          <!-- sleeper sinking into it -->
-          <rect x="84" y="138" width="58" height="18" rx="9" fill="#5ed0d6" opacity=".85"/>
-          <circle cx="80" cy="147" r="11" fill="#3a4180"/>
+          <ellipse cx="120" cy="156" rx="62" ry="15" fill="#1f2552"/>
+          <ellipse cx="120" cy="156" rx="48" ry="10" fill="#2b3168"/>
+          <!-- sleeper lying flat, sinking in -->
+          <g opacity=".9">
+            <line x1="100" y1="140" x2="150" y2="140" stroke="#5ed0d6" stroke-width="13" stroke-linecap="round"/>
+            <circle cx="92" cy="140" r="11" fill="#5ed0d6"/>
+          </g>
           <!-- downward sink arrow -->
-          <line x1="110" y1="62" x2="110" y2="128" stroke="#5ed0d6" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
-          <text x="110" y="200" fill="#6f76a0" font-size="12">sink through bed</text>
+          <line x1="120" y1="58" x2="120" y2="122" stroke="#5ed0d6" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#arrowC)"/>
+          <text x="120" y="206" fill="#6f76a0" font-size="12">sink straight down</text>
+          <text x="120" y="222" fill="#6f76a0" font-size="12">through the bed</text>
 
-          <text x="350" y="112" fill="#6f76a0" font-size="22">+</text>
+          <text x="258" y="132" fill="#6f76a0" font-size="24">+</text>
 
-          <!-- twist -->
-          <text x="350" y="42" fill="#9d8cff" font-size="14" font-weight="700">&amp; TWIST</text>
-          <!-- circular rotation arrow around the navel -->
-          <path d="M350 120 a34 34 0 1 0 26 11" fill="none" stroke="#9d8cff" stroke-width="3" marker-end="url(#arrow)"/>
-          <circle cx="350" cy="152" r="4" fill="#9d8cff"/>
-          <!-- turning figure -->
-          <circle cx="338" cy="148" r="11" fill="#3a4180"/>
-          <path d="M348 152 q18 4 16 22" fill="none" stroke="#9d8cff" stroke-width="8" stroke-linecap="round"/>
-          <text x="350" y="200" fill="#6f76a0" font-size="12">rotate 180° around navel</text>
+          <!-- ============ ② TWIST 180° ============ -->
+          <text x="372" y="36" fill="#9d8cff" font-size="14" font-weight="700">② TWIST 180°</text>
+          <!-- START position (ghost): head up -->
+          <g opacity=".38">
+            <line x1="372" y1="132" x2="372" y2="96" stroke="#5b6298" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="372" cy="86" r="10" fill="#5b6298"/>
+          </g>
+          <text x="372" y="74" fill="#6f76a0" font-size="9.5">start</text>
+          <!-- 180° rotation sweep arrow (right side, half circle) -->
+          <path d="M384 84 A56 56 0 0 1 384 180" fill="none" stroke="#9d8cff" stroke-width="3" marker-end="url(#arrowP)"/>
+          <!-- navel = fixed pivot -->
+          <circle cx="372" cy="132" r="5.5" fill="#c9a96e"/>
+          <circle cx="372" cy="132" r="10" fill="none" stroke="#c9a96e" stroke-width="1" opacity=".5"/>
+          <text x="350" y="129" text-anchor="end" fill="#c9a96e" font-size="9.5">navel</text>
+          <text x="350" y="141" text-anchor="end" fill="#6f76a0" font-size="9.5">(pivot)</text>
+          <!-- END position (solid): head swung to bottom -->
+          <line x1="372" y1="132" x2="372" y2="168" stroke="#9d8cff" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="372" cy="178" r="10" fill="#9d8cff"/>
+          <text x="372" y="206" fill="#6f76a0" font-size="12">rotate around the navel —</text>
+          <text x="372" y="222" fill="#6f76a0" font-size="12">head swings top → bottom</text>
 
-          <text x="560" y="112" fill="#6f76a0" font-size="22">=</text>
+          <text x="486" y="132" fill="#6f76a0" font-size="24">=</text>
 
-          <!-- OBE -->
-          <text x="630" y="42" fill="#ff9e5e" font-size="14" font-weight="700">O.B.E.</text>
-          <circle cx="630" cy="95" r="11" fill="url(#riseG)"/>
-          <line x1="630" y1="106" x2="630" y2="150" stroke="url(#riseG)" stroke-width="6" stroke-linecap="round"/>
-          <line x1="630" y1="120" x2="612" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
-          <line x1="630" y1="120" x2="648" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
-          <text x="630" y="200" fill="#6f76a0" font-size="12">stand up, no doubt</text>
+          <!-- ============ ③ O.B.E. ============ -->
+          <text x="600" y="36" fill="#ff9e5e" font-size="14" font-weight="700">③ O.B.E.</text>
+          <circle cx="600" cy="92" r="11" fill="url(#riseG)"/>
+          <line x1="600" y1="103" x2="600" y2="148" stroke="url(#riseG)" stroke-width="6" stroke-linecap="round"/>
+          <line x1="600" y1="118" x2="582" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="600" y1="118" x2="618" y2="148" stroke="url(#riseG)" stroke-width="5" stroke-linecap="round"/>
+          <text x="600" y="206" fill="#6f76a0" font-size="12">stand up — no doubt</text>
+          <text x="600" y="222" fill="#6f76a0" font-size="12">you've separated</text>
         </g>
       </svg>
-      <figcaption>The safety-cap exit. Because the press and the twist each test your state, it's far higher-success than the all-or-nothing "roll over" exit most books recommend.</figcaption>
+      <figcaption>The safety-cap exit. The twist is a true rotation: your navel stays put as a pivot while the whole body turns a half-turn around it — the faint figure is the start, the solid one is 180° later. Because the press and the twist each test your state, it's far higher-success than the all-or-nothing "roll over" exit most books recommend.</figcaption>
     </figure>
 
     <div class="callout c-warn">
