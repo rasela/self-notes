@@ -29,7 +29,8 @@ When the user drops a markdown/source file and says "add this note":
    rendered from those data-attributes by the script at the bottom — don't write
    inner markup. `data-title` uses Bebas Neue so keep it short (≈2 words).
 3. **Add 1–2 redirects** to `_redirects` for nice short URLs.
-4. **Commit + push** (only when asked).
+4. **Commit + push** (do this by default once the change is complete, unless
+   the user explicitly says not to).
 
 Leave the user's original source file (e.g. in `~/Downloads`) untouched.
 
@@ -136,7 +137,9 @@ new components.
 
 # Conventions for working in this repo
 
-- **Commit + push only when asked.** Co-author trailer is added automatically.
+- **Commit + push by default** once a change is complete — don't wait to be
+  asked. Only skip when the user explicitly says not to commit/push. Co-author
+  trailer is added automatically.
 - Keep each note in **one file**; don't factor out shared CSS/JS — duplication
   across pages is intentional and keeps every note portable.
 - When editing `index.html`, only touch the card block + data-attributes; the
