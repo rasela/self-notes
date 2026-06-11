@@ -38,10 +38,13 @@ Leave the user's original source file (e.g. in `~/Downloads`) untouched.
 
 `index.html` (grid) · `morning-routine.html` · `options-mm-guide.html` ·
 `dark-psychology.html` · `focus-10.html` · `protocol.html` · `abtb.html`
-(Buhlman OBE) · `obe-taxonomy.html` · `absorption.html` (orderflow).
+(Buhlman OBE) · `obe-taxonomy.html` · `phasing.html` (Kepple/Tasker) ·
+`lucidology.html` (Newport) · `gurriaran.html` (stance layer) ·
+`absorption.html` / `footprint.html` (orderflow).
 
-Topics cluster into OBE/astral practice (focus-10, protocol, abtb, obe-taxonomy)
-and trading (options-mm-guide, absorption), plus standalone notes.
+Topics cluster into OBE/astral practice (focus-10, protocol, abtb, obe-taxonomy,
+phasing, lucidology, gurriaran) and trading (options-mm-guide, absorption,
+footprint), plus standalone notes.
 
 ---
 
