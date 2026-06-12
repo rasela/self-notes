@@ -403,7 +403,7 @@ footer a{color:var(--acc);text-decoration:none}
                 <span class="ctrl-name">Carrier frequency</span>
                 <span class="ctrl-readout" id="base-val">200 Hz</span>
               </div>
-              <input type="range" id="base" min="80" max="500" value="200" step="1" oninput="onCarrierSlider()">
+              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
             </div>
             <div class="ctrl-row" id="beat-row">
               <div class="ctrl-header">
@@ -510,6 +510,7 @@ footer a{color:var(--acc);text-decoration:none}
       <div class="tech-body">
         <p>A binaural beat doesn't exist in the audio at all. The left ear gets one pure tone (the <strong>carrier</strong>, e.g. 200 Hz) and the right ear gets a slightly different one (e.g. 208 Hz). Your brainstem combines them and perceives the <strong>difference</strong> — an 8 Hz pulse — which the brain tends to entrain toward (the frequency-following response).</p>
         <p>That's why the player hard-pans each oscillator fully left and right, and why <strong>wired stereo headphones</strong> matter: Bluetooth codecs can down-mix or desync the channels, at which point both ears hear both tones and the beat collapses into ordinary audio.</p>
+        <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
         <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
         <p>While playing, the player holds a <strong>wake lock</strong> so the screen stays on by itself — <strong>don't switch the screen off manually</strong>. Browsers run inside the OS audio policy, and a screen turned off by hand can suspend the audio engine mid-session (the status line under the timer shows whether the lock is active). Just dim the brightness, lay the phone face-up, and let the player manage the screen.</p>
       </div>
