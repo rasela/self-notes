@@ -18,3 +18,5 @@
 /footprint     /footprint.html         200
 /orderflow     /footprint.html         200
 /delta         /footprint.html         200
+/beats         /beats.html             200
+/hemisync      /beats.html             200
