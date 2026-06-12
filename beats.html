@@ -932,11 +932,14 @@ footer a{color:var(--acc);text-decoration:none}
     { label: 'Focus 15', beat: 2.5 },
     { label: 'Focus 21', beat: 1.5 },
     { label: 'Focus 27', beat: 0.5 },
-    /* ── OBE-prep stage names (settle → descend → hold → push) ── */
-    { label: 'Settle',    beat: 8 },
-    { label: 'Descend',   beat: 7 },
-    { label: 'Work Zone', beat: 6 },
-    { label: 'Push',      beat: 5 },
+    /* ── named practice stages (OBE prep + deep sleep ladders) ── */
+    { label: 'Unwind',     beat: 10 },
+    { label: 'Settle',     beat: 8 },
+    { label: 'Descend',    beat: 7 },
+    { label: 'Work Zone',  beat: 6 },
+    { label: 'Push',       beat: 5 },
+    { label: 'Drift',      beat: 5 },
+    { label: 'Deep Sleep', beat: 2 },
     { label: 'Delta',    beat: 0.5 },
     { label: 'Theta',    beat: 4   },
     { label: 'Alpha',    beat: 10  },
@@ -970,6 +973,18 @@ footer a{color:var(--acc);text-decoration:none}
         { label: 'Descend',   beat: 7, mins: 10 },
         { label: 'Work Zone', beat: 6, mins: 25 },
         { label: 'Push',      beat: 5, mins: 10 },
+      ],
+    },
+    'deep-sleep': {
+      name: 'Deep Sleep',
+      desc: 'Unwind 10 → 8 → descend 7 → drift 5 → 2 Hz delta hold, then fade into natural sleep · ~50 min. For sleep, not practice nights.',
+      fadeOut: true,
+      stages: [
+        { label: 'Unwind',     beat: 10, mins: 5  },
+        { label: 'Settle',     beat: 8,  mins: 5  },
+        { label: 'Descend',    beat: 7,  mins: 10 },
+        { label: 'Drift',      beat: 5,  mins: 10 },
+        { label: 'Deep Sleep', beat: 2,  mins: 20 },
       ],
     },
     'relaxation': {
