@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Binaural Beats — Hemi-Sync Session Player</title>
+<title>Binaural Beats — Session Player</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"/>
@@ -276,7 +276,7 @@ footer a{color:var(--acc);text-decoration:none}
 <div id="prog"></div>
 
 <nav>
-  <div class="brand">Gateway <span>/ Binaural Beats</span></div>
+  <div class="brand">Practice <span>/ Binaural Beats</span></div>
   <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
     <span class="hline"></span><span class="hline"></span><span class="hline"></span>
   </button>
@@ -295,7 +295,7 @@ footer a{color:var(--acc);text-decoration:none}
 
 <main>
   <div class="hero">
-    <p class="eyebrow">Monroe Institute · Hemi-Sync</p>
+    <p class="eyebrow">Personal Build · For My Practice</p>
     <h1>Binaural<br><em>Beats</em></h1>
     <p class="subtitle">Session Player — Focus Presets &amp; Journeys</p>
     <div class="seq">
@@ -311,7 +311,7 @@ footer a{color:var(--acc);text-decoration:none}
 
   <div class="warn">
     <div class="warn-inner">
-      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
+      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). And <strong>don't turn the screen off</strong> — the player keeps it awake during a session, but switching it off manually lets the OS suspend the audio mid-session. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
     </div>
   </div>
 
@@ -368,9 +368,9 @@ footer a{color:var(--acc);text-decoration:none}
         <div id="manual-mode">
           <div class="field-label">State</div>
           <select class="state-select" id="state" onchange="applyState()" aria-label="Select target state">
-            <optgroup label="Gateway Focus Levels">
+            <optgroup label="Focus Levels">
               <option value="c1">C-1 · Full Waking Consciousness — β 14 Hz</option>
-              <option value="f3">Focus 3 · Basic Hemi-Sync — α 10 Hz</option>
+              <option value="f3">Focus 3 · Basic Sync — α 10 Hz</option>
               <option value="f10" selected>Focus 10 · Mind Awake, Body Asleep — 8 Hz</option>
               <option value="f12">Focus 12 · Expanded Awareness — θ 6 Hz</option>
               <option value="f15">Focus 15 · No Time — 2.5 Hz</option>
@@ -387,7 +387,7 @@ footer a{color:var(--acc);text-decoration:none}
             <option value="custom" hidden>Custom — fine-tuned</option>
           </select>
 
-          <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. Wave I foundation; master this first.</div>
+          <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.</div>
 
           <div class="field-label">Carrier</div>
           <div class="carrier-row">
@@ -488,15 +488,15 @@ footer a{color:var(--acc);text-decoration:none}
         <span class="tech-abbr">What each preset is aiming at</span>
       </div>
       <div class="lvls">
-        <div class="lvl"><div><div class="lvl-tag">C-1</div><div class="lvl-hz">β 14 Hz</div></div><div class="lvl-b"><strong>Full Waking Consciousness</strong><p>Normal beta state — the starting point for every Gateway exercise. Left-brain-dominant everyday awareness.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 3</div><div class="lvl-hz">α 10 Hz</div></div><div class="lvl-b"><strong>Basic Hemi-Sync</strong><p>The first signpost (Wave I): the brain hemispheres synchronize and the signal becomes coherent. A gentle, settled alpha state.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 10</div><div class="lvl-hz">α–θ 8 Hz</div></div><div class="lvl-b"><strong>Mind Awake, Body Asleep</strong><p>The alpha–theta paradox state — mind fully alert while the body sleeps deeply. The Wave I foundation everything else is built on. See the <a href="focus-10.html" style="color:var(--acc);text-decoration:none">Focus 10 note</a>.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 12</div><div class="lvl-hz">θ 6 Hz</div></div><div class="lvl-b"><strong>Expanded Awareness</strong><p>Deep theta — problem solving, patterning, remote viewing, non-verbal communication. The Wave II–IV workhorse; answers arrive as symbols, images, or sudden knowing.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 15</div><div class="lvl-hz">θ–δ 2.5 Hz</div></div><div class="lvl-b"><strong>No Time</strong><p>Deep theta–delta — the state of "no time." Pure being, creation and manifestation work. Wave V.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 21</div><div class="lvl-hz">θ–δ 1.5 Hz</div></div><div class="lvl-b"><strong>The Bridge</strong><p>The edge of time-space — the deepest state where mind-awake contact is still maintained, and the bridge to other energy systems. Monroe's phasing territory. Wave VI (Odyssey).</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 27</div><div class="lvl-hz">δ 0.5 Hz</div></div><div class="lvl-b"><strong>The Park · Reception Center</strong><p>Deepest delta preset — Focus 27 is The Park, the reception/healing area for transitioned consciousness, mapped in Monroe's later Lifeline work (Focus 22–26 are the belief-system territories below it).</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">C-1</div><div class="lvl-hz">β 14 Hz</div></div><div class="lvl-b"><strong>Full Waking Consciousness</strong><p>Normal beta state — the starting point for every session. Left-brain-dominant everyday awareness.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 3</div><div class="lvl-hz">α 10 Hz</div></div><div class="lvl-b"><strong>Basic Sync</strong><p>The first signpost: the brain hemispheres synchronize and the signal becomes coherent. A gentle, settled alpha state.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 10</div><div class="lvl-hz">α–θ 8 Hz</div></div><div class="lvl-b"><strong>Mind Awake, Body Asleep</strong><p>The alpha–theta paradox state — mind fully alert while the body sleeps deeply. The foundation everything else is built on. See the <a href="focus-10.html" style="color:var(--acc);text-decoration:none">Focus 10 note</a>.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 12</div><div class="lvl-hz">θ 6 Hz</div></div><div class="lvl-b"><strong>Expanded Awareness</strong><p>Deep theta — problem solving, patterning, remote viewing, non-verbal communication. The workhorse state; answers arrive as symbols, images, or sudden knowing.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 15</div><div class="lvl-hz">θ–δ 2.5 Hz</div></div><div class="lvl-b"><strong>No Time</strong><p>Deep theta–delta — the state of "no time." Pure being, creation and manifestation work.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 21</div><div class="lvl-hz">θ–δ 1.5 Hz</div></div><div class="lvl-b"><strong>The Bridge</strong><p>The edge of time-space — the deepest state where mind-awake contact is still maintained, and the bridge to other energy systems. Phasing territory.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 27</div><div class="lvl-hz">δ 0.5 Hz</div></div><div class="lvl-b"><strong>The Park · Reception Center</strong><p>Deepest delta preset — Focus 27 is The Park, the reception/healing area for transitioned consciousness (Focus 22–26 are the belief-system territories below it).</p></div></div>
       </div>
-      <div class="note"><p><strong>About these numbers —</strong> Monroe never published official single-beat values per Focus level; Hemi-Sync layers several carrier/beat pairs at once. This ladder (14 → 0.5 Hz) is the common community approximation, kept here as-is for testing. Spectral analyses of the actual Gateway tapes are usually cited around a <strong>~4 Hz beat on a ~100 Hz carrier</strong> for Focus 10 — that's what the 100 Hz carrier preset is for: same ladder, tape-style carrier.</p></div>
+      <div class="note"><p><strong>About these numbers —</strong> there is no official single-beat value per focus level; the original audio layers several carrier/beat pairs at once. This ladder (14 → 0.5 Hz) is the common community approximation, kept here as-is for testing. Spectral analyses of the original tapes are usually cited around a <strong>~4 Hz beat on a ~100 Hz carrier</strong> for Focus 10 — that's what the 100 Hz carrier preset is for: same ladder, tape-style carrier.</p></div>
     </article>
 
     <div class="div"><div class="div-dot"></div></div>
@@ -510,14 +510,15 @@ footer a{color:var(--acc);text-decoration:none}
       <div class="tech-body">
         <p>A binaural beat doesn't exist in the audio at all. The left ear gets one pure tone (the <strong>carrier</strong>, e.g. 200 Hz) and the right ear gets a slightly different one (e.g. 208 Hz). Your brainstem combines them and perceives the <strong>difference</strong> — an 8 Hz pulse — which the brain tends to entrain toward (the frequency-following response).</p>
         <p>That's why the player hard-pans each oscillator fully left and right, and why <strong>wired stereo headphones</strong> matter: Bluetooth codecs can down-mix or desync the channels, at which point both ears hear both tones and the beat collapses into ordinary audio.</p>
-        <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. The screen is kept awake while playing (on browsers that support wake lock), and journeys you build can be saved on-device.</p>
+        <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
+        <p>While playing, the player holds a <strong>wake lock</strong> so the screen stays on by itself — <strong>don't switch the screen off manually</strong>. Browsers run inside the OS audio policy, and a screen turned off by hand can suspend the audio engine mid-session (the status line under the timer shows whether the lock is active). Just dim the brightness, lay the phone face-up, and let the player manage the screen.</p>
       </div>
     </article>
 
   </div><!-- /wrap -->
 
   <footer>
-    <p>Monroe Institute · Hemi-Sync · Session Player<br>Personal study notes · <a href="focus-10.html">Focus 10</a> · <a href="protocol.html">4-Week Protocol</a> · <a href="obe-taxonomy.html">OBE Taxonomy</a></p>
+    <p>Binaural Beats · Session Player · Personal Build<br>Personal study notes · <a href="focus-10.html">Focus 10</a> · <a href="protocol.html">4-Week Protocol</a> · <a href="obe-taxonomy.html">OBE Taxonomy</a></p>
   </footer>
 
 </main>
@@ -653,13 +654,13 @@ footer a{color:var(--acc);text-decoration:none}
      approximation (see the reference note), kept as-is for testing.
      ════════════════════════════════════════════════════════════════ */
   const STATES = {
-    c1:    { beat: 14,  desc: 'C-1 · Full Waking Consciousness — normal beta. The starting point for all Gateway exercises; left-brain-dominant everyday awareness.' },
-    f3:    { beat: 10,  desc: 'Focus 3 · Basic Hemi-Sync — gentle alpha. Brain hemispheres synchronize and the signal becomes coherent. First Hemi-Sync signpost (Wave I).' },
-    f10:   { beat: 8,   desc: 'Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. Wave I foundation; master this first.' },
-    f12:   { beat: 6,   desc: 'Focus 12 · Expanded Awareness — deep theta. Problem solving, patterning, remote viewing, NVC. Wave II–IV workhorse; answers arrive as symbols, images, or sudden knowing.' },
-    f15:   { beat: 2.5, desc: 'Focus 15 · No Time — deep theta–delta. The state of "no time": pure being, creation and manifestation work. Wave V.' },
-    f21:   { beat: 1.5, desc: 'Focus 21 · The Bridge — edge of time-space, the deepest mind-awake state and the bridge to other energy systems. Monroe’s phasing territory. Wave VI (Odyssey).' },
-    f27:   { beat: 0.5, desc: 'Focus 27 · The Park — deepest delta preset. The reception/healing area for transitioned consciousness, mapped in Monroe’s later Lifeline work.' },
+    c1:    { beat: 14,  desc: 'C-1 · Full Waking Consciousness — normal beta. The starting point for every session; left-brain-dominant everyday awareness.' },
+    f3:    { beat: 10,  desc: 'Focus 3 · Basic Sync — gentle alpha. Brain hemispheres synchronize and the signal becomes coherent. The first signpost.' },
+    f10:   { beat: 8,   desc: 'Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.' },
+    f12:   { beat: 6,   desc: 'Focus 12 · Expanded Awareness — deep theta. Problem solving, patterning, remote viewing, NVC. The workhorse state; answers arrive as symbols, images, or sudden knowing.' },
+    f15:   { beat: 2.5, desc: 'Focus 15 · No Time — deep theta–delta. The state of "no time": pure being, creation and manifestation work.' },
+    f21:   { beat: 1.5, desc: 'Focus 21 · The Bridge — edge of time-space, the deepest mind-awake state and the bridge to other energy systems. Phasing territory.' },
+    f27:   { beat: 0.5, desc: 'Focus 27 · The Park — deepest delta preset. The reception/healing area for transitioned consciousness.' },
     delta: { beat: 0.5, desc: 'Delta band · 0.5 Hz beat — deep dreamless sleep territory.' },
     theta: { beat: 4,   desc: 'Theta band · 4 Hz beat — hypnagogia, deep meditation, memory consolidation.' },
     alpha: { beat: 10,  desc: 'Alpha band · 10 Hz beat — relaxed, eyes-closed wakeful awareness.' },
@@ -976,7 +977,7 @@ footer a{color:var(--acc);text-decoration:none}
     },
   };
 
-  const LS_KEY = 'gateway-custom-journeys';
+  const LS_KEY = 'beats-custom-journeys';
   function loadCustomJourneys() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
     catch (_) { return {}; }
