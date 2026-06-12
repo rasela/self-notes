@@ -932,6 +932,11 @@ footer a{color:var(--acc);text-decoration:none}
     { label: 'Focus 15', beat: 2.5 },
     { label: 'Focus 21', beat: 1.5 },
     { label: 'Focus 27', beat: 0.5 },
+    /* ── OBE-prep stage names (settle → descend → hold → push) ── */
+    { label: 'Settle',    beat: 8 },
+    { label: 'Descend',   beat: 7 },
+    { label: 'Work Zone', beat: 6 },
+    { label: 'Push',      beat: 5 },
     { label: 'Delta',    beat: 0.5 },
     { label: 'Theta',    beat: 4   },
     { label: 'Alpha',    beat: 10  },
@@ -958,12 +963,13 @@ footer a{color:var(--acc);text-decoration:none}
   const BUILTIN_JOURNEYS = {
     'obe-prep': {
       name: 'OBE Prep',
-      desc: 'Focus 10 → 12 → 21, then fade out · ~50 min',
+      desc: 'Settle 8 → descend 7 → long 6 Hz hold → optional 5 Hz push · ~55 min — remove the last stage on non-exit nights. No delta on practice nights.',
       fadeOut: true,
       stages: [
-        { label: 'Focus 10', beat: 8,   mins: 20 },
-        { label: 'Focus 12', beat: 6,   mins: 15 },
-        { label: 'Focus 21', beat: 1.5, mins: 15 },
+        { label: 'Settle',    beat: 8, mins: 10 },
+        { label: 'Descend',   beat: 7, mins: 10 },
+        { label: 'Work Zone', beat: 6, mins: 25 },
+        { label: 'Push',      beat: 5, mins: 10 },
       ],
     },
     'relaxation': {
