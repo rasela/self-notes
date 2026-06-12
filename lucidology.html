@@ -914,33 +914,13 @@
 
 </div>
 
+<script src="shared.js"></script>
 <script>
   // gentle scroll reveal (respects reduced-motion via CSS class gating)
   const io=new IntersectionObserver((es)=>{
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
   },{threshold:.08});
   document.querySelectorAll('.fade').forEach(el=>io.observe(el));
-
-  // hamburger drawer
-  const hbtn=document.getElementById('hbtn');
-  const overlay=document.getElementById('overlay');
-  const drawer=document.getElementById('drawer');
-  const open=()=>{hbtn.classList.add('open');overlay.classList.add('open');drawer.classList.add('open');hbtn.setAttribute('aria-expanded','true');};
-  const close=()=>{hbtn.classList.remove('open');overlay.classList.remove('open');drawer.classList.remove('open');hbtn.setAttribute('aria-expanded','false');};
-  hbtn.addEventListener('click',()=>hbtn.classList.contains('open')?close():open());
-  overlay.addEventListener('click',close);
-  document.addEventListener('keydown',e=>e.key==='Escape'&&close());
-  drawer.querySelectorAll('a[data-a]').forEach(link=>{
-    link.addEventListener('click',e=>{
-      e.preventDefault();
-      const id=link.getAttribute('data-a');
-      close();
-      setTimeout(()=>{
-        const t=document.getElementById(id);
-        if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'});
-      },400);
-    });
-  });
 </script>
 </body>
 </html>

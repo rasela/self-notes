@@ -1,16 +1,26 @@
 # self-notes
 
 A personal knowledge base of self-study notes, published as a static site. Each
-note is a **single, self-contained HTML file** (inline `<style>` + `<script>`,
-no build step, no shared assets). The site is hosted on a static host that reads
+note is **one HTML file plus the shared shell** (`shared.css` + `shared.js`,
+no build step). The site is hosted on a static host that reads
 `_redirects` for short URLs (Netlify-style).
 
 ## How it works
 
 - **`index.html`** — the landing page. A searchable grid of cards, one card per
-  note. The card list is the source of truth for "what notes exist."
-- **`<note>.html`** — one file per note. Fully standalone; opening it in a
-  browser is all that's needed. No external JS/CSS except Google Fonts.
+  note. The card list is the source of truth for "what notes exist." It is
+  self-contained (does not use the shared shell).
+- **`<note>.html`** — one file per note. Links `shared.css` (before its inline
+  `<style>`) and `shared.js` (before its inline `<script>`). No other external
+  JS/CSS except Google Fonts.
+- **`shared.css`** — the common page shell: tokens (incl. default purple
+  accent), reset, grain, progress bar, nav, TOC drawer, back-to-top, footer.
+  Pages override tokens/rules in their inline `<style>`, which always loads
+  after the link — page CSS wins at equal specificity.
+- **`shared.js`** — the shell behaviour: progress bar, drawer
+  (open/close/Esc/overlay, smooth-scroll `data-a` links), tap-to-toggle
+  `.check`/`.night` checklists, back-to-top. Every feature is guarded, so
+  pages missing an element (e.g. no `#prog`) can still use it.
 - **`_redirects`** — short-URL → file mappings, e.g. `/obe /abtb.html 200`.
 - **`README.md`** — intentionally minimal.
 
@@ -40,20 +50,23 @@ Leave the user's original source file (e.g. in `~/Downloads`) untouched.
 `dark-psychology.html` · `focus-10.html` · `protocol.html` · `abtb.html`
 (Buhlman OBE) · `obe-taxonomy.html` · `phasing.html` (Kepple/Tasker) ·
 `lucidology.html` (Newport) · `gurriaran.html` (stance layer) ·
-`absorption.html` / `footprint.html` (orderflow).
+`absorption.html` / `footprint.html` (orderflow) · `beats.html` (binaural
+session player).
 
 Topics cluster into OBE/astral practice (focus-10, protocol, abtb, obe-taxonomy,
-phasing, lucidology, gurriaran) and trading (options-mm-guide, absorption,
-footprint), plus standalone notes.
+phasing, lucidology, gurriaran, beats) and trading (options-mm-guide,
+absorption, footprint), plus standalone notes.
+
+`lucidology.html` is the one themed exception: it keeps its own night-sky CSS
+inline (no `shared.css`) but still uses `shared.js` for the drawer.
 
 ---
 
 # Page structure spec
 
 The canonical template is **`abtb.html` / `absorption.html`** — match these for
-any new note. The three oldest pages (`dark-psychology`, `options-mm-guide`,
-`morning-routine`) use different fonts and predate this system; **don't** copy
-them — bring new work in line with the abtb/absorption house style.
+any new note. All pages (including the former legacy trio) now sit on the
+shared shell + house style.
 
 The fastest way to build a new note: **duplicate `abtb.html`, swap the accent
 color, content, and TOC.** Everything below describes what that template already
@@ -65,15 +78,21 @@ does, so changes stay consistent.
   Single column, generous tap targets (≥40px), `-webkit-tap-highlight-color`
   cleared on interactive rows. Desktop only adds hover affordances inside a
   `@media(min-width:640px)` block — never a separate desktop layout.
-- **One file, zero dependencies** beyond Google Fonts. Inline `<style>` and
-  `<script>`. No external images — use inline SVG or CSS.
+- **One content file + the shared shell.** Shell (nav, drawer, progress,
+  back-to-top, tokens) comes from `shared.css`/`shared.js`; everything
+  page-specific (accent, components, content scripts) stays inline in the
+  note's own `<style>`/`<script>`. No other dependencies beyond Google Fonts.
+  No external images — use inline SVG or CSS.
 - **Self-contained navigation** — every page links back to `index.html`.
 
 ## Required structure (top to bottom)
 
 1. **`<head>`** — `<meta viewport width=device-width, initial-scale=1>`, a
    descriptive `<title>` (`"Topic — Subtitle"`), Google Fonts preconnect +
-   stylesheet, then the inline `:root` token block + styles.
+   stylesheet, **`<link rel="stylesheet" href="shared.css"/>`**, then the
+   inline `<style>` with the page's `:root` token overrides (at minimum the
+   accent) + page-specific styles. The shell rules live in `shared.css` —
+   don't re-declare them unless the page intentionally deviates.
 2. **Grain overlay** — `body::before` fixed fractal-noise SVG at low opacity
    (the subtle texture every page shares).
 3. **Reading-progress bar** — `#prog`, fixed under the nav, fills on scroll.
@@ -91,9 +110,10 @@ does, so changes stay consistent.
      (`.tech-title` + `.tech-abbr` kicker), separated by `.div` diamond dividers.
    - **`<footer>`** — small-caps credit line + a few cross-links to sibling notes.
 7. **Back-to-top FAB** (`#btt`), bottom-right, appears after scrolling.
-8. **`<script>`** at the very bottom — progress bar, drawer open/close (+ Esc +
-   overlay click), smooth-scroll TOC links (offset ~64px for the nav), any
-   tap-to-toggle checklists, back-to-top. Copy this wholesale from `abtb.html`.
+8. **`<script src="shared.js"></script>`** at the very bottom — provides the
+   progress bar, drawer open/close (+ Esc + overlay click), smooth-scroll TOC
+   links (offset ~64px for the nav), tap-to-toggle checklists, and back-to-top.
+   Any page-specific behaviour goes in an inline `<script>` after it.
 
 ## Table of contents — requirements
 
@@ -143,8 +163,11 @@ new components.
 - **Commit + push by default** once a change is complete — don't wait to be
   asked. Only skip when the user explicitly says not to commit/push. Co-author
   trailer is added automatically.
-- Keep each note in **one file**; don't factor out shared CSS/JS — duplication
-  across pages is intentional and keeps every note portable.
+- The **shared shell** (`shared.css`/`shared.js`) holds only what is identical
+  on every page — shell chrome and behaviour. Content components (`.tip`,
+  `.steps`, heroes, page scripts) stay inline per note so each page can evolve
+  independently. When changing `shared.*`, remember it affects **every** page —
+  prefer a per-page inline override for one-off tweaks.
 - When editing `index.html`, only touch the card block + data-attributes; the
   render script and search already handle the rest.
 - Match the voice of the source note (these are the user's personal study notes,

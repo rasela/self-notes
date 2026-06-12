@@ -5,36 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Options Gamma — Market Maker Playbook v3</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230a0a0f'/><text y='.9em' font-size='80' x='10'>📈</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="shared.css">
 <style>
+  /* house neutrals + this page's semantic trading colors; shell from shared.css */
   :root {
-    --bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:#2a2a3a;
+    --surface:#111116;--card:#13131a;
     --accent:#00ff9d;--accent2:#ff3c6e;--accent3:#f5c400;--accent4:#4d9fff;--accent5:#bf7fff;
-    --text:#e8e8f0;--muted:#6b6b80;--positive:#00ff9d;--negative:#ff3c6e;
+    --text:#e8e6f0;--muted:#9896a8;--positive:#00ff9d;--negative:#ff3c6e;
+    --acc:#00ff9d;--accdim:rgba(0,255,157,0.08);--bora:rgba(0,255,157,0.25);
+    --prog2:var(--accent3);
   }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}
-  .section-progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:1000;transition:width 0.1s;box-shadow:0 0 8px var(--accent);}
-  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 20px;position:relative;overflow:hidden;}
-  .hero::before{content:'';position:absolute;width:800px;height:800px;background:radial-gradient(circle,rgba(0,255,157,0.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
-  .hero-tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);border:1px solid rgba(0,255,157,0.3);padding:6px 16px;border-radius:2px;margin-bottom:16px;animation:fadeUp 0.8s ease both;}
-  .hero-version{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:24px;animation:fadeUp 0.8s 0.05s ease both;}
-  .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,12vw,130px);letter-spacing:4px;line-height:0.95;margin-bottom:24px;animation:fadeUp 0.8s 0.1s ease both;}
-  .hero h1 span{color:var(--accent);}
-  .hero p{max-width:520px;color:var(--muted);font-size:16px;animation:fadeUp 0.8s 0.2s ease both;margin-bottom:48px;}
-  .nav-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;animation:fadeUp 0.8s 0.3s ease both;}
-  .nav-pill{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 20px;border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;text-transform:uppercase;}
-  .nav-pill:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,255,157,0.05);}
-  .scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;animation:fadeUp 1s 1s ease both;}
-  .scroll-hint span{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
-  .scroll-dot{width:1px;height:40px;background:linear-gradient(180deg,var(--muted) 0%,transparent 100%);animation:scrollPulse 2s infinite;}
-  .section{max-width:900px;margin:0 auto;padding:80px 24px;opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease;}
+  body{font-family:var(--sans);font-size:15px;line-height:1.7;color:var(--text)}
+  /* house hero */
+  .hero{padding:32px 16px 28px;max-width:720px;margin:0 auto;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-100px;left:-120px;width:400px;height:400px;background:radial-gradient(ellipse,rgba(0,255,157,.05) 0%,transparent 70%);pointer-events:none}
+  .eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--accent);opacity:.5}
+  h1{font-family:var(--serif);font-size:clamp(32px,9vw,54px);font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+  h1 em{font-style:italic;color:var(--accent)}
+  .subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .section{max-width:720px;margin:0 auto;padding:44px 16px;opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease;}
   .section.visible{opacity:1;transform:translateY(0);}
   .section-header{display:flex;align-items:center;gap:16px;margin-bottom:48px;}
-  .section-num{font-family:'Bebas Neue',sans-serif;font-size:72px;color:rgba(0,255,157,0.1);line-height:1;min-width:70px;}
-  .section-title-block h2{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--text);line-height:1;}
-  .section-title-block p{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+  .section-num{font-family:var(--serif);font-weight:600;font-size:44px;color:rgba(0,255,157,0.15);line-height:1;min-width:56px;}
+  .section-title-block h2{font-family:var(--serif);font-weight:600;font-size:clamp(22px,6vw,30px);letter-spacing:-.01em;color:var(--text);line-height:1.15;}
+  .section-title-block p{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
   .divider{height:1px;background:linear-gradient(90deg,var(--accent) 0%,transparent 100%);margin-bottom:48px;opacity:0.3;}
   .section-sep{height:1px;background:var(--border);max-width:900px;margin:0 auto;opacity:0.5;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden;}
@@ -44,7 +41,7 @@
   .card.neutral::before{background:var(--accent3);}
   .card.info::before{background:var(--accent4);}
   .card.purple::before{background:var(--accent5);}
-  .card h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:12px;}
+  .card h3{font-family:var(--serif);font-weight:600;font-size:18px;margin-bottom:12px;}
   .card.positive h3{color:var(--positive);}
   .card.negative h3{color:var(--negative);}
   .card.neutral h3{color:var(--accent3);}
@@ -52,7 +49,7 @@
   .card.purple h3{color:var(--accent5);}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media(max-width:600px){.two-col{grid-template-columns:1fr;}}
-  .data-table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px;margin:24px 0;}
+  .data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;margin:24px 0;}
   .data-table th{text-align:left;padding:10px 16px;background:rgba(0,255,157,0.05);border-bottom:1px solid var(--accent);color:var(--accent);font-size:10px;letter-spacing:2px;text-transform:uppercase;}
   .data-table td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);}
   .data-table tr:last-child td{border-bottom:none;}
@@ -63,9 +60,9 @@
   .tag-info{color:var(--accent4);font-weight:500;}
   .tag-purple{color:var(--accent5);font-weight:500;}
   .gamma-diagram{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:32px;margin:24px 0;}
-  .diagram-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+  .diagram-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
   .flow-row{display:flex;align-items:center;gap:0;margin:12px 0;flex-wrap:wrap;}
-  .flow-box{padding:10px 16px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;white-space:nowrap;}
+  .flow-box{padding:10px 16px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:500;white-space:nowrap;}
   .flow-box.green{background:rgba(0,255,157,0.1);border:1px solid rgba(0,255,157,0.3);color:var(--positive);}
   .flow-box.red{background:rgba(255,60,110,0.1);border:1px solid rgba(255,60,110,0.3);color:var(--negative);}
   .flow-box.yellow{background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.3);color:var(--accent3);}
@@ -81,30 +78,30 @@
   .highlight-yellow strong{color:var(--accent3);}
   .highlight-purple{border-left:3px solid var(--accent5);padding:16px 20px;background:rgba(191,127,255,0.03);margin:20px 0;font-size:14px;}
   .highlight-purple strong{color:var(--accent5);}
-  .delta-spectrum{display:flex;height:40px;border-radius:3px;overflow:hidden;margin:16px 0;font-family:'DM Mono',monospace;font-size:10px;}
+  .delta-spectrum{display:flex;height:40px;border-radius:3px;overflow:hidden;margin:16px 0;font-family:var(--mono);font-size:10px;}
   .ds-seg{flex:1;display:flex;align-items:center;justify-content:center;font-weight:500;flex-direction:column;gap:2px;}
   .vix-meter{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;margin:16px 0;}
   .vix-bar-container{position:relative;height:32px;border-radius:3px;overflow:hidden;margin:16px 0;background:var(--surface);}
   .vix-bar{display:flex;height:100%;}
-  .vix-segment{display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;font-weight:500;}
-  .vix-labels{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;}
+  .vix-segment{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;letter-spacing:1px;font-weight:500;}
+  .vix-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;}
   .greek-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media(max-width:600px){.greek-grid{grid-template-columns:1fr;}}
   .greek-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:24px;text-align:center;}
-  .greek-symbol{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;margin-bottom:8px;}
+  .greek-symbol{font-family:var(--serif);font-weight:600;font-size:40px;line-height:1;margin-bottom:8px;}
   .greek-card:nth-child(1) .greek-symbol{color:var(--accent);}
   .greek-card:nth-child(2) .greek-symbol{color:var(--accent2);}
   .greek-card:nth-child(3) .greek-symbol{color:var(--accent3);}
-  .greek-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+  .greek-name{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
   .greek-trigger{font-size:13px;color:var(--text);}
   .quiz-block{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:32px;margin-top:40px;position:relative;}
-  .quiz-block::before{content:'KNOWLEDGE CHECK';position:absolute;top:-10px;left:24px;background:var(--accent3);color:#000;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;padding:3px 10px;font-weight:500;}
+  .quiz-block::before{content:'KNOWLEDGE CHECK';position:absolute;top:-10px;left:24px;background:var(--accent3);color:#000;font-family:var(--mono);font-size:9px;letter-spacing:3px;padding:3px 10px;font-weight:500;}
   .quiz-question{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border);}
   .quiz-question:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
   .quiz-q{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--text);line-height:1.5;}
-  .quiz-q span{font-family:'DM Mono',monospace;color:var(--accent3);font-size:11px;margin-right:8px;}
+  .quiz-q span{font-family:var(--mono);color:var(--accent3);font-size:11px;margin-right:8px;}
   .quiz-options{display:flex;flex-direction:column;gap:8px;}
-  .quiz-option{display:flex;align-items:center;gap:12px;padding:10px 16px;border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all 0.2s;font-size:13px;font-family:'DM Mono',monospace;background:var(--card);}
+  .quiz-option{display:flex;align-items:center;gap:12px;padding:10px 16px;border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all 0.2s;font-size:13px;font-family:var(--mono);background:var(--card);}
   .quiz-option:hover:not(.answered){border-color:var(--accent3);background:rgba(245,196,0,0.05);}
   .quiz-option.selected{border-color:var(--accent4);background:rgba(77,159,255,0.08);}
   .quiz-option.correct{border-color:var(--positive)!important;background:rgba(0,255,157,0.08)!important;color:var(--positive);}
@@ -113,65 +110,77 @@
   .quiz-option .opt-letter{width:22px;height:22px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:500;}
   .quiz-option.correct .opt-letter{background:var(--positive);color:#000;}
   .quiz-option.wrong .opt-letter{background:var(--negative);color:#fff;}
-  .check-btn{margin-top:12px;padding:9px 20px;background:transparent;border:1px solid var(--accent3);color:var(--accent3);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:all 0.2s;text-transform:uppercase;}
+  .check-btn{margin-top:12px;padding:9px 20px;background:transparent;border:1px solid var(--accent3);color:var(--accent3);font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:all 0.2s;text-transform:uppercase;}
   .check-btn:hover{background:rgba(245,196,0,0.1);}
   .check-btn:disabled{opacity:0.3;cursor:not-allowed;}
-  .quiz-feedback{margin-top:10px;font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;border-radius:3px;display:none;line-height:1.6;}
+  .quiz-feedback{margin-top:10px;font-family:var(--mono);font-size:12px;padding:10px 14px;border-radius:3px;display:none;line-height:1.6;}
   .quiz-feedback.show{display:block;}
   .quiz-feedback.correct-fb{background:rgba(0,255,157,0.08);color:var(--positive);border:1px solid rgba(0,255,157,0.2);}
   .quiz-feedback.wrong-fb{background:rgba(255,60,110,0.08);color:var(--negative);border:1px solid rgba(255,60,110,0.2);}
-  .score-display{display:flex;align-items:center;gap:16px;margin-top:24px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:3px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
-  .score-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent3);line-height:1;}
+  .score-display{display:flex;align-items:center;gap:16px;margin-top:24px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+  .score-num{font-family:var(--mono);font-size:28px;color:var(--accent3);line-height:1;}
   .la-block{background:var(--surface);border:1px solid var(--accent5);border-radius:4px;padding:32px;margin-top:24px;position:relative;}
-  .la-block::before{content:'OFFLINE STUDY — LONG ANSWER';position:absolute;top:-10px;left:24px;background:var(--accent5);color:#000;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;padding:3px 10px;font-weight:500;}
+  .la-block::before{content:'OFFLINE STUDY — LONG ANSWER';position:absolute;top:-10px;left:24px;background:var(--accent5);color:#000;font-family:var(--mono);font-size:9px;letter-spacing:3px;padding:3px 10px;font-weight:500;}
   .la-question{margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid var(--border);}
   .la-question:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
   .la-q{font-size:15px;font-weight:500;margin-bottom:16px;line-height:1.6;}
-  .la-q span{font-family:'DM Mono',monospace;color:var(--accent5);font-size:11px;margin-right:8px;}
-  .la-hint{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;}
-  .reveal-btn{padding:9px 20px;background:transparent;border:1px solid var(--accent5);color:var(--accent5);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:all 0.2s;text-transform:uppercase;}
+  .la-q span{font-family:var(--mono);color:var(--accent5);font-size:11px;margin-right:8px;}
+  .la-hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:16px;}
+  .reveal-btn{padding:9px 20px;background:transparent;border:1px solid var(--accent5);color:var(--accent5);font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:all 0.2s;text-transform:uppercase;}
   .reveal-btn:hover{background:rgba(191,127,255,0.1);}
   .reveal-btn.revealed{border-color:var(--muted);color:var(--muted);}
   .la-answer{display:none;margin-top:16px;padding:20px;background:rgba(191,127,255,0.04);border:1px solid rgba(191,127,255,0.2);border-radius:3px;font-size:13px;line-height:1.8;}
   .la-answer.show{display:block;}
   .la-answer strong{color:var(--accent5);}
   .la-answer .ap{display:flex;gap:10px;margin-bottom:10px;}
-  .la-answer .ap::before{content:'→';color:var(--accent5);flex-shrink:0;font-family:'DM Mono',monospace;}
+  .la-answer .ap::before{content:'→';color:var(--accent5);flex-shrink:0;font-family:var(--mono);}
   .flip-visual{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;margin:24px 0;}
   .price-bar{position:relative;height:50px;background:linear-gradient(90deg,rgba(255,60,110,0.3) 0%,rgba(255,60,110,0.1) 40%,rgba(245,196,0,0.3) 49%,rgba(245,196,0,0.3) 51%,rgba(0,255,157,0.1) 60%,rgba(0,255,157,0.3) 100%);border-radius:3px;margin:24px 0 12px;display:flex;align-items:center;justify-content:center;}
-  .flip-point{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent3);color:#000;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:2px;white-space:nowrap;font-weight:700;}
-  .flip-labels{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;margin-top:8px;}
+  .flip-point{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent3);color:#000;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:2px;white-space:nowrap;font-weight:700;}
+  .flip-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-top:8px;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
   @keyframes scrollPulse{0%,100%{opacity:0.3;}50%{opacity:1;}}
-  footer{text-align:center;padding:60px 20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;}
+  
 </style>
 </head>
 <body>
 
-<div class="section-progress" id="progress"></div>
+<div id="prog"></div>
 
+<nav>
+  <div class="brand">Options <span>/ Gamma Playbook</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#s1" data-a="s1"><span class="toc-tag">01</span>Delta &amp; Gamma</a></li>
+    <li><a href="#s2" data-a="s2"><span class="toc-tag">02</span>MM Delta Hedging</a></li>
+    <li><a href="#s2b" data-a="s2b"><span class="toc-tag">2B</span>Delta Matrix</a></li>
+    <li><a href="#s3" data-a="s3"><span class="toc-tag">03</span>Calls &amp; Puts</a></li>
+    <li><a href="#s4" data-a="s4"><span class="toc-tag">04</span>VIX &amp; Gamma Flip</a></li>
+    <li><a href="#s5" data-a="s5"><span class="toc-tag">05</span>GEX Charts</a></li>
+    <li><a href="#s6" data-a="s6"><span class="toc-tag">06</span>Vanna &amp; Charm</a></li>
+    <li><a href="#s7" data-a="s7"><span class="toc-tag">07</span>Greek Relationships</a></li>
+    <li><a href="#s8" data-a="s8"><span class="toc-tag">08</span>Offline Study</a></li>
+    <li><a href="#cheatsheet" data-a="cheatsheet"><span class="toc-tag">★</span>Cheat Sheet</a></li>
+    <li><a href="#s9" data-a="s9"><span class="toc-tag">09</span>Covered Calls &amp; Puts</a></li>
+    <li><a href="#s10" data-a="s10"><span class="toc-tag">10</span>Option Exercise</a></li>
+    <li><a href="#s11" data-a="s11"><span class="toc-tag">11</span>Volatility Skew</a></li>
+    <li><a href="#s12" data-a="s12"><span class="toc-tag">12</span>Crash Anatomy</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← All notes</a></p>
+</aside>
+
+<main>
 <div class="hero" id="top">
-  <div class="hero-tag">Market Maker Playbook</div>
-  <div class="hero-version">VERSION 3.0 — NOW WITH SKEW, OPTION EXERCISE & COVERED CALLS</div>
-  <h1>Options<br><span>Gamma</span><br>Decoded</h1>
-  <p>Complete guide — Delta, Gamma, Vanna, Charm, GEX and how they all drive index movements from a market maker's perspective.</p>
-  <div class="nav-pills">
-    <a class="nav-pill" href="#s1">Delta & Gamma</a>
-    <a class="nav-pill" href="#s2">MM Mechanics</a>
-    <a class="nav-pill" href="#s2b">Delta Matrix</a>
-    <a class="nav-pill" href="#s3">Calls & Puts</a>
-    <a class="nav-pill" href="#s4">VIX & Flip</a>
-    <a class="nav-pill" href="#s5">GEX Charts</a>
-    <a class="nav-pill" href="#s6">Vanna & Charm</a>
-    <a class="nav-pill" href="#s7">Greek Relationships</a>
-    <a class="nav-pill" href="#s9">Covered Calls & Puts</a>
-    <a class="nav-pill" href="#s10">Option Exercise</a>
-    <a class="nav-pill" href="#s11">Skew</a>
-    <a class="nav-pill" href="#s12">Crash Anatomy</a>
-    <a class="nav-pill" href="#s8">Offline Study</a>
-    <a class="nav-pill" href="#cheatsheet">Cheat Sheet</a>
-  </div>
-  <div class="scroll-hint"><span>Scroll</span><div class="scroll-dot"></div></div>
+  <p class="eyebrow">Market Maker Playbook · Version 3.0</p>
+  <h1>Options <em>Gamma</em><br>Decoded</h1>
+  <p class="subtitle">Delta · Gamma · Vanna · Charm · GEX — from the MM's side</p>
 </div>
 
 <!-- S1 DELTA & GAMMA -->
@@ -209,7 +218,7 @@
       <div class="ds-seg" style="background:rgba(0,255,157,0.3);color:var(--positive)">ITM<br><small>δ≈0.75</small></div>
       <div class="ds-seg" style="background:rgba(0,255,157,0.15);color:var(--positive);flex:1.5">Deep ITM<br><small>δ≈1.0</small></div>
     </div>
-    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">★ Gamma HIGHEST at ATM. Collapses deep ITM (delta maxed) or deep OTM (delta near zero).</p>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px">★ Gamma HIGHEST at ATM. Collapses deep ITM (delta maxed) or deep OTM (delta near zero).</p>
   </div>
   <div class="highlight"><strong>Core Rule:</strong> Delta tells you WHERE you are. Gamma tells you HOW FAST you're moving there. Buy option = Long/Positive Gamma. Sell option = Short/Negative Gamma. Always — for both calls and puts.</div>
 
@@ -305,38 +314,38 @@
     <div class="diagram-label">// Step 1 — How Delta Moves (Regardless of MM Position)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--positive);margin-bottom:12px">CALL DELTA</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--positive);margin-bottom:12px">CALL DELTA</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px">
             <div style="font-size:20px">📈</div>
             <div>
-              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
               <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--positive)">↑ Increases</strong> → 1.0</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px">
             <div style="font-size:20px">📉</div>
             <div>
-              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
               <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--negative)">↓ Decreases</strong> → 0</div>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--negative);margin-bottom:12px">PUT DELTA</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--negative);margin-bottom:12px">PUT DELTA</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px">
             <div style="font-size:20px">📈</div>
             <div>
-              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px">RALLY</div>
               <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--positive)">↑ Shrinks</strong> → 0</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px">
             <div style="font-size:20px">📉</div>
             <div>
-              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px">DROP</div>
               <div style="font-size:13px;margin-top:2px">Delta <strong style="color:var(--negative)">↓ Grows more negative</strong> → -1.0</div>
             </div>
           </div>
@@ -347,10 +356,10 @@
 
   <!-- PART 2: FULL MATRIX -->
   <div style="margin-top:32px">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Step 2 — Full MM Hedging Matrix (Buy & Sell)</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Step 2 — Full MM Hedging Matrix (Buy & Sell)</div>
 
     <!-- CALLS TABLE -->
-    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:10px;margin-top:24px">CALL OPTIONS</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:10px;margin-top:24px">CALL OPTIONS</div>
     <div style="overflow-x:auto">
     <table class="data-table" style="margin:0">
       <tr>
@@ -381,7 +390,7 @@
     </div>
 
     <!-- PUTS TABLE -->
-    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:10px;margin-top:32px">PUT OPTIONS</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:10px;margin-top:32px">PUT OPTIONS</div>
     <div style="overflow-x:auto">
     <table class="data-table" style="margin:0">
       <tr>
@@ -414,20 +423,20 @@
 
   <!-- THE SINGLE RULE -->
   <div style="margin-top:32px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:4px;position:relative">
-    <div style="position:absolute;top:-10px;left:24px;background:var(--accent);color:#000;font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;letter-spacing:3px;font-weight:700">THE MASTER RULE</div>
+    <div style="position:absolute;top:-10px;left:24px;background:var(--accent);color:#000;font-family:var(--mono);font-size:9px;padding:3px 10px;letter-spacing:3px;font-weight:700">THE MASTER RULE</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
       <div style="padding:16px;background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);border-radius:3px;text-align:center">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">UNDER-HEDGED</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">UNDER-HEDGED</div>
         <div style="font-size:13px">Trade <strong style="color:var(--negative)">WITH</strong> market direction</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">→ Amplifies the move</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px">→ Amplifies the move</div>
       </div>
       <div style="padding:16px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:3px;text-align:center">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:8px">OVER-HEDGED</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:8px">OVER-HEDGED</div>
         <div style="font-size:13px">Trade <strong style="color:var(--positive)">AGAINST</strong> market direction</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px">→ Dampens the move</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px">→ Dampens the move</div>
       </div>
     </div>
-    <div style="margin-top:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--border);padding-top:16px">
+    <div style="margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--border);padding-top:16px">
       MMs never CHOOSE to buy or sell. Delta moved. Hedge is now mismatched. They are FORCED to rebalance or carry directional risk they're not paid to take.
     </div>
   </div>
@@ -489,11 +498,11 @@
     <h3>Expiration Outcomes — ATM with Heavy OI</h3>
     <div class="two-col" style="margin-top:12px">
       <div style="padding:16px;border:1px solid var(--border);border-radius:3px">
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent3);margin-bottom:8px;letter-spacing:2px">MAX PAIN — PINNING</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;letter-spacing:2px">MAX PAIN — PINNING</div>
         <p style="font-size:13px;color:var(--muted)">Price stays near strike. MMs buy dips, sell rips around it. Magnetically stuck. Most common outcome.</p>
       </div>
       <div style="padding:16px;border:1px solid var(--border);border-radius:3px">
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--negative);margin-bottom:8px;letter-spacing:2px">GAMMA SQUEEZE</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--negative);margin-bottom:8px;letter-spacing:2px">GAMMA SQUEEZE</div>
         <p style="font-size:13px;color:var(--muted)">Price breaks away. MMs chase aggressively. Near-expiry gamma spike = explosive, fast move.</p>
       </div>
     </div>
@@ -556,8 +565,8 @@
     <p style="font-size:13px;color:var(--muted);margin-bottom:8px">The Gamma Flip is NOT about when MMs become short gamma on individual positions. It is the <strong style="color:var(--text)">specific price level</strong> where NET gamma across the ENTIRE options chain crosses from positive to negative.</p>
     <div class="price-bar">
       <div class="flip-point">★ GAMMA FLIP LEVEL</div>
-      <span style="position:absolute;left:15%;color:var(--negative);font-family:'DM Mono',monospace;font-size:11px">NEGATIVE GEX ZONE</span>
-      <span style="position:absolute;right:15%;color:var(--positive);font-family:'DM Mono',monospace;font-size:11px">POSITIVE GEX ZONE</span>
+      <span style="position:absolute;left:15%;color:var(--negative);font-family:var(--mono);font-size:11px">NEGATIVE GEX ZONE</span>
+      <span style="position:absolute;right:15%;color:var(--positive);font-family:var(--mono);font-size:11px">POSITIVE GEX ZONE</span>
     </div>
     <div class="flip-labels">
       <span style="color:var(--negative)">← Trending / Explosive</span>
@@ -602,19 +611,19 @@
   <div class="divider"></div>
   <div class="card neutral">
     <h3>GEX Formula</h3>
-    <div style="font-family:'DM Mono',monospace;font-size:14px;padding:16px;background:var(--surface);border-radius:3px;margin-top:12px;letter-spacing:1px">GEX = Open Interest × Gamma × Contract Size × Spot Price</div>
+    <div style="font-family:var(--mono);font-size:14px;padding:16px;background:var(--surface);border-radius:3px;margin-top:12px;letter-spacing:1px">GEX = Open Interest × Gamma × Contract Size × Spot Price</div>
     <p style="font-size:13px;color:var(--muted);margin-top:12px">= Total dollars of shares MMs must buy/sell per 1% move at each strike</p>
   </div>
   <div class="gamma-diagram" style="margin-top:24px">
     <div class="diagram-label">// Example GEX Chart — Index at 5200</div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5400</div><div style="height:28px;width:60%;background:rgba(0,255,157,0.3);border:1px solid rgba(0,255,157,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$1.5bn — Magnet / Resistance</div></div>
-      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5300</div><div style="height:28px;width:80%;background:rgba(0,255,157,0.4);border:1px solid rgba(0,255,157,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$2bn — STRONGEST PIN LEVEL</div></div>
-      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--accent3)">★5200</div><div style="height:28px;width:35%;background:rgba(0,255,157,0.15);border:1px solid rgba(0,255,157,0.3);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--positive)">+$500m</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3)">← CURRENT PRICE</div></div>
-      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5100</div><div style="height:28px;width:45%;background:rgba(255,60,110,0.3);border:1px solid rgba(255,60,110,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--negative)">-$1bn — GAMMA FLIP LEVEL</div></div>
-      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:'DM Mono',monospace;font-size:11px;width:60px;text-align:right;color:var(--muted)">5000</div><div style="height:28px;width:70%;background:rgba(255,60,110,0.4);border:1px solid rgba(255,60,110,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--negative)">-$3bn — LANDMINE — Crash Accelerator</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:var(--mono);font-size:11px;width:60px;text-align:right;color:var(--muted)">5400</div><div style="height:28px;width:60%;background:rgba(0,255,157,0.3);border:1px solid rgba(0,255,157,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:10px;color:var(--positive)">+$1.5bn — Magnet / Resistance</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:var(--mono);font-size:11px;width:60px;text-align:right;color:var(--muted)">5300</div><div style="height:28px;width:80%;background:rgba(0,255,157,0.4);border:1px solid rgba(0,255,157,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:10px;color:var(--positive)">+$2bn — STRONGEST PIN LEVEL</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:var(--mono);font-size:11px;width:60px;text-align:right;color:var(--accent3)">★5200</div><div style="height:28px;width:35%;background:rgba(0,255,157,0.15);border:1px solid rgba(0,255,157,0.3);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:10px;color:var(--positive)">+$500m</div><div style="font-family:var(--mono);font-size:10px;color:var(--accent3)">← CURRENT PRICE</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:var(--mono);font-size:11px;width:60px;text-align:right;color:var(--muted)">5100</div><div style="height:28px;width:45%;background:rgba(255,60,110,0.3);border:1px solid rgba(255,60,110,0.5);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:10px;color:var(--negative)">-$1bn — GAMMA FLIP LEVEL</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="font-family:var(--mono);font-size:11px;width:60px;text-align:right;color:var(--muted)">5000</div><div style="height:28px;width:70%;background:rgba(255,60,110,0.4);border:1px solid rgba(255,60,110,0.6);border-radius:2px;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:10px;color:var(--negative)">-$3bn — LANDMINE — Crash Accelerator</div></div>
     </div>
-    <div style="margin-top:16px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center">GREEN = Positive GEX (Magnet — pins price) | RED = Negative GEX (Landmine — explodes price)</div>
+    <div style="margin-top:16px;font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center">GREEN = Positive GEX (Magnet — pins price) | RED = Negative GEX (Landmine — explodes price)</div>
   </div>
   <div class="highlight"><strong>Golden Rule:</strong> Above gamma flip = Trade Mean Reversion (fade moves). Below gamma flip = Trade Momentum (follow moves).</div>
 </div>
@@ -669,17 +678,17 @@
     <p style="font-size:13px;color:var(--muted);margin-bottom:20px">When VIX drops AND time passes simultaneously — Vanna and Charm push in OPPOSITE directions. They cancel out, keeping index flat despite enormous re-hedging happening underneath.</p>
     <div class="two-col">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent4);letter-spacing:2px;margin-bottom:12px">VANNA FLOW</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent4);letter-spacing:2px;margin-bottom:12px">VANNA FLOW</div>
         <div class="flow-row"><div class="flow-box blue">VIX Falls</div><div class="flow-arrow">→</div><div class="flow-box blue">Delta Shrinks</div><div class="flow-arrow">→</div><div class="flow-box red">MM Sells ↓</div></div>
-        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Selling pressure on index</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">Selling pressure on index</p>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px;margin-bottom:12px">CHARM FLOW</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px;margin-bottom:12px">CHARM FLOW</div>
         <div class="flow-row"><div class="flow-box yellow">Time Passes</div><div class="flow-arrow">→</div><div class="flow-box yellow">Delta Decays</div><div class="flow-arrow">→</div><div class="flow-box green">MM Buys ↑</div></div>
-        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">Buying pressure on index</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">Buying pressure on index</p>
       </div>
     </div>
-    <div style="margin-top:20px;padding:16px;background:rgba(191,127,255,0.05);border:1px solid rgba(191,127,255,0.2);border-radius:3px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent5);text-align:center">
+    <div style="margin-top:20px;padding:16px;background:rgba(191,127,255,0.05);border:1px solid rgba(191,127,255,0.2);border-radius:3px;font-family:var(--mono);font-size:12px;color:var(--accent5);text-align:center">
       VANNA selling ↓ + CHARM buying ↑ = NET FLAT INDEX<br>
       <span style="color:var(--muted);font-size:10px;margin-top:4px;display:block">Massive re-hedging happening invisibly. Market LOOKS dead. MMs are working overtime.</span>
     </div>
@@ -953,18 +962,18 @@
     <div class="diagram-label">// What Covered Programs Do to the Gamma Environment</div>
     <div class="two-col" style="margin-top:16px">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:12px">COVERED CALL PROGRAM</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--positive);letter-spacing:2px;margin-bottom:12px">COVERED CALL PROGRAM</div>
         <div class="flow-row"><div class="flow-box gray">Institution sells calls</div><div class="flow-arrow">→</div><div class="flow-box green">MM buys calls</div></div>
         <div class="flow-row"><div class="flow-box green">MM Long Gamma</div><div class="flow-arrow">→</div><div class="flow-box green">Dampens moves</div></div>
         <div class="flow-row"><div class="flow-box green">VIX stays low</div><div class="flow-arrow">→</div><div class="flow-box green">Choppy market</div></div>
-        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">MMs absorb every move. Market grinds slowly.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">MMs absorb every move. Market grinds slowly.</p>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent4);letter-spacing:2px;margin-bottom:12px">COVERED PUT PROGRAM</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent4);letter-spacing:2px;margin-bottom:12px">COVERED PUT PROGRAM</div>
         <div class="flow-row"><div class="flow-box gray">Institution sells puts</div><div class="flow-arrow">→</div><div class="flow-box blue">MM buys puts</div></div>
         <div class="flow-row"><div class="flow-box blue">MM Long Gamma</div><div class="flow-arrow">→</div><div class="flow-box blue">Dampens drops</div></div>
         <div class="flow-row"><div class="flow-box blue">VIX stays low</div><div class="flow-arrow">→</div><div class="flow-box blue">Drops cushioned</div></div>
-        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px">MMs buy every dip mechanically. Downside suppressed.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">MMs buy every dip mechanically. Downside suppressed.</p>
       </div>
     </div>
   </div>
@@ -982,7 +991,7 @@
   <p style="color:var(--muted);margin-bottom:28px">Exercise is not a surprise to MMs. It is the <strong style="color:var(--text)">finish line</strong> of a race they were running the entire time through delta hedging. By the time exercise happens, MMs are already covered.</p>
 
   <!-- MM SELLS SCENARIOS -->
-  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:16px;text-transform:uppercase">When MM Sells Options</div>
+  <div style="font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--negative);margin-bottom:16px;text-transform:uppercase">When MM Sells Options</div>
 
   <div class="two-col">
     <div class="card negative">
@@ -1020,7 +1029,7 @@
   <div class="highlight-red" style="margin-top:8px"><strong>Why MM buys above market on put exercise:</strong> MM is obligated to buy at the 5000 strike even though market is at 4600. That's $400 above market. But their short shares — held throughout the crash as delta hedge — already profited $400 per share on the way down. The exercise loss is perfectly offset by the hedge profit.</div>
 
   <!-- MM BUYS SCENARIOS -->
-  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:16px;margin-top:40px;text-transform:uppercase">When MM Buys Options</div>
+  <div style="font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--positive);margin-bottom:16px;margin-top:40px;text-transform:uppercase">When MM Buys Options</div>
 
   <div class="two-col">
     <div class="card positive">
@@ -1079,7 +1088,7 @@
   <div class="card neutral">
     <h3>What Skew Is</h3>
     <p style="font-size:13px;margin-bottom:16px">In theory — a call and put at the same distance from current price should cost the same. In reality, puts are always more expensive. That difference is <strong style="color:var(--accent3)">Skew.</strong></p>
-    <div style="background:var(--surface);border-radius:3px;padding:20px;font-family:'DM Mono',monospace;font-size:12px;margin-top:8px">
+    <div style="background:var(--surface);border-radius:3px;padding:20px;font-family:var(--mono);font-size:12px;margin-top:8px">
       <div style="color:var(--muted);margin-bottom:12px">// Example — Index at 5000</div>
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <span style="color:var(--negative)">4800 Put (OTM) → IV: 22%</span>
@@ -1092,21 +1101,21 @@
 
   <!-- WHY PUTS MORE EXPENSIVE -->
   <div style="margin-top:24px">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Three reasons puts are more expensive</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Three reasons puts are more expensive</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">📥</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">DEMAND</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">DEMAND</div>
         <p style="font-size:13px;color:var(--muted)">Everyone wants crash protection. Funds, institutions, retail all buy puts as insurance. High demand = higher price.</p>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">⚡</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">CRASH ASYMMETRY</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">CRASH ASYMMETRY</div>
         <p style="font-size:13px;color:var(--muted)">Markets can drop 20% in days. They rarely rally 20% in days. Real asymmetry — options pricing reflects it.</p>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">💰</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">MM RISK PREMIUM</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--negative);letter-spacing:2px;margin-bottom:8px">MM RISK PREMIUM</div>
         <p style="font-size:13px;color:var(--muted)">MMs know selling puts is dangerous — crash risk, violent moves, negative gamma. They charge more to take that risk.</p>
       </div>
     </div>
@@ -1148,7 +1157,7 @@
 
   <!-- SKEW TYPES -->
   <div style="margin-top:32px">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Skew Types & What They Signal</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px">// Skew Types & What They Signal</div>
     <table class="data-table" style="margin:0">
       <tr><th>Skew Type</th><th>What it means</th><th>Signal</th><th>Gamma Environment</th></tr>
       <tr>
@@ -1187,8 +1196,8 @@
   <div class="highlight-red" style="margin-top:16px"><strong>Skew connects to Vanna:</strong> When VIX spikes, IV rises across all strikes — but it rises MORE on puts than calls because of skew. This means Vanna flows hit harder on the put side. Asymmetric re-hedging. Crashes get amplified more than rallies get supported.</div>
 
   <div style="margin-top:16px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:4px">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:2px;margin-bottom:12px">QUICK RULE</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;font-family:'DM Mono',monospace;font-size:11px;text-align:center">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:2px;margin-bottom:12px">QUICK RULE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;font-family:var(--mono);font-size:11px;text-align:center">
       <div style="padding:10px;border:1px solid rgba(255,60,110,0.3);border-radius:3px;color:var(--negative)">High Put Skew<br>= Fear</div>
       <div style="padding:10px;border:1px solid rgba(0,255,157,0.3);border-radius:3px;color:var(--positive)">Flat Skew<br>= Calm</div>
       <div style="padding:10px;border:1px solid rgba(255,60,110,0.3);border-radius:3px;color:var(--accent3)">Skew Rising<br>= Fear Building</div>
@@ -1235,15 +1244,15 @@
   <!-- THREE LAYERS -->
   <div style="display:flex;flex-direction:column;gap:0;margin-bottom:32px">
     <div style="background:rgba(255,60,110,0.08);border:1px solid rgba(255,60,110,0.3);border-radius:4px 4px 0 0;padding:20px 24px;border-bottom:none">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--negative);letter-spacing:3px;margin-bottom:8px">LAYER 1 — GAMMA MECHANICS</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--negative);letter-spacing:3px;margin-bottom:8px">LAYER 1 — GAMMA MECHANICS</div>
       <p style="font-size:13px">Gamma flip triggers → MMs short gamma → selling into every down tick → self-reinforcing mechanical cascade. No emotion. Pure mathematics.</p>
     </div>
     <div style="background:rgba(255,60,110,0.05);border:1px solid rgba(255,60,110,0.2);padding:20px 24px;border-bottom:none">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:3px;margin-bottom:8px">LAYER 2 — INSTITUTIONAL HEDGING</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:3px;margin-bottom:8px">LAYER 2 — INSTITUTIONAL HEDGING</div>
       <p style="font-size:13px">Funds see losses → buy puts for protection → MMs short those puts → negative gamma on downside → more mechanical shorting. Institutions are rational but their hedging adds fuel.</p>
     </div>
     <div style="background:rgba(255,60,110,0.03);border:1px solid rgba(255,60,110,0.15);border-radius:0 0 4px 4px;padding:20px 24px">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:8px">LAYER 3 — RETAIL PANIC</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:8px">LAYER 3 — RETAIL PANIC</div>
       <p style="font-size:13px">Retail sees red screens → panic sell shares AND buy puts → more downward pressure + more negative gamma → more selling → more panic. Emotion amplifies the mechanical.</p>
     </div>
   </div>
@@ -1288,13 +1297,17 @@
 
 <div class="section-sep"></div>
 
-<footer>OPTIONS GAMMA — MARKET MAKER PLAYBOOK V3 &nbsp;|&nbsp; BUILT FOR LEARNING</footer>
+<footer>
+  <p>Options Gamma · Market Maker Playbook V3<br>Personal study notes · <a href="absorption.html">Absorption</a> · <a href="footprint.html">Footprint</a></p>
+</footer>
+</main>
 
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="shared.js"></script>
 <script>
-  window.addEventListener('scroll',()=>{
-    const pct=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
-    document.getElementById('progress').style.width=pct+'%';
-  });
   const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
   document.querySelectorAll('.section').forEach(s=>obs.observe(s));
 
