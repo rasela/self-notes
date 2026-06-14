@@ -92,7 +92,6 @@ h1 em{font-style:italic;color:var(--gold)}
 /* viz */
 .viz-wrap{margin-bottom:14px;position:relative}
 canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);display:block}
-.viz-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:11px;color:var(--tm);letter-spacing:.08em;pointer-events:none;transition:opacity .3s}
 
 /* mode tabs */
 .mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:16px}
@@ -319,7 +318,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
         <div class="viz-wrap">
           <canvas id="viz"></canvas>
-          <div class="viz-idle" id="viz-idle">— press start to begin —</div>
         </div>
 
         <!-- ════ CARRIER — shared across Manual + Journey ════ -->
@@ -502,7 +500,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
         <p>In <strong>Manual</strong> mode you pick a single state and a <strong>duration</strong> (5 min – 3 hr, in 5-minute steps via the stepper). The session plays at that fixed beat and ends itself with a gentle fade — no need to come back and stop it.</p>
         <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
-        <p>This is the <strong>offline build.</strong> Instead of generating the tones live, it <strong>renders the entire session</strong> — every stage glide and the final fade — into a single audio file the moment you press Start (you'll see a brief <strong>"Preparing…"</strong>). That file plays through an ordinary media element, so the phone keeps it alive with the <strong>screen off</strong> and shows <strong>lock-screen controls</strong> — no wake lock, no display drain. Because the audio is baked up front, changing the beat, carrier or journey <strong>re-renders</strong>, so set things up before you press Start. Use your phone's hardware buttons for volume.</p>
+        <p>Set the carrier, beat and duration (or build a journey) before you press Start — you'll see a brief <strong>"Preparing…"</strong>, then it plays. Use your phone's hardware buttons for volume.</p>
       </div>
     </article>
 
@@ -967,7 +965,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('play-btn').classList.add('playing');
     document.getElementById('play-icon').innerHTML = '<span class="pulse-dot"></span>';
     document.getElementById('play-label').textContent = stopLabel;
-    document.getElementById('viz-idle').style.opacity = '0';
     document.getElementById('timer').classList.add('running');
     timerInterval = setInterval(updateTimer, 1000); updateTimer();
     drawViz();
@@ -1058,7 +1055,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 14,8 4,14"/></svg>';
     document.getElementById('play-label').textContent =
       mode === 'journey' ? 'Start Journey' : 'Start Session';
-    document.getElementById('viz-idle').style.opacity = '1';
     document.getElementById('timer').classList.remove('running');
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('journey-live').classList.remove('show');
