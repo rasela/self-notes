@@ -90,8 +90,6 @@ h1 em{font-style:italic;color:var(--gold)}
 .beat-pill{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--acc);background:var(--accdim);border:1px solid var(--bora);border-radius:99px;padding:4px 10px;white-space:nowrap}
 
 /* viz */
-.viz-wrap{margin-bottom:14px;position:relative}
-canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);display:block}
 
 /* mode tabs */
 .mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:16px}
@@ -263,8 +261,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   <p class="toc-label">Contents</p>
   <ul class="toc-list">
     <li><a href="#player" data-a="player"><span class="toc-tag">◉</span>Session Player</a></li>
-    <li><a href="#reference" data-a="reference"><span class="toc-tag">☷</span>Focus Reference</a></li>
-    <li><a href="#how" data-a="how"><span class="toc-tag">✦</span>How It Works</a></li>
   </ul>
   <p class="toc-back"><a href="index.html">← All notes</a></p>
 </aside>
@@ -314,10 +310,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
             <div class="freq-label">Right ear</div>
             <div class="freq-val"><span id="s-right">208</span><span class="freq-unit">Hz</span></div>
           </div>
-        </div>
-
-        <div class="viz-wrap">
-          <canvas id="viz"></canvas>
         </div>
 
         <!-- ════ CARRIER — shared across Manual + Journey ════ -->
@@ -466,44 +458,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       <div class="tip"><p><strong>Before a real session —</strong> run <strong>Test tone</strong> (a beep in the left ear, then the right) to confirm both channels, then <strong>Beat check</strong> (a strong 10 Hz throb at 300 Hz). If the beat check sounds like a steady tone with no pulsing, the output is mono or Bluetooth — go wired.</p></div>
     </article>
 
-    <div class="div"><div class="div-dot"></div></div>
-
-    <!-- ════════════ FOCUS REFERENCE ════════════ -->
-    <article id="reference" class="technique">
-      <div class="tech-head">
-        <h2 class="tech-title">Focus Level Reference</h2>
-        <span class="tech-abbr">What each preset is aiming at</span>
-      </div>
-      <div class="lvls">
-        <div class="lvl"><div><div class="lvl-tag">C-1</div><div class="lvl-hz">β 14 Hz</div></div><div class="lvl-b"><strong>Full Waking Consciousness</strong><p>Normal beta state — the starting point for every session. Left-brain-dominant everyday awareness.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 3</div><div class="lvl-hz">α 10 Hz</div></div><div class="lvl-b"><strong>Basic Sync</strong><p>The first signpost: the brain hemispheres synchronize and the signal becomes coherent. A gentle, settled alpha state.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 10</div><div class="lvl-hz">α–θ 8 Hz</div></div><div class="lvl-b"><strong>Mind Awake, Body Asleep</strong><p>The alpha–theta paradox state — mind fully alert while the body sleeps deeply. The foundation everything else is built on. See the <a href="focus-10.html" style="color:var(--acc);text-decoration:none">Focus 10 note</a>.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 12</div><div class="lvl-hz">θ 6 Hz</div></div><div class="lvl-b"><strong>Expanded Awareness</strong><p>Deep theta — problem solving, patterning, remote viewing, non-verbal communication. The workhorse state; answers arrive as symbols, images, or sudden knowing.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 15</div><div class="lvl-hz">θ–δ 2.5 Hz</div></div><div class="lvl-b"><strong>No Time</strong><p>Deep theta–delta — the state of "no time." Pure being, creation and manifestation work.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 21</div><div class="lvl-hz">θ–δ 1.5 Hz</div></div><div class="lvl-b"><strong>The Bridge</strong><p>The edge of time-space — the deepest state where mind-awake contact is still maintained, and the bridge to other energy systems. Phasing territory.</p></div></div>
-        <div class="lvl"><div><div class="lvl-tag">F 27</div><div class="lvl-hz">δ 0.5 Hz</div></div><div class="lvl-b"><strong>The Park · Reception Center</strong><p>Deepest delta preset — Focus 27 is The Park, the reception/healing area for transitioned consciousness (Focus 22–26 are the belief-system territories below it).</p></div></div>
-      </div>
-      <div class="note"><p><strong>About these numbers —</strong> there is no official single-beat value per focus level; the original audio layers several carrier/beat pairs at once. This ladder (14 → 0.5 Hz) is the common community approximation, kept here as-is for testing. Spectral analyses of the original tapes are usually cited around a <strong>~4 Hz beat on a ~100 Hz carrier</strong> for Focus 10 — that's what the 100 Hz carrier preset is for: same ladder, tape-style carrier.</p></div>
-    </article>
-
-    <div class="div"><div class="div-dot"></div></div>
-
-    <!-- ════════════ HOW IT WORKS ════════════ -->
-    <article id="how" class="technique">
-      <div class="tech-head">
-        <h2 class="tech-title">How It Works</h2>
-        <span class="tech-abbr">Why wired · why it plays with the screen off</span>
-      </div>
-      <div class="tech-body">
-        <p>A binaural beat doesn't exist in the audio at all. The left ear gets one pure tone (the <strong>carrier</strong>, e.g. 200 Hz) and the right ear gets a slightly different one (e.g. 208 Hz). Your brainstem combines them and perceives the <strong>difference</strong> — an 8 Hz pulse — which the brain tends to entrain toward (the frequency-following response).</p>
-        <p>That's why the player hard-pans each oscillator fully left and right, and why <strong>wired stereo headphones</strong> matter: Bluetooth codecs can down-mix or desync the channels, at which point both ears hear both tones and the beat collapses into ordinary audio.</p>
-        <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
-        <p>In <strong>Manual</strong> mode you pick a single state and a <strong>duration</strong> (5 min – 3 hr, in 5-minute steps via the stepper). The session plays at that fixed beat and ends itself with a gentle fade — no need to come back and stop it.</p>
-        <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
-        <p>Set the carrier, beat and duration (or build a journey) before you press Start — you'll see a brief <strong>"Preparing…"</strong>, then it plays. Use your phone's hardware buttons for volume.</p>
-      </div>
-    </article>
-
   </div><!-- /wrap -->
 
   <footer>
@@ -545,7 +499,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   let manualMins    = 30;         /* manual session length (min) — set via the stepper */
   let timerInterval = null;
   let journeyInterval = null;
-  let animFrame     = null;
 
   /* ── mode / journey state ── */
   let editorStages  = [];         /* [{label, beat, mins}] — the journey being built */
@@ -967,7 +920,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('play-label').textContent = stopLabel;
     document.getElementById('timer').classList.add('running');
     timerInterval = setInterval(updateTimer, 1000); updateTimer();
-    drawViz();
     setBgStatus(true);
   }
 
@@ -1045,7 +997,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     clearInterval(timerInterval);
     clearInterval(journeyInterval);
     journeyInterval = null;
-    cancelAnimationFrame(animFrame);
     playing = false;
     lockSetup(false);
     clearMediaSession();
@@ -1058,7 +1009,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('timer').classList.remove('running');
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('journey-live').classList.remove('show');
-    clearCanvas();
 
     setBgStatus(false);
     setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
@@ -1070,56 +1020,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
     document.getElementById('timer').textContent = m + ':' + s;
-  }
-
-  /* ── synthetic visualizer (no analyser — must not route the element through
-     a suspendable AudioContext, or background playback would stop) ── */
-  function clearCanvas() {
-    const c = document.getElementById('viz');
-    c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  }
-
-  function vizBeat() {
-    if (mode === 'journey' && journeyStages.length)
-      return journeyStages[Math.min(stageIndex, journeyStages.length - 1)].beat;
-    return getBeat();
-  }
-
-  function drawViz() {
-    const c = document.getElementById('viz');
-    c.width  = c.offsetWidth  * devicePixelRatio;
-    c.height = c.offsetHeight * devicePixelRatio;
-    const cx = c.getContext('2d');
-    cx.scale(devicePixelRatio, devicePixelRatio);
-    const W = c.offsetWidth, H = c.offsetHeight;
-    const t0 = performance.now();
-
-    const grad = cx.createLinearGradient(0, 0, W, 0);
-    grad.addColorStop(0,   'rgba(167,139,250,0.4)');
-    grad.addColorStop(0.5, 'rgba(201,169,110,0.9)');
-    grad.addColorStop(1,   'rgba(167,139,250,0.4)');
-
-    function frame() {
-      animFrame = requestAnimationFrame(frame);
-      const t = (performance.now() - t0) / 1000;
-      const beat = vizBeat();
-      const env = 0.32 + 0.68 * Math.abs(Math.sin(Math.PI * beat * t)); /* amplitude pulses at the beat */
-      const cycles = 14;
-      cx.clearRect(0, 0, W, H);
-
-      const drawLine = (lw, st) => {
-        cx.beginPath(); cx.lineWidth = lw; cx.strokeStyle = st;
-        for (let x = 0; x <= W; x += 2) {
-          const ph = (x / W) * cycles * 2 * Math.PI + t * 6;
-          const y = H / 2 + Math.sin(ph) * (H / 2 - 3) * env;
-          x === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
-        }
-        cx.stroke();
-      };
-      drawLine(1.5, grad);
-      drawLine(5,   'rgba(167,139,250,0.07)');
-    }
-    frame();
   }
 
   /* ════════════════════════════════════════════════════════════════
