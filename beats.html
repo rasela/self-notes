@@ -283,7 +283,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   <div class="warn">
     <div class="warn-inner">
-      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). This is the <strong>offline build</strong>: it renders the whole session to an audio file the moment you press Start, so you can <strong>lock the screen</strong> and it keeps playing — lock-screen play/pause works too, and the battery isn't drained by the display. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
+      <p><strong>Use wired stereo headphones</strong> — Bluetooth can collapse the channels and kill the beat. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
     </div>
   </div>
 
@@ -361,25 +361,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <!-- ════ MANUAL MODE ════ -->
         <div id="manual-mode">
           <div class="field-label">State</div>
-          <select class="state-select" id="state" onchange="applyState()" aria-label="Select target state">
-            <optgroup label="Focus Levels">
-              <option value="c1">C-1 · Full Waking Consciousness — β 14 Hz</option>
-              <option value="f3">Focus 3 · Basic Sync — α 10 Hz</option>
-              <option value="f10" selected>Focus 10 · Mind Awake, Body Asleep — 8 Hz</option>
-              <option value="f12">Focus 12 · Expanded Awareness — θ 6 Hz</option>
-              <option value="f15">Focus 15 · No Time — 2.5 Hz</option>
-              <option value="f21">Focus 21 · The Bridge — 1.5 Hz</option>
-              <option value="f27">Focus 27 · The Park — δ 0.5 Hz</option>
-            </optgroup>
-            <optgroup label="Brainwave Bands">
-              <option value="delta">δ Delta — 0.5 Hz · deep sleep</option>
-              <option value="theta">θ Theta — 4 Hz · hypnagogia / meditation</option>
-              <option value="alpha">α Alpha — 10 Hz · relaxed awareness</option>
-              <option value="beta">β Beta — 20 Hz · alert focus</option>
-              <option value="gamma">γ Gamma — 40 Hz · high cognition</option>
-            </optgroup>
-            <option value="custom" hidden>Custom — fine-tuned</option>
-          </select>
+          <select class="state-select" id="state" onchange="applyState()" aria-label="Select target state"><!-- populated by JS from FOCUS_OPTIONS --></select>
 
           <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.</div>
 
@@ -530,19 +512,21 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
      STATE PRESETS — beat-frequency ladder is a community
      approximation (see the reference note), kept as-is for testing.
      ════════════════════════════════════════════════════════════════ */
-  const STATES = {
-    c1:    { beat: 14,  desc: 'C-1 · Full Waking Consciousness — normal beta. The starting point for every session; left-brain-dominant everyday awareness.' },
-    f3:    { beat: 10,  desc: 'Focus 3 · Basic Sync — gentle alpha. Brain hemispheres synchronize and the signal becomes coherent. The first signpost.' },
-    f10:   { beat: 8,   desc: 'Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.' },
-    f12:   { beat: 6,   desc: 'Focus 12 · Expanded Awareness — deep theta. Problem solving, patterning, remote viewing, NVC. The workhorse state; answers arrive as symbols, images, or sudden knowing.' },
-    f15:   { beat: 2.5, desc: 'Focus 15 · No Time — deep theta–delta. The state of "no time": pure being, creation and manifestation work.' },
-    f21:   { beat: 1.5, desc: 'Focus 21 · The Bridge — edge of time-space, the deepest mind-awake state and the bridge to other energy systems. Phasing territory.' },
-    f27:   { beat: 0.5, desc: 'Focus 27 · The Park — deepest delta preset. The reception/healing area for transitioned consciousness.' },
-    delta: { beat: 0.5, desc: 'Delta band · 0.5 Hz beat — deep dreamless sleep territory.' },
-    theta: { beat: 4,   desc: 'Theta band · 4 Hz beat — hypnagogia, deep meditation, memory consolidation.' },
-    alpha: { beat: 10,  desc: 'Alpha band · 10 Hz beat — relaxed, eyes-closed wakeful awareness.' },
-    beta:  { beat: 20,  desc: 'Beta band · 20 Hz beat — alert, engaged waking focus.' },
-    gamma: { beat: 40,  desc: 'Gamma band · 40 Hz beat — high-frequency cognition and binding.' },
+  /* short descriptions for the states that have one (keyed by FOCUS_OPTIONS
+     label); anything else falls back to "<label> · <beat> Hz beat". */
+  const STATE_DESC = {
+    'C-1':      'Full Waking Consciousness — normal beta; the everyday starting point.',
+    'Focus 3':  'Basic Sync — gentle alpha; the hemispheres synchronize.',
+    'Focus 10': 'Mind Awake, Body Asleep — the alpha–theta paradox state; the foundation.',
+    'Focus 12': 'Expanded Awareness — deep theta; the workhorse state.',
+    'Focus 15': 'No Time — deep theta–delta; pure being and manifestation.',
+    'Focus 21': 'The Bridge — edge of time-space; phasing territory.',
+    'Focus 27': 'The Park — deepest delta; the reception/healing area.',
+    'Delta':    'Deep dreamless sleep territory.',
+    'Theta':    'Hypnagogia, deep meditation, memory consolidation.',
+    'Alpha':    'Relaxed, eyes-closed wakeful awareness.',
+    'Beta':     'Alert, engaged waking focus.',
+    'Gamma':    'High-frequency cognition and binding.',
   };
 
   /* ── helpers ── */
@@ -561,12 +545,25 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
        beat needs a restart, so we only update the readouts here. */
   }
 
+  /* build the manual State dropdown from the same FOCUS_OPTIONS list the
+     journey stage selects use, so both modes offer identical choices. */
+  function populateManualStates() {
+    const sel = document.getElementById('state');
+    sel.innerHTML = FOCUS_OPTIONS.map(o =>
+      '<option value="' + o.label + '">' + o.label + '</option>').join('') +
+      '<option value="custom" hidden>Custom — fine-tuned</option>';
+    sel.value = 'Focus 10';
+    applyState();
+  }
+
   function applyState() {
-    const key = document.getElementById('state').value;
-    const st = STATES[key];
-    if (!st) return;
-    document.getElementById('beat').value = st.beat;
-    document.getElementById('state-desc').textContent = st.desc;
+    const label = document.getElementById('state').value;
+    if (label === 'custom') return;
+    const beat = beatFor(label);
+    document.getElementById('beat').value = beat;
+    document.getElementById('state-desc').textContent = STATE_DESC[label]
+      ? label + ' · ' + STATE_DESC[label]
+      : label + ' · ' + beat + ' Hz beat';
     updateDisplay();
   }
 
@@ -1472,6 +1469,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   renderJourneyPresets();
   loadJourneyPreset('obe-prep');   /* seed the editor with a sensible default */
+  populateManualStates();
   renderDuration();
   updateDisplay();
   setBgStatus(false);
