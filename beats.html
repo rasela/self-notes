@@ -894,6 +894,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     setPreparing(false);
     uiStart('Stop Journey');
     setBeatDisplay(journeyStages[0].beat);
+    /* swap the journey editor out for the live readout so the card height
+       stays put — the editor is locked while playing anyway */
+    document.getElementById('journey-mode').style.display = 'none';
     document.getElementById('journey-live').classList.add('show');
     renderStageHeader();
     journeyInterval = setInterval(journeyDisplayTick, 250);
@@ -924,6 +927,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('timer').classList.remove('running');
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('journey-live').classList.remove('show');
+    /* restore the editor that was swapped out on start (journey mode only) */
+    document.getElementById('journey-mode').style.display = mode === 'journey' ? '' : 'none';
 
     setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
   }
