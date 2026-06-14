@@ -527,7 +527,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   const GLIDE_SEC    = 15;        /* beat-frequency crossfade duration between stages */
   const END_FADE_SEC = 25;        /* gentle fade-out to silence at journey end */
-  const RENDER_SR    = 8000;      /* render rate — far above Nyquist for ≤~310 Hz tones */
+  const RENDER_SR    = 8000;      /* preferred render rate — far above Nyquist for ≤~310 Hz tones */
+  let   renderRate   = RENDER_SR; /* actual rate the device accepts (set by probeRenderRate at init) */
   const MANUAL_LOOP  = 10;        /* manual loop length (s); even → seamless on the 0.5-Hz beat grid */
 
   /* ── media playback ── */
@@ -632,32 +633,29 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* ════════════════════════════════════════════════════════════════
      WAV ENCODING  (16-bit PCM, little-endian)
      ════════════════════════════════════════════════════════════════ */
-  function encodeWAV(channels /* [Float32Array,…] */, sampleRate) {
-    const numCh = channels.length;
-    const n = channels[0].length;
-    const bytesPerSample = 2;
-    const blockAlign = numCh * bytesPerSample;
-    const dataLen = n * blockAlign;
-    const buf = new ArrayBuffer(44 + dataLen);
-    const dv = new DataView(buf);
+  function pcm16(s) { s = s < -1 ? -1 : s > 1 ? 1 : s; return (s < 0 ? s * 0x8000 : s * 0x7FFF) | 0; }
+
+  function writeWavHeader(dv, sampleRate, numCh, frames) {
+    const blockAlign = numCh * 2;
+    const dataLen = frames * blockAlign;
     let p = 0;
     const ws  = s => { for (let i = 0; i < s.length; i++) dv.setUint8(p++, s.charCodeAt(i)); };
     const u32 = v => { dv.setUint32(p, v, true); p += 4; };
     const u16 = v => { dv.setUint16(p, v, true); p += 2; };
-
     ws('RIFF'); u32(36 + dataLen); ws('WAVE');
     ws('fmt '); u32(16); u16(1); u16(numCh); u32(sampleRate);
     u32(sampleRate * blockAlign); u16(blockAlign); u16(16);
     ws('data'); u32(dataLen);
+  }
 
-    for (let i = 0; i < n; i++) {
-      for (let c = 0; c < numCh; c++) {
-        let s = channels[c][i];
-        s = s < -1 ? -1 : s > 1 ? 1 : s;
-        dv.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-        p += 2;
-      }
-    }
+  function encodeWAV(channels /* [Float32Array,…] */, sampleRate) {
+    const numCh = channels.length, n = channels[0].length;
+    const buf = new ArrayBuffer(44 + n * numCh * 2);
+    const dv = new DataView(buf);
+    writeWavHeader(dv, sampleRate, numCh, n);
+    let p = 44;
+    for (let i = 0; i < n; i++)
+      for (let c = 0; c < numCh; c++) { dv.setInt16(p, pcm16(channels[c][i]), true); p += 2; }
     return new Blob([buf], { type: 'audio/wav' });
   }
 
@@ -669,17 +667,24 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   /* ════════════════════════════════════════════════════════════════
      OFFLINE RENDER
+
+     WebKit can reject a too-low OfflineAudioContext sample rate AND a
+     too-large single render. So we (1) probe once for the lowest rate the
+     device actually accepts, and (2) render journeys in bounded chunks
+     streamed straight into the WAV buffer — peak memory stays ≈ the size of
+     the final file (~100 MB even for an hour), never the whole float render.
      ════════════════════════════════════════════════════════════════ */
+  function probeRenderRate() {
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    for (const r of [8000, 11025, 16000, 22050, 24000, 44100]) {
+      try { new OAC(1, 1, r); return r; } catch (e) { /* try next */ }
+    }
+    return 44100;
+  }
+
   function makeOffline(seconds) {
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-    try {
-      return new OAC(2, Math.ceil(RENDER_SR * seconds), RENDER_SR);
-    } catch (e) {
-      /* some WebKit builds reject low sample rates — fall back to 44.1k.
-         (WAV header is written from the rendered buffer's own rate, so the
-         file is always correct regardless of what we end up with.) */
-      return new OAC(2, Math.ceil(44100 * seconds), 44100);
-    }
+    return new OAC(2, Math.max(1, Math.ceil(renderRate * seconds)), renderRate);
   }
 
   /* hard-panned L/R sine pair → master gain → destination */
@@ -707,36 +712,108 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return bufferToWavUrl(buf);
   }
 
-  /* Journey: bake every stage + 15 s glides + optional 25 s end fade into one
-     continuous file (mirrors the live glideBeat / endJourney scheduling). */
-  async function renderJourney(stages, base, fadeOut) {
-    const stageSec = stages.reduce((s, st) => s + st.mins * 60, 0);
-    const totalSec = stageSec + (fadeOut ? END_FADE_SEC : 0);
-    const oac = makeOffline(totalSec);
-    const { L, R, g } = buildPair(oac, base);
+  /* ── journey schedule maths (absolute time → value) ── */
+  function beatAt(stages, absT) {
+    let t = 0;
+    for (let i = 0; i < stages.length; i++) {
+      const end = t + stages[i].mins * 60;
+      if (absT < end || i === stages.length - 1) {
+        if (i > 0 && absT < t + GLIDE_SEC) {
+          const a = Math.max(0, Math.min(1, (absT - t) / GLIDE_SEC));
+          return stages[i - 1].beat + (stages[i].beat - stages[i - 1].beat) * a;
+        }
+        return stages[i].beat;
+      }
+      t = end;
+    }
+    return stages[stages.length - 1].beat;
+  }
 
-    /* beat schedule on the right ear */
-    R.frequency.setValueAtTime(base + stages[0].beat, 0);
+  function gainAt(absT, stageSec, fadeOut) {
+    if (absT < 0.4) return Math.max(0.0001, absT / 0.4);          /* fade-in */
+    if (fadeOut && absT >= stageSec)
+      return Math.max(0.0001, 1 - Math.min(1, (absT - stageSec) / END_FADE_SEC));
+    return 1;
+  }
+
+  /* schedule the right-ear frequency / master gain for ONE chunk window
+     [w0,w1] (local times are absolute − w0). */
+  function scheduleChunk(R, g, base, stages, stageSec, fadeOut, w0, w1) {
+    R.setValueAtTime(base + beatAt(stages, w0), 0);
     let t = 0;
     for (let i = 0; i < stages.length; i++) {
       if (i > 0) {
-        R.frequency.setValueAtTime(base + stages[i - 1].beat, t);
-        R.frequency.linearRampToValueAtTime(base + stages[i].beat, t + GLIDE_SEC);
+        const gS = t, gE = t + GLIDE_SEC;
+        if (gE > w0 && gS < w1) {
+          const ls = Math.max(0, gS - w0);
+          R.setValueAtTime(base + beatAt(stages, w0 + ls), ls);
+          const le = Math.min(w1 - w0, gE - w0);
+          R.linearRampToValueAtTime(base + beatAt(stages, w0 + le), le);
+        }
       }
       t += stages[i].mins * 60;
     }
 
-    /* gain: tiny fade-in to avoid a click, hold, optional gentle fade-out */
-    g.gain.setValueAtTime(0.0001, 0);
-    g.gain.linearRampToValueAtTime(1, 0.4);
+    g.setValueAtTime(gainAt(w0, stageSec, fadeOut), 0);
+    if (w0 < 0.4) g.linearRampToValueAtTime(1, Math.min(w1 - w0, 0.4 - w0));
     if (fadeOut) {
-      g.gain.setValueAtTime(1, stageSec);
-      g.gain.linearRampToValueAtTime(0.0001, stageSec + END_FADE_SEC);
+      const fS = stageSec, fE = stageSec + END_FADE_SEC;
+      if (fE > w0 && fS < w1) {
+        const ls = Math.max(0, fS - w0);
+        g.setValueAtTime(gainAt(w0 + ls, stageSec, fadeOut), ls);
+        const le = Math.min(w1 - w0, fE - w0);
+        g.linearRampToValueAtTime(Math.max(0.0001, gainAt(w0 + le, stageSec, fadeOut)), le);
+      }
     }
+  }
 
-    L.start(0); R.start(0);
-    const buf = await oac.startRendering();
-    return bufferToWavUrl(buf);
+  /* Journey: bake every stage + 15 s glides + optional 25 s end fade into one
+     continuous file (mirrors the live glideBeat / endJourney behaviour),
+     rendered in chunks with equal-power crossfaded joins. */
+  async function renderJourney(stages, base, fadeOut) {
+    const sr = renderRate;
+    const stageSec = stages.reduce((s, st) => s + st.mins * 60, 0);
+    const totalSec = stageSec + (fadeOut ? END_FADE_SEC : 0);
+    const frames = Math.ceil(totalSec * sr);
+    const xf = Math.max(1, Math.round(0.06 * sr));   /* crossfade overlap */
+    const chunkFrames = Math.round(60 * sr);          /* ≤ ~4 MB render per chunk */
+
+    const ab = new ArrayBuffer(44 + frames * 4);      /* stereo 16-bit */
+    const dv = new DataView(ab);
+    writeWavHeader(dv, sr, 2, frames);
+
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+
+    for (let cs = 0; cs < frames; cs += chunkFrames) {
+      const ownEnd     = Math.min(frames, cs + chunkFrames);
+      const renderStart = cs > 0 ? cs - xf : 0;       /* lead-in overlap */
+      const renderEnd   = ownEnd;
+      const len = renderEnd - renderStart;
+      const w0 = renderStart / sr, w1 = renderEnd / sr;
+
+      const oac = new OAC(2, len, sr);
+      const { L, R, g } = buildPair(oac, base);
+      scheduleChunk(R.frequency, g.gain, base, stages, stageSec, fadeOut, w0, w1);
+      L.start(0); R.start(0);
+      const buf = await oac.startRendering();
+      const cl = buf.getChannelData(0), cr = buf.getChannelData(1);
+
+      for (let i = 0; i < len; i++) {
+        const gi = renderStart + i;
+        if (gi >= frames) break;
+        let l = cl[i], r = cr[i];
+        if (cs > 0 && i < xf) {                        /* blend with prev chunk's tail */
+          const a = i / xf, cf = Math.cos(a * Math.PI / 2), sf = Math.sin(a * Math.PI / 2);
+          const q = 44 + gi * 4;
+          l = (dv.getInt16(q,     true) / 0x8000) * cf + l * sf;
+          r = (dv.getInt16(q + 2, true) / 0x8000) * cf + r * sf;
+        }
+        const q = 44 + gi * 4;
+        dv.setInt16(q,     pcm16(l), true);
+        dv.setInt16(q + 2, pcm16(r), true);
+      }
+    }
+    return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
   }
 
   /* ════════════════════════════════════════════════════════════════
@@ -829,6 +906,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       player.loop = true; player.volume = vol;
       await player.play();
     } catch (err) {
+      console.error('[beats-offline] manual start failed', err);
       setPreparing(false);
       document.getElementById('play-label').textContent = 'Start Session';
       setAudioStatus(false, 'Could not start playback (' + (err && err.message || err) + '). Tap Start again.');
@@ -864,6 +942,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       player.loop = false; player.volume = vol;
       await player.play();
     } catch (err) {
+      console.error('[beats-offline] journey start failed', err);
       setPreparing(false);
       document.getElementById('play-label').textContent = 'Start Journey';
       setAudioStatus(false, 'Could not start journey (' + (err && err.message || err) + '). Tap Start again.');
@@ -1408,6 +1487,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   player.addEventListener('ended', () => { if (playing) stopAudio(); });
   player.addEventListener('play',  () => { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; });
   player.addEventListener('pause', () => { if ('mediaSession' in navigator && playing) navigator.mediaSession.playbackState = 'paused'; });
+
+  /* pick the lowest OfflineAudioContext sample rate the device accepts, so
+     journey files stay small (and we never blow up on a rejected rate) */
+  renderRate = probeRenderRate();
+  console.log('[beats-offline] render rate =', renderRate, 'Hz');
 
   /* bless the media element on the first user interaction (iOS gesture rule) */
   document.addEventListener('pointerdown', unlockPlayer, { once: true });
