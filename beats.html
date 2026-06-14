@@ -31,17 +31,10 @@
 
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
-/* hero */
-.hero{padding:32px 16px 28px;max-width:680px;margin:0 auto;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:400px;height:400px;background:radial-gradient(ellipse,rgba(167,139,250,.06) 0%,transparent 70%);pointer-events:none}
-.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
-h1{font-family:var(--serif);font-size:clamp(32px,9vw,58px);font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+/* compact app header */
+.hero{padding:22px 16px 14px;max-width:680px;margin:0 auto}
+h1{font-family:var(--serif);font-size:clamp(24px,6vw,34px);font-weight:600;line-height:1.1;letter-spacing:-.01em}
 h1 em{font-style:italic;color:var(--gold)}
-.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:20px}
-.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
-.badge{font-family:var(--sans);font-size:10px;letter-spacing:.08em;padding:6px 11px;border:1px solid var(--acc);border-radius:2px;color:var(--acc);background:var(--accdim)}
-.arrow{color:var(--tm);font-size:12px}
 
 /* warn banner */
 .warn{max-width:680px;margin:0 auto 0;padding:0 16px 24px}
@@ -55,25 +48,11 @@ h1 em{font-style:italic;color:var(--gold)}
 /* technique */
 .technique{margin-bottom:44px;animation:fu .5s ease both}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
-.tech-title{font-family:var(--serif);font-size:clamp(22px,7vw,32px);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:4px}
-.tech-abbr{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
-.tech-body p{font-family:var(--serif);font-size:clamp(16px,4.5vw,18px);line-height:1.85;color:#c8c6d4;margin-bottom:16px}
-.tech-body p strong{color:#eceaf5;font-weight:600}
-.tech-body p:last-child{margin-bottom:0}
 
-/* tip / note */
+/* tip */
 .tip{background:var(--bgc);border:1px solid var(--border);border-top:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
 .tip p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
 .tip p strong{color:var(--acc) !important;font-weight:600}
-.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
-.note p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
-.note p strong{color:var(--gold) !important}
-
-/* divider */
-.div{display:flex;align-items:center;gap:14px;margin:8px 0 44px}
-.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
-.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.4}
 
 /* ════════ PLAYER ════════ */
 .player{background:var(--bgc);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
@@ -173,14 +152,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .bt-warning.show{display:flex}
 .bt-warning svg{flex-shrink:0;margin-top:1px}
 
-/* timer + background status */
+/* timer */
 .timer-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
 .timer-label{font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm)}
 .timer-val{font-family:var(--mono);font-size:13px;color:var(--ts)}
 .timer-val.running{color:var(--green)}
-.wl-line{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--sans);font-size:10px;letter-spacing:.06em;color:var(--tm);min-height:16px}
-.wl-dot{width:6px;height:6px;border-radius:50%;background:var(--tm);flex-shrink:0;transition:background .3s}
-.wl-dot.active{background:var(--green);box-shadow:0 0 6px var(--green)}
 
 /* ════════ JOURNEY ════════ */
 .journey-live{display:none;margin-bottom:16px;padding:14px;background:var(--bg2);border:1px solid var(--bora);border-radius:8px}
@@ -222,16 +198,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .fadeout-toggle input{width:16px;height:16px;accent-color:var(--acc);cursor:pointer}
 .journey-total{font-family:var(--mono);font-size:11px;color:var(--tm);letter-spacing:.04em;text-align:right}
 
-/* ════════ FOCUS REFERENCE ════════ */
-.lvls{display:flex;flex-direction:column;gap:10px;margin:16px 0}
-.lvl{display:grid;grid-template-columns:64px 1fr;gap:12px;background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:13px 14px}
-.lvl-tag{font-family:var(--mono);font-size:11px;color:var(--acc);line-height:1.4}
-.lvl-hz{font-family:var(--mono);font-size:10px;color:var(--tm);margin-top:3px}
-.lvl-b strong{font-family:var(--serif);font-size:16px;color:var(--tp);display:block;margin-bottom:3px}
-.lvl-b p{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts)}
-
-/* back to top */
-
 @media(min-width:640px){
   .mode-tab:hover{color:var(--ts)}
   .cpill:hover{border-color:var(--bora);color:var(--acc)}
@@ -247,38 +213,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 </head>
 <body>
 
-<div id="prog"></div>
-
 <nav>
   <div class="brand">Practice <span>/ Binaural</span></div>
-  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
-    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
-  </button>
 </nav>
-
-<div class="overlay" id="overlay"></div>
-<aside class="drawer" id="drawer">
-  <p class="toc-label">Contents</p>
-  <ul class="toc-list">
-    <li><a href="#player" data-a="player"><span class="toc-tag">◉</span>Session Player</a></li>
-  </ul>
-  <p class="toc-back"><a href="index.html">← All notes</a></p>
-</aside>
 
 <main>
   <div class="hero">
-    <p class="eyebrow">Personal Build · Background Playback</p>
-    <h1>Binaural<br><em>Beats</em></h1>
-    <p class="subtitle">Offline Player — Plays With The Screen Off</p>
-    <div class="seq">
-      <span class="badge">Wired stereo</span>
-      <span class="arrow">→</span>
-      <span class="badge">Pick a state</span>
-      <span class="arrow">→</span>
-      <span class="badge">Play &amp; lock</span>
-      <span class="arrow">→</span>
-      <span class="badge">Drift</span>
-    </div>
+    <h1>Binaural <em>Beats</em></h1>
   </div>
 
   <div class="warn">
@@ -291,11 +232,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
     <!-- ════════════ PLAYER ════════════ -->
     <article id="player" class="technique">
-      <div class="tech-head">
-        <h2 class="tech-title">Session Player</h2>
-        <span class="tech-abbr">Offline render · screen-off background playback</span>
-      </div>
-
       <div class="player">
 
         <div class="freq-display">
@@ -430,10 +366,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
           <span class="timer-label">Session time</span>
           <span class="timer-val" id="timer">00:00</span>
         </div>
-        <div class="wl-line" id="wl-banner" aria-live="polite">
-          <span class="wl-dot" id="wl-dot"></span>
-          <span id="wl-text">Background audio: plays with the screen off · lock-screen controls</span>
-        </div>
 
       </div><!-- /player -->
 
@@ -447,10 +379,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   </footer>
 
 </main>
-
-<button id="btt" aria-label="Back to top">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-</button>
 
 <!-- hidden media element: the rendered session plays through here so iOS keeps
      it alive with the screen off + exposes lock-screen controls -->
@@ -509,8 +437,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   let beatCheckActive = false;
 
   /* ════════════════════════════════════════════════════════════════
-     STATE PRESETS — beat-frequency ladder is a community
-     approximation (see the reference note), kept as-is for testing.
+     STATE PRESETS — the beat-frequency ladder is a community
+     approximation, kept as-is for testing.
      ════════════════════════════════════════════════════════════════ */
   /* short descriptions for the states that have one (keyed by FOCUS_OPTIONS
      label); anything else falls back to "<label> · <beat> Hz beat". */
@@ -889,13 +817,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     if (on) document.getElementById('play-label').textContent = label || 'Preparing…';
   }
 
-  function setBgStatus(active) {
-    document.getElementById('wl-dot').classList.toggle('active', active);
-    document.getElementById('wl-text').textContent = active
-      ? 'Background audio: playing — safe to lock the screen'
-      : 'Background audio: plays with the screen off · lock-screen controls';
-  }
-
   /* ════════════════════════════════════════════════════════════════
      START / STOP
      ════════════════════════════════════════════════════════════════ */
@@ -917,14 +838,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('play-label').textContent = stopLabel;
     document.getElementById('timer').classList.add('running');
     timerInterval = setInterval(updateTimer, 1000); updateTimer();
-    setBgStatus(true);
   }
 
   async function startAudio() {
     const base = getBase(), beat = getBeat();
 
     setPreparing(true, 'Preparing…');
-    setAudioStatus(false, 'Rendering tones for background playback…');
+    setAudioStatus(false, 'Rendering tones…');
     try {
       const url = await renderManual(base, beat, manualMins);
       setPlayerSrc(url);
@@ -940,8 +860,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     setPreparing(false);
     uiStart('Stop Session');
     setMediaSession('Binaural · ' + base + '/' + (base + beat) + ' Hz (Δ ' + beat.toFixed(1) + ') · ' + manualMins + ' min');
-    setAudioStatus(true, 'Playing in background · left ' + base + ' Hz, right ' +
-      (base + beat) + ' Hz · ' + manualMins + ' min — the screen can be off.');
+    setAudioStatus(true, 'Playing · left ' + base + ' Hz, right ' +
+      (base + beat) + ' Hz · ' + manualMins + ' min.');
     checkBluetooth();
   }
 
@@ -958,8 +878,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     const base = getBase();
 
     setPreparing(true, 'Rendering journey…');
-    setAudioStatus(false, 'Baking the full journey (' + journeyStages.length +
-      ' stages) for hands-free background playback…');
+    setAudioStatus(false, 'Rendering journey (' + journeyStages.length + ' stages)…');
     try {
       const url = await renderJourney(journeyStages, base, journeyFadeOut);
       setPlayerSrc(url);
@@ -979,8 +898,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     renderStageHeader();
     journeyInterval = setInterval(journeyDisplayTick, 250);
     setMediaSession(activeJourneyName() + ' · journey');
-    setAudioStatus(true, 'Journey playing in background · ' + journeyStages.length +
-      ' stages · the screen can be off.');
+    setAudioStatus(true, 'Journey playing · ' + journeyStages.length + ' stages.');
     checkBluetooth();
   }
 
@@ -1007,7 +925,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('journey-live').classList.remove('show');
 
-    setBgStatus(false);
     setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
   }
 
@@ -1472,7 +1389,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   populateManualStates();
   renderDuration();
   updateDisplay();
-  setBgStatus(false);
 </script>
 </body>
 </html>
