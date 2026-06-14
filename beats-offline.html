@@ -667,12 +667,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return new Blob([buf], { type: 'audio/wav' });
   }
 
-  function bufferToWavUrl(audioBuf) {
-    const chs = [];
-    for (let c = 0; c < audioBuf.numberOfChannels; c++) chs.push(audioBuf.getChannelData(c));
-    return URL.createObjectURL(encodeWAV(chs, audioBuf.sampleRate));
-  }
-
   /* ════════════════════════════════════════════════════════════════
      OFFLINE RENDER
 
@@ -707,9 +701,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return { L, R, g };
   }
 
-  /* Manual: a short seamless loop. With an integer carrier and a 0.5-Hz beat
-     grid, an even loop length is a whole number of cycles for both ears, so it
-     wraps with no click and no crossfade needed. */
+  /* Manual: render a short seamless UNIT (integer cycles for both ears at an
+     even length → wraps with no click), then tile it into a long (~20 min) WAV.
+     iOS Safari inserts a brief silence each time a *short* clip loops, which is
+     heard as a pause every ~10 s; a long file pushes that boundary out to once
+     every 20 min (and player.loop=true still covers longer sessions). Tiling a
+     phase-aligned unit stays perfectly gapless — each copy joins like the loop
+     wrap, with none of the journey path's per-chunk crossfade. */
   async function renderManualLoop(base, beat) {
     const oac = makeOffline(MANUAL_LOOP);
     const { L, R, g } = buildPair(oac, base);
@@ -717,7 +715,26 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     g.gain.value = 1;                 /* loudness is set live via player.volume */
     L.start(0); R.start(0);
     const buf = await oac.startRendering();
-    return bufferToWavUrl(buf);
+
+    const sr = buf.sampleRate;
+    const cl = buf.getChannelData(0), cr = buf.getChannelData(1);
+    const unitFrames = buf.length;
+
+    /* one interleaved 16-bit copy of the seamless unit */
+    const unit = new Int16Array(unitFrames * 2);
+    for (let i = 0; i < unitFrames; i++) {
+      unit[i * 2]     = pcm16(cl[i]);
+      unit[i * 2 + 1] = pcm16(cr[i]);
+    }
+
+    const repeats = Math.max(1, Math.round((20 * 60) / MANUAL_LOOP));
+    const totalFrames = unitFrames * repeats;
+    const ab = new ArrayBuffer(44 + totalFrames * 4);
+    writeWavHeader(new DataView(ab), sr, 2, totalFrames);
+    const out = new Int16Array(ab, 44);          /* 44 is 2-byte aligned */
+    for (let r = 0; r < repeats; r++) out.set(unit, r * unit.length);
+
+    return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
   }
 
   /* ── journey schedule maths (absolute time → value) ── */
