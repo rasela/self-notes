@@ -39,8 +39,9 @@ When the user drops a markdown/source file and says "add this note":
    rendered from those data-attributes by the script at the bottom — don't write
    inner markup. `data-title` uses Bebas Neue so keep it short (≈2 words).
 3. **Add 1–2 redirects** to `_redirects` for nice short URLs.
-4. **Commit + push** (do this by default once the change is complete, unless
-   the user explicitly says not to).
+4. **Commit on a branch + open a PR** (do this by default once the change is
+   complete, unless the user explicitly says not to) — see the workflow under
+   *Conventions* below, and share the Netlify deploy preview link.
 
 Leave the user's original source file (e.g. in `~/Downloads`) untouched.
 
@@ -160,9 +161,18 @@ new components.
 
 # Conventions for working in this repo
 
-- **Commit + push by default** once a change is complete — don't wait to be
-  asked. Only skip when the user explicitly says not to commit/push. Co-author
-  trailer is added automatically.
+- **Branch → PR → Netlify preview is the default workflow.** Before starting
+  any change, cut a fresh branch off the **latest** `main`/`master`
+  (`git checkout main && git pull --ff-only`, then `git checkout -b <branch>`).
+  Never commit work directly to `main`. When the change is complete, push the
+  branch and **open a PR** (`gh pr create`) — do this by default, don't wait to
+  be asked. Co-author trailer is added automatically. Only skip the
+  branch/PR/push when the user explicitly says not to.
+- **Surface the Netlify Deploy Preview.** Netlify builds a deploy preview for
+  every PR. After opening the PR, share the preview URL so the change can be
+  reviewed live (it shows up as the Netlify "Deploy Preview" check / bot comment
+  on the PR — read it back with `gh pr view <n> --comments` or the checks list
+  once the build finishes, and paste the link in your reply).
 - The **shared shell** (`shared.css`/`shared.js`) holds only what is identical
   on every page — shell chrome and behaviour. Content components (`.tip`,
   `.steps`, heroes, page scripts) stay inline per note so each page can evolve
