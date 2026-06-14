@@ -122,6 +122,9 @@ canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border
 .dur-btn:disabled{opacity:.3;cursor:default}
 .dur-hint{font-family:var(--sans);font-size:10px;letter-spacing:.04em;color:var(--tm);margin:6px 0 16px;text-align:center}
 
+/* setup controls are locked while a session is playing — stop to change */
+.setup-locked{opacity:.4;pointer-events:none;filter:saturate(.55);transition:opacity .25s,filter .25s}
+
 /* carrier section (shared across modes) */
 #carrier-section{margin-bottom:16px}
 .carrier-now{margin-left:8px;font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--acc);text-transform:none}
@@ -963,8 +966,18 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* ════════════════════════════════════════════════════════════════
      START / STOP
      ════════════════════════════════════════════════════════════════ */
+  /* lock/unlock all setup inputs while a session is playing — the audio is a
+     baked file, so changing carrier / beat / duration / journey mid-play has no
+     effect. Stop to change. Volume + diagnostics stay live. */
+  function lockSetup(on) {
+    ['carrier-section', 'manual-mode', 'journey-mode'].forEach(id =>
+      document.getElementById(id).classList.toggle('setup-locked', on));
+    document.querySelector('.mode-tabs').classList.toggle('setup-locked', on);
+  }
+
   function uiStart(stopLabel) {
     playing = true;
+    lockSetup(true);
     document.getElementById('play-btn').classList.add('playing');
     document.getElementById('play-icon').innerHTML = '<span class="pulse-dot"></span>';
     document.getElementById('play-label').textContent = stopLabel;
@@ -1053,6 +1066,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     journeyInterval = null;
     cancelAnimationFrame(animFrame);
     playing = false;
+    lockSetup(false);
     clearMediaSession();
 
     document.getElementById('play-btn').classList.remove('playing');
