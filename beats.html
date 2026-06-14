@@ -681,82 +681,43 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return 1;
   }
 
-  /* schedule the right-ear frequency / master gain for ONE chunk window
-     [w0,w1] (local times are absolute − w0). */
-  function scheduleChunk(R, g, base, stages, stageSec, fadeOut, w0, w1) {
-    R.setValueAtTime(base + beatAt(stages, w0), 0);
-    let t = 0;
-    for (let i = 0; i < stages.length; i++) {
-      if (i > 0) {
-        const gS = t, gE = t + GLIDE_SEC;
-        if (gE > w0 && gS < w1) {
-          const ls = Math.max(0, gS - w0);
-          R.setValueAtTime(base + beatAt(stages, w0 + ls), ls);
-          const le = Math.min(w1 - w0, gE - w0);
-          R.linearRampToValueAtTime(base + beatAt(stages, w0 + le), le);
-        }
-      }
-      t += stages[i].mins * 60;
-    }
-
-    g.setValueAtTime(gainAt(w0, stageSec, fadeOut), 0);
-    if (w0 < 0.4) g.linearRampToValueAtTime(1, Math.min(w1 - w0, 0.4 - w0));
-    if (fadeOut) {
-      const fS = stageSec, fE = stageSec + END_FADE_SEC;
-      if (fE > w0 && fS < w1) {
-        const ls = Math.max(0, fS - w0);
-        g.setValueAtTime(gainAt(w0 + ls, stageSec, fadeOut), ls);
-        const le = Math.min(w1 - w0, fE - w0);
-        g.linearRampToValueAtTime(Math.max(0.0001, gainAt(w0 + le, stageSec, fadeOut)), le);
-      }
-    }
-  }
-
   /* Journey: bake every stage + 15 s glides + optional 25 s end fade into one
-     continuous file (mirrors the live glideBeat / endJourney behaviour),
-     rendered in chunks with equal-power crossfaded joins. */
+     continuous file (mirrors the live glideBeat / endJourney behaviour).
+
+     Synthesized directly by phase accumulation rather than rendered in
+     OfflineAudioContext chunks: each chunk built a fresh oscillator pair
+     (always phase 0), so every 60 s boundary jumped phase and the crossfade
+     join left an audible click / amplitude throb. Integrating the phase
+     sample-by-sample keeps both ears perfectly continuous across the whole
+     file — no boundaries, no crossfade, no clicks. We write straight into the
+     WAV Int16Array as we go, so peak memory stays ≈ the final file size. */
   async function renderJourney(stages, base, fadeOut) {
     const sr = renderRate;
     const stageSec = stages.reduce((s, st) => s + st.mins * 60, 0);
     const totalSec = stageSec + (fadeOut ? END_FADE_SEC : 0);
     const frames = Math.ceil(totalSec * sr);
-    const xf = Math.max(1, Math.round(0.06 * sr));   /* crossfade overlap */
-    const chunkFrames = Math.round(60 * sr);          /* ≤ ~4 MB render per chunk */
 
     const ab = new ArrayBuffer(44 + frames * 4);      /* stereo 16-bit */
     const dv = new DataView(ab);
     writeWavHeader(dv, sr, 2, frames);
+    const out = new Int16Array(ab, 44);
 
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const TWO_PI = Math.PI * 2;
+    const wL = TWO_PI * base / sr;                    /* left ear: constant carrier */
+    let phaseL = 0, phaseR = 0;
 
-    for (let cs = 0; cs < frames; cs += chunkFrames) {
-      const ownEnd     = Math.min(frames, cs + chunkFrames);
-      const renderStart = cs > 0 ? cs - xf : 0;       /* lead-in overlap */
-      const renderEnd   = ownEnd;
-      const len = renderEnd - renderStart;
-      const w0 = renderStart / sr, w1 = renderEnd / sr;
-
-      const oac = new OAC(2, len, sr);
-      const { L, R, g } = buildPair(oac, base);
-      scheduleChunk(R.frequency, g.gain, base, stages, stageSec, fadeOut, w0, w1);
-      L.start(0); R.start(0);
-      const buf = await oac.startRendering();
-      const cl = buf.getChannelData(0), cr = buf.getChannelData(1);
-
-      for (let i = 0; i < len; i++) {
-        const gi = renderStart + i;
-        if (gi >= frames) break;
-        let l = cl[i], r = cr[i];
-        if (cs > 0 && i < xf) {                        /* blend with prev chunk's tail */
-          const a = i / xf, cf = Math.cos(a * Math.PI / 2), sf = Math.sin(a * Math.PI / 2);
-          const q = 44 + gi * 4;
-          l = (dv.getInt16(q,     true) / 0x8000) * cf + l * sf;
-          r = (dv.getInt16(q + 2, true) / 0x8000) * cf + r * sf;
-        }
-        const q = 44 + gi * 4;
-        dv.setInt16(q,     pcm16(l), true);
-        dv.setInt16(q + 2, pcm16(r), true);
-      }
+    /* yield to the event loop periodically so a long render never blocks the UI */
+    const YIELD_EVERY = Math.round(5 * sr);
+    for (let i = 0; i < frames; i++) {
+      const t = i / sr;
+      const g = gainAt(t, stageSec, fadeOut);
+      out[i * 2]     = pcm16(Math.sin(phaseL) * g);
+      out[i * 2 + 1] = pcm16(Math.sin(phaseR) * g);
+      phaseL += wL;
+      phaseR += TWO_PI * (base + beatAt(stages, t)) / sr;
+      if (phaseL >= TWO_PI) phaseL -= TWO_PI;
+      if (phaseR >= TWO_PI) phaseR -= TWO_PI;
+      if (i % YIELD_EVERY === 0) await Promise.resolve();
     }
     return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
   }
