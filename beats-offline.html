@@ -490,7 +490,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
 <!-- hidden media element: the rendered session plays through here so iOS keeps
      it alive with the screen off + exposes lock-screen controls -->
-<audio id="player" playsinline preload="auto" style="display:none"></audio>
+<audio id="bg-audio" playsinline preload="auto" style="display:none"></audio>
 
 <script src="shared.js"></script>
 <script>
@@ -1483,7 +1483,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* ════════════════════════════════════════════════════════════════
      INIT
      ════════════════════════════════════════════════════════════════ */
-  player = document.getElementById('player');
+  player = document.getElementById('bg-audio');
   player.addEventListener('ended', () => { if (playing) stopAudio(); });
   player.addEventListener('play',  () => { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; });
   player.addEventListener('pause', () => { if ('mediaSession' in navigator && playing) navigator.mediaSession.playbackState = 'paused'; });
