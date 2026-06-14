@@ -111,6 +111,10 @@ canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border
 /* state description */
 .state-desc{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:6px;padding:11px 13px;font-family:var(--sans);font-size:12px;line-height:1.65;color:var(--ts);margin-bottom:16px}
 
+/* carrier section (shared across modes) */
+#carrier-section{margin-bottom:16px}
+.carrier-now{margin-left:8px;font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--acc);text-transform:none}
+
 /* carrier pills */
 .carrier-row{display:flex;gap:6px;margin-bottom:6px}
 .cpill{flex:1;min-height:44px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--ts);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
@@ -305,6 +309,33 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
           <div class="viz-idle" id="viz-idle">— press start to begin —</div>
         </div>
 
+        <!-- ════ CARRIER — shared across Manual + Journey ════ -->
+        <div id="carrier-section">
+          <div class="field-label">Carrier <span class="carrier-now" id="carrier-val">200 Hz</span></div>
+          <div class="carrier-row">
+            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
+            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
+            <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
+          </div>
+          <!-- fine-tune panel: odd carriers + (manual-only) beat -->
+          <div class="finetune" id="finetune">
+            <div class="ctrl-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Carrier frequency</span>
+                <span class="ctrl-readout" id="base-val">200 Hz</span>
+              </div>
+              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
+            </div>
+            <div class="ctrl-row" id="beat-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Beat frequency (manual)</span>
+                <span class="ctrl-readout" id="beat-val">8.0 Hz</span>
+              </div>
+              <input type="range" id="beat" min="0.5" max="50" value="8" step="0.5" oninput="onBeatSlider()">
+            </div>
+          </div>
+        </div>
+
         <div class="mode-tabs" role="tablist">
           <button class="mode-tab active" id="tab-manual" role="tab" aria-selected="true" onclick="setMode('manual')">Manual</button>
           <button class="mode-tab" id="tab-journey" role="tab" aria-selected="false" onclick="setMode('journey')">Journey</button>
@@ -349,30 +380,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
           <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.</div>
 
-          <div class="field-label">Carrier</div>
-          <div class="carrier-row">
-            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
-            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
-            <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
-          </div>
-
-          <!-- hidden fine-tune panel: odd carriers + manual beat -->
-          <div class="finetune" id="finetune">
-            <div class="ctrl-row">
-              <div class="ctrl-header">
-                <span class="ctrl-name">Carrier frequency</span>
-                <span class="ctrl-readout" id="base-val">200 Hz</span>
-              </div>
-              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
-            </div>
-            <div class="ctrl-row" id="beat-row">
-              <div class="ctrl-header">
-                <span class="ctrl-name">Beat frequency</span>
-                <span class="ctrl-readout" id="beat-val">8.0 Hz</span>
-              </div>
-              <input type="range" id="beat" min="0.5" max="50" value="8" step="0.5" oninput="onBeatSlider()">
-            </div>
-          </div>
         </div><!-- /manual-mode -->
 
         <!-- ════ JOURNEY MODE ════ -->
@@ -566,6 +573,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   function updateDisplay() {
     const base = getBase(), beat = getBeat();
     document.getElementById('base-val').textContent  = base + ' Hz';
+    document.getElementById('carrier-val').textContent = base + ' Hz';
     document.getElementById('beat-val').textContent  = beat.toFixed(1) + ' Hz';
     document.getElementById('s-left').textContent    = base;
     document.getElementById('s-right').textContent   = base + beat;
@@ -1062,6 +1070,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
     document.getElementById('manual-mode').style.display  = m === 'manual'  ? '' : 'none';
     document.getElementById('journey-mode').style.display = m === 'journey' ? '' : 'none';
+    /* the beat fine-tune slider is manual-only; the carrier control stays shared */
+    document.getElementById('beat-row').style.display     = m === 'manual'  ? '' : 'none';
 
     document.getElementById('play-label').textContent =
       m === 'journey' ? 'Start Journey' : 'Start Session';
