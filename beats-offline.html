@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Binaural Beats — Offline (Background) Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+:root{
+  --bg:        #0a0a0c;
+  --bg2:       #111116;
+  --bgc:       #13131a;
+  --border:    rgba(255,255,255,0.07);
+  --bora:      rgba(167,139,250,0.22);
+  --tp:        #e8e6f0;
+  --ts:        #9896a8;
+  --tm:        #5a5870;
+  --acc:       #a78bfa;
+  --accdim:    rgba(167,139,250,0.1);
+  --gold:      #c9a96e;
+  --golddim:   rgba(201,169,110,0.1);
+  --green:     #4ade80;
+  --greendim:  rgba(74,222,128,0.12);
+  --serif:     'Lora', Georgia, serif;
+  --sans:      'Inter', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', ui-monospace, monospace;
+}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* hero */
+.hero{padding:32px 16px 28px;max-width:680px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:400px;height:400px;background:radial-gradient(ellipse,rgba(167,139,250,.06) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(32px,9vw,58px);font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+h1 em{font-style:italic;color:var(--gold)}
+.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:20px}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
+.badge{font-family:var(--sans);font-size:10px;letter-spacing:.08em;padding:6px 11px;border:1px solid var(--acc);border-radius:2px;color:var(--acc);background:var(--accdim)}
+.arrow{color:var(--tm);font-size:12px}
+
+/* warn banner */
+.warn{max-width:680px;margin:0 auto 0;padding:0 16px 24px}
+.warn-inner{background:var(--bgc);border:1px solid rgba(255,180,0,.15);border-left:3px solid #c9a96e;border-radius:4px;padding:14px 16px}
+.warn-inner p{font-family:var(--sans);font-size:13px;line-height:1.65;color:var(--ts)}
+.warn-inner p strong{color:var(--gold)}
+
+/* content */
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+/* technique */
+.technique{margin-bottom:44px;animation:fu .5s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.tech-title{font-family:var(--serif);font-size:clamp(22px,7vw,32px);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:4px}
+.tech-abbr{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.tech-body p{font-family:var(--serif);font-size:clamp(16px,4.5vw,18px);line-height:1.85;color:#c8c6d4;margin-bottom:16px}
+.tech-body p strong{color:#eceaf5;font-weight:600}
+.tech-body p:last-child{margin-bottom:0}
+
+/* tip / note */
+.tip{background:var(--bgc);border:1px solid var(--border);border-top:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
+.tip p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.tip p strong{color:var(--acc) !important;font-weight:600}
+.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
+.note p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.note p strong{color:var(--gold) !important}
+
+/* divider */
+.div{display:flex;align-items:center;gap:14px;margin:8px 0 44px}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.4}
+
+/* ════════ PLAYER ════════ */
+.player{background:var(--bgc);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.player::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:280px;height:120px;background:radial-gradient(ellipse,rgba(167,139,250,.14) 0%,transparent 70%);pointer-events:none}
+
+/* frequency display */
+.freq-display{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;position:relative}
+.freq-block.right{text-align:right}
+.freq-label{font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm);margin-bottom:2px;white-space:nowrap}
+.freq-val{font-family:var(--mono);font-size:19px;color:var(--tp);line-height:1.05;display:flex;align-items:baseline;gap:4px}
+.freq-block.right .freq-val{justify-content:flex-end}
+.freq-unit{font-family:var(--mono);font-size:10px;color:var(--tm)}
+.freq-sep{display:flex;align-items:center;justify-content:center}
+.beat-pill{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--acc);background:var(--accdim);border:1px solid var(--bora);border-radius:99px;padding:4px 10px;white-space:nowrap}
+
+/* viz */
+.viz-wrap{margin-bottom:14px;position:relative}
+canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);display:block}
+.viz-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:11px;color:var(--tm);letter-spacing:.08em;pointer-events:none;transition:opacity .3s}
+
+/* mode tabs */
+.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:16px}
+.mode-tab{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:6px;border:none;background:transparent;color:var(--tm);cursor:pointer;transition:all .15s;min-height:42px;-webkit-tap-highlight-color:transparent}
+.mode-tab.active{background:var(--accdim);color:var(--acc);box-shadow:inset 0 0 0 1px var(--bora)}
+
+/* field labels */
+.field-label{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm);margin-bottom:8px}
+
+/* state dropdown */
+.state-select{width:100%;min-height:48px;font-family:var(--mono);font-size:13px;background:var(--bg2);color:var(--tp);border:1px solid var(--border);border-radius:6px;padding:12px 36px 12px 14px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23a78bfa' stroke-width='1.4' fill='none'/></svg>");background-repeat:no-repeat;background-position:right 12px center;text-overflow:ellipsis;margin-bottom:10px}
+.state-select:focus{border-color:var(--bora)}
+.state-select optgroup{font-family:var(--sans);font-size:11px;color:var(--tm);background:var(--bg2)}
+.state-select option{color:var(--tp);background:var(--bg2)}
+
+/* state description */
+.state-desc{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:6px;padding:11px 13px;font-family:var(--sans);font-size:12px;line-height:1.65;color:var(--ts);margin-bottom:16px}
+
+/* carrier pills */
+.carrier-row{display:flex;gap:6px;margin-bottom:6px}
+.cpill{flex:1;min-height:44px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--ts);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.cpill:active{background:var(--bg2)}
+.cpill.active{background:var(--accdim);border-color:var(--bora);color:var(--acc)}
+
+/* fine-tune panel (hidden by default) */
+.finetune{display:none;margin-top:10px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;flex-direction:column;gap:16px}
+.finetune.open{display:flex}
+
+/* sliders */
+.ctrl-row{display:flex;flex-direction:column;gap:6px}
+.ctrl-header{display:flex;justify-content:space-between;align-items:baseline}
+.ctrl-name{font-family:var(--sans);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm)}
+.ctrl-readout{font-family:var(--mono);font-size:12px;color:var(--acc)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:rgba(255,255,255,.13);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc),0 0 12px rgba(167,139,250,.5);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc),0 0 12px rgba(167,139,250,.5);cursor:pointer}
+.vol-row{margin:16px 0}
+
+/* play button */
+.play-btn{width:100%;padding:15px;border-radius:8px;border:1px solid rgba(255,255,255,.13);background:transparent;color:var(--tp);font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;min-height:50px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.play-btn::before{content:'';position:absolute;inset:0;background:var(--accdim);opacity:0;transition:opacity .2s}
+.play-btn:active::before{opacity:1}
+.play-btn.playing{border-color:var(--green);color:var(--green)}
+.play-btn.playing::before{opacity:1;background:var(--greendim)}
+.play-btn[disabled]{opacity:.65;cursor:default}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;position:relative;flex-shrink:0}
+.pulse-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--green);animation:pulse-ring 1.2s ease-out infinite}
+
+/* diagnostics */
+.diag-row{display:flex;gap:8px;margin-top:10px}
+.diag-btn{flex:1;font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:11px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--ts);cursor:pointer;transition:all .15s;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.diag-btn:active{background:var(--bg2)}
+.diag-btn.active{background:var(--accdim);border-color:var(--bora);color:var(--acc)}
+
+/* audio status */
+.audio-status{display:flex;align-items:center;gap:9px;margin-top:10px;padding:10px 13px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);font-family:var(--sans);font-size:11px;letter-spacing:.02em;color:var(--tm);line-height:1.5;transition:all .3s}
+.audio-status.live{border-color:rgba(74,222,128,.4);color:var(--green);background:var(--greendim)}
+.audio-status .as-dot{width:8px;height:8px;border-radius:50%;background:var(--tm);flex-shrink:0}
+.audio-status.live .as-dot{background:var(--green)}
+
+/* bluetooth warning */
+.bt-warning{display:none;align-items:flex-start;gap:9px;margin-top:10px;padding:11px 13px;border-radius:6px;background:rgba(255,176,0,.08);border:1px solid rgba(255,176,0,.35);border-left:2px solid #ffb000;font-family:var(--sans);font-size:11px;line-height:1.6;color:#ffcf7a;letter-spacing:.02em}
+.bt-warning.show{display:flex}
+.bt-warning svg{flex-shrink:0;margin-top:1px}
+
+/* timer + background status */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.timer-label{font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm)}
+.timer-val{font-family:var(--mono);font-size:13px;color:var(--ts)}
+.timer-val.running{color:var(--green)}
+.wl-line{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--sans);font-size:10px;letter-spacing:.06em;color:var(--tm);min-height:16px}
+.wl-dot{width:6px;height:6px;border-radius:50%;background:var(--tm);flex-shrink:0;transition:background .3s}
+.wl-dot.active{background:var(--green);box-shadow:0 0 6px var(--green)}
+
+/* ════════ JOURNEY ════════ */
+.journey-live{display:none;margin-bottom:16px;padding:14px;background:var(--bg2);border:1px solid var(--bora);border-radius:8px}
+.journey-live.show{display:block}
+.jl-stage{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.jl-stage-name{font-family:var(--mono);font-size:13px;color:var(--tp);letter-spacing:.02em}
+.jl-stage-count{font-family:var(--sans);font-size:10px;color:var(--tm)}
+.jl-bar-track{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.jl-bar-fill{height:100%;width:0%;background:var(--acc);border-radius:3px;transition:width .4s linear}
+.jl-times{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--tm)}
+.jl-times .gliding{color:var(--acc)}
+.jl-next{margin-top:8px;font-family:var(--sans);font-size:11px;color:var(--tm);letter-spacing:.02em}
+
+.journey-panel{margin-bottom:4px}
+.journey-presets{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.jp-wrap{display:flex;gap:6px;align-items:stretch}
+.journey-preset{display:flex;flex-direction:column;gap:3px;text-align:left;padding:12px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:all .15s;width:100%;min-height:44px;-webkit-tap-highlight-color:transparent}
+.journey-preset:active{background:var(--bg2)}
+.journey-preset.active{border-color:var(--bora);background:var(--accdim)}
+.jp-name{font-family:var(--mono);font-size:12px;color:var(--acc);letter-spacing:.04em}
+.jp-desc{font-family:var(--sans);font-size:11px;color:var(--tm);letter-spacing:.02em;line-height:1.5}
+.journey-preset.active .jp-desc{color:var(--ts)}
+
+.stage-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.stage-row{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2)}
+.stage-idx{font-family:var(--mono);font-size:11px;color:var(--tm);flex:0 0 auto;width:14px}
+.stage-row select{flex:1 1 auto;min-width:0;font-family:var(--mono);font-size:12px;background:var(--bgc);color:var(--tp);border:1px solid var(--border);border-radius:5px;padding:8px 22px 8px 8px;outline:none;min-height:38px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%239896a8' stroke-width='1.4' fill='none'/></svg>");background-repeat:no-repeat;background-position:right 8px center;text-overflow:ellipsis}
+.stage-mins{flex:0 0 auto;display:flex;align-items:center;gap:4px}
+.stage-mins input{flex:0 0 auto;width:50px;text-align:center;font-family:var(--mono);font-size:12px;background:var(--bgc);color:var(--tp);border:1px solid var(--border);border-radius:5px;padding:8px 4px;outline:none;min-height:38px;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.stage-mins input::-webkit-outer-spin-button,.stage-mins input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stage-row select:focus,.stage-mins input:focus{border-color:var(--bora)}
+.stage-mins span{font-family:var(--sans);font-size:10px;color:var(--tm);flex:0 0 auto}
+.stage-del{width:34px;min-height:34px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--ts);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;-webkit-tap-highlight-color:transparent}
+.stage-del:active{border-color:#ff6b6b;color:#ff6b6b}
+.stage-actions{display:flex;gap:8px;margin-bottom:10px}
+.stage-action-btn{flex:1;font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:9px;border-radius:6px;border:1px dashed rgba(255,255,255,.13);background:transparent;color:var(--ts);cursor:pointer;transition:all .15s;min-height:40px;-webkit-tap-highlight-color:transparent}
+.stage-action-btn:active{border-color:var(--acc);color:var(--acc)}
+.fadeout-toggle{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-family:var(--sans);font-size:11px;color:var(--ts);cursor:pointer;letter-spacing:.03em;min-height:32px}
+.fadeout-toggle input{width:16px;height:16px;accent-color:var(--acc);cursor:pointer}
+.journey-total{font-family:var(--mono);font-size:11px;color:var(--tm);letter-spacing:.04em;text-align:right}
+
+/* ════════ FOCUS REFERENCE ════════ */
+.lvls{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.lvl{display:grid;grid-template-columns:64px 1fr;gap:12px;background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:13px 14px}
+.lvl-tag{font-family:var(--mono);font-size:11px;color:var(--acc);line-height:1.4}
+.lvl-hz{font-family:var(--mono);font-size:10px;color:var(--tm);margin-top:3px}
+.lvl-b strong{font-family:var(--serif);font-size:16px;color:var(--tp);display:block;margin-bottom:3px}
+.lvl-b p{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts)}
+
+/* back to top */
+
+@media(min-width:640px){
+  .mode-tab:hover{color:var(--ts)}
+  .cpill:hover{border-color:var(--bora);color:var(--acc)}
+  .diag-btn:hover{border-color:var(--bora);color:var(--acc)}
+  .play-btn:hover{border-color:var(--bora)}
+  .play-btn:hover::before{opacity:1}
+  .journey-preset:hover{border-color:var(--bora)}
+  .stage-action-btn:hover{border-color:var(--acc);color:var(--acc)}
+  .stage-del:hover{border-color:#ff6b6b;color:#ff6b6b}
+  .player{padding:22px}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">Practice <span>/ Binaural · Offline</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#player" data-a="player"><span class="toc-tag">◉</span>Session Player</a></li>
+    <li><a href="#reference" data-a="reference"><span class="toc-tag">☷</span>Focus Reference</a></li>
+    <li><a href="#how" data-a="how"><span class="toc-tag">✦</span>How It Works</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← All notes</a></p>
+</aside>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Personal Build · Background Playback</p>
+    <h1>Binaural<br><em>Beats</em></h1>
+    <p class="subtitle">Offline Player — Plays With The Screen Off</p>
+    <div class="seq">
+      <span class="badge">Wired stereo</span>
+      <span class="arrow">→</span>
+      <span class="badge">Pick a state</span>
+      <span class="arrow">→</span>
+      <span class="badge">Play &amp; lock</span>
+      <span class="arrow">→</span>
+      <span class="badge">Drift</span>
+    </div>
+  </div>
+
+  <div class="warn">
+    <div class="warn-inner">
+      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). This is the <strong>offline build</strong>: it renders the whole session to an audio file the moment you press Start, so you can <strong>lock the screen</strong> and it keeps playing — lock-screen play/pause works too, and the battery isn't drained by the display. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ════════════ PLAYER ════════════ -->
+    <article id="player" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Session Player</h2>
+        <span class="tech-abbr">Offline render · screen-off background playback</span>
+      </div>
+
+      <div class="player">
+
+        <div class="freq-display">
+          <div class="freq-block left">
+            <div class="freq-label">Left ear</div>
+            <div class="freq-val"><span id="s-left">200</span><span class="freq-unit">Hz</span></div>
+          </div>
+          <div class="freq-sep">
+            <div class="beat-pill" id="beat-pill">Δ 8.0 Hz</div>
+          </div>
+          <div class="freq-block right">
+            <div class="freq-label">Right ear</div>
+            <div class="freq-val"><span id="s-right">208</span><span class="freq-unit">Hz</span></div>
+          </div>
+        </div>
+
+        <div class="viz-wrap">
+          <canvas id="viz"></canvas>
+          <div class="viz-idle" id="viz-idle">— press start to begin —</div>
+        </div>
+
+        <div class="mode-tabs" role="tablist">
+          <button class="mode-tab active" id="tab-manual" role="tab" aria-selected="true" onclick="setMode('manual')">Manual</button>
+          <button class="mode-tab" id="tab-journey" role="tab" aria-selected="false" onclick="setMode('journey')">Journey</button>
+        </div>
+
+        <!-- live journey progress -->
+        <div class="journey-live" id="journey-live" aria-live="polite">
+          <div class="jl-stage">
+            <span class="jl-stage-name" id="jl-stage-name">—</span>
+            <span class="jl-stage-count" id="jl-stage-count">Stage 1 / 3</span>
+          </div>
+          <div class="jl-bar-track"><div class="jl-bar-fill" id="jl-bar-fill"></div></div>
+          <div class="jl-times">
+            <span id="jl-stage-remaining">stage 00:00</span>
+            <span id="jl-total-elapsed">total 00:00</span>
+          </div>
+          <div class="jl-next" id="jl-next"></div>
+        </div>
+
+        <!-- ════ MANUAL MODE ════ -->
+        <div id="manual-mode">
+          <div class="field-label">State</div>
+          <select class="state-select" id="state" onchange="applyState()" aria-label="Select target state">
+            <optgroup label="Focus Levels">
+              <option value="c1">C-1 · Full Waking Consciousness — β 14 Hz</option>
+              <option value="f3">Focus 3 · Basic Sync — α 10 Hz</option>
+              <option value="f10" selected>Focus 10 · Mind Awake, Body Asleep — 8 Hz</option>
+              <option value="f12">Focus 12 · Expanded Awareness — θ 6 Hz</option>
+              <option value="f15">Focus 15 · No Time — 2.5 Hz</option>
+              <option value="f21">Focus 21 · The Bridge — 1.5 Hz</option>
+              <option value="f27">Focus 27 · The Park — δ 0.5 Hz</option>
+            </optgroup>
+            <optgroup label="Brainwave Bands">
+              <option value="delta">δ Delta — 0.5 Hz · deep sleep</option>
+              <option value="theta">θ Theta — 4 Hz · hypnagogia / meditation</option>
+              <option value="alpha">α Alpha — 10 Hz · relaxed awareness</option>
+              <option value="beta">β Beta — 20 Hz · alert focus</option>
+              <option value="gamma">γ Gamma — 40 Hz · high cognition</option>
+            </optgroup>
+            <option value="custom" hidden>Custom — fine-tuned</option>
+          </select>
+
+          <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.</div>
+
+          <div class="field-label">Carrier</div>
+          <div class="carrier-row">
+            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
+            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
+            <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
+          </div>
+
+          <!-- hidden fine-tune panel: odd carriers + manual beat -->
+          <div class="finetune" id="finetune">
+            <div class="ctrl-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Carrier frequency</span>
+                <span class="ctrl-readout" id="base-val">200 Hz</span>
+              </div>
+              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
+            </div>
+            <div class="ctrl-row" id="beat-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Beat frequency</span>
+                <span class="ctrl-readout" id="beat-val">8.0 Hz</span>
+              </div>
+              <input type="range" id="beat" min="0.5" max="50" value="8" step="0.5" oninput="onBeatSlider()">
+            </div>
+          </div>
+        </div><!-- /manual-mode -->
+
+        <!-- ════ JOURNEY MODE ════ -->
+        <div id="journey-mode" style="display:none">
+          <div class="journey-panel">
+            <div class="field-label">Preset Journeys</div>
+            <div class="journey-presets" id="journey-presets"><!-- populated by JS --></div>
+
+            <div class="field-label">Stages</div>
+            <div class="stage-list" id="stage-list"><!-- populated by JS --></div>
+            <div class="stage-actions">
+              <button class="stage-action-btn" onclick="addStage()">+ Add stage</button>
+              <button class="stage-action-btn" onclick="saveCustomJourney()">⤓ Save journey</button>
+            </div>
+            <label class="fadeout-toggle">
+              <input type="checkbox" id="journey-fadeout" checked onchange="renderJourneyTotal()">
+              Gentle fade-out to silence at end
+            </label>
+            <div class="journey-total" id="journey-total">Total — 50 min</div>
+          </div>
+        </div>
+
+        <div class="ctrl-row vol-row">
+          <div class="ctrl-header">
+            <span class="ctrl-name">Volume</span>
+            <span class="ctrl-readout" id="vol-val">50%</span>
+          </div>
+          <input type="range" id="vol" min="0" max="1" value="0.5" step="0.01" oninput="setVol()">
+        </div>
+
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">
+          <span id="play-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 14,8 4,14"/></svg>
+          </span>
+          <span id="play-label">Start Session</span>
+        </button>
+
+        <div class="diag-row">
+          <button class="diag-btn" id="testtone-btn" onclick="playTestTone()">▸ Test tone</button>
+          <button class="diag-btn" id="beatcheck-btn" onclick="toggleBeatCheck()">◎ Beat check</button>
+        </div>
+
+        <div class="audio-status" id="audio-status">
+          <span class="as-dot"></span>
+          <span id="audio-status-text">Audio idle — press Start. L/R channels are hard-separated.</span>
+        </div>
+
+        <div class="bt-warning" id="bt-warning">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffb000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5 12 23V1l5.5 5.5L6.5 17.5"/></svg>
+          <span id="bt-warning-text">Bluetooth output detected. BT codecs can down-mix or desync the channels and destroy the binaural beat — use <strong>wired</strong> headphones for reliable results.</span>
+        </div>
+
+        <div class="timer-row">
+          <span class="timer-label">Session time</span>
+          <span class="timer-val" id="timer">00:00</span>
+        </div>
+        <div class="wl-line" id="wl-banner" aria-live="polite">
+          <span class="wl-dot" id="wl-dot"></span>
+          <span id="wl-text">Background audio: plays with the screen off · lock-screen controls</span>
+        </div>
+
+      </div><!-- /player -->
+
+      <div class="tip"><p><strong>Before a real session —</strong> run <strong>Test tone</strong> (a beep in the left ear, then the right) to confirm both channels, then <strong>Beat check</strong> (a strong 10 Hz throb at 300 Hz). If the beat check sounds like a steady tone with no pulsing, the output is mono or Bluetooth — go wired.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- ════════════ FOCUS REFERENCE ════════════ -->
+    <article id="reference" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Focus Level Reference</h2>
+        <span class="tech-abbr">What each preset is aiming at</span>
+      </div>
+      <div class="lvls">
+        <div class="lvl"><div><div class="lvl-tag">C-1</div><div class="lvl-hz">β 14 Hz</div></div><div class="lvl-b"><strong>Full Waking Consciousness</strong><p>Normal beta state — the starting point for every session. Left-brain-dominant everyday awareness.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 3</div><div class="lvl-hz">α 10 Hz</div></div><div class="lvl-b"><strong>Basic Sync</strong><p>The first signpost: the brain hemispheres synchronize and the signal becomes coherent. A gentle, settled alpha state.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 10</div><div class="lvl-hz">α–θ 8 Hz</div></div><div class="lvl-b"><strong>Mind Awake, Body Asleep</strong><p>The alpha–theta paradox state — mind fully alert while the body sleeps deeply. The foundation everything else is built on. See the <a href="focus-10.html" style="color:var(--acc);text-decoration:none">Focus 10 note</a>.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 12</div><div class="lvl-hz">θ 6 Hz</div></div><div class="lvl-b"><strong>Expanded Awareness</strong><p>Deep theta — problem solving, patterning, remote viewing, non-verbal communication. The workhorse state; answers arrive as symbols, images, or sudden knowing.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 15</div><div class="lvl-hz">θ–δ 2.5 Hz</div></div><div class="lvl-b"><strong>No Time</strong><p>Deep theta–delta — the state of "no time." Pure being, creation and manifestation work.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 21</div><div class="lvl-hz">θ–δ 1.5 Hz</div></div><div class="lvl-b"><strong>The Bridge</strong><p>The edge of time-space — the deepest state where mind-awake contact is still maintained, and the bridge to other energy systems. Phasing territory.</p></div></div>
+        <div class="lvl"><div><div class="lvl-tag">F 27</div><div class="lvl-hz">δ 0.5 Hz</div></div><div class="lvl-b"><strong>The Park · Reception Center</strong><p>Deepest delta preset — Focus 27 is The Park, the reception/healing area for transitioned consciousness (Focus 22–26 are the belief-system territories below it).</p></div></div>
+      </div>
+      <div class="note"><p><strong>About these numbers —</strong> there is no official single-beat value per focus level; the original audio layers several carrier/beat pairs at once. This ladder (14 → 0.5 Hz) is the common community approximation, kept here as-is for testing. Spectral analyses of the original tapes are usually cited around a <strong>~4 Hz beat on a ~100 Hz carrier</strong> for Focus 10 — that's what the 100 Hz carrier preset is for: same ladder, tape-style carrier.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- ════════════ HOW IT WORKS ════════════ -->
+    <article id="how" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">How It Works</h2>
+        <span class="tech-abbr">Why wired · why it plays with the screen off</span>
+      </div>
+      <div class="tech-body">
+        <p>A binaural beat doesn't exist in the audio at all. The left ear gets one pure tone (the <strong>carrier</strong>, e.g. 200 Hz) and the right ear gets a slightly different one (e.g. 208 Hz). Your brainstem combines them and perceives the <strong>difference</strong> — an 8 Hz pulse — which the brain tends to entrain toward (the frequency-following response).</p>
+        <p>That's why the player hard-pans each oscillator fully left and right, and why <strong>wired stereo headphones</strong> matter: Bluetooth codecs can down-mix or desync the channels, at which point both ears hear both tones and the beat collapses into ordinary audio.</p>
+        <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
+        <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
+        <p>This is the <strong>offline build.</strong> Instead of generating the tones live, it <strong>renders the entire session</strong> — every stage glide and the final fade — into a single audio file the moment you press Start (you'll see a brief <strong>"Preparing…"</strong>). That file plays through an ordinary media element, so the phone keeps it alive with the <strong>screen off</strong> and shows <strong>lock-screen controls</strong> — no wake lock, no display drain. Because the audio is baked up front, changing the beat, carrier or journey <strong>re-renders</strong>, so set things up before you press Start (volume stays live).</p>
+      </div>
+    </article>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <p>Binaural Beats · Offline (Background) Player · Personal Build<br>Personal study notes · <a href="beats.html">Live player</a> · <a href="focus-10.html">Focus 10</a> · <a href="protocol.html">4-Week Protocol</a> · <a href="obe-taxonomy.html">OBE Taxonomy</a></p>
+  </footer>
+
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- hidden media element: the rendered session plays through here so iOS keeps
+     it alive with the screen off + exposes lock-screen controls -->
+<audio id="player" playsinline preload="auto" style="display:none"></audio>
+
+<script src="shared.js"></script>
+<script>
+  /* ════════════════════════════════════════════════════════════════
+     BINAURAL BEATS — OFFLINE / BACKGROUND ENGINE
+
+     Live oscillators can't play in the background on iOS (Safari suspends
+     the AudioContext on screen-lock). So instead of synthesizing live, we
+     render the whole session offline (OfflineAudioContext) → encode to a
+     WAV blob → play it through a real <audio> element. A media element is
+     granted background playback + lock-screen controls, so the screen can
+     be off — no wake lock, no battery drain from the display.
+
+     • Manual  → a short seamless loop (loop=true), rendered instantly.
+     • Journey → the entire ladder (all glides + fade) baked into one file
+                 so the OS plays it start-to-finish with zero JS (iOS nearly
+                 freezes JS timers while backgrounded).
+     ════════════════════════════════════════════════════════════════ */
+
+  /* ── state ── */
+  let playing       = false;
+  let mode          = 'manual';   /* 'manual' | 'journey' */
+  let timerInterval = null;
+  let journeyInterval = null;
+  let animFrame     = null;
+
+  /* ── mode / journey state ── */
+  let editorStages  = [];         /* [{label, beat, mins}] — the journey being built */
+  let journeyStages = [];         /* running journey snapshot (+ startSec/endSec) */
+  let stageIndex    = 0;
+  let journeyFadeOut = true;
+  let journeyTotalStageSec = 0;   /* sum of stage durations (excludes the fade tail) */
+  let activeJourneyKey = null;
+
+  const GLIDE_SEC    = 15;        /* beat-frequency crossfade duration between stages */
+  const END_FADE_SEC = 25;        /* gentle fade-out to silence at journey end */
+  const RENDER_SR    = 8000;      /* render rate — far above Nyquist for ≤~310 Hz tones */
+  const MANUAL_LOOP  = 10;        /* manual loop length (s); even → seamless on the 0.5-Hz beat grid */
+
+  /* ── media playback ── */
+  let player    = null;           /* the <audio> element */
+  let curUrl    = null;           /* current object URL (revoked on swap/stop) */
+  let unlocked  = false;          /* iOS: element "blessed" by a gesture yet? */
+
+  /* ── diagnostics (live, screen-on only) ── */
+  let bcCtx           = null;     /* beat-check AudioContext */
+  let beatCheckActive = false;
+
+  /* ════════════════════════════════════════════════════════════════
+     STATE PRESETS — beat-frequency ladder is a community
+     approximation (see the reference note), kept as-is for testing.
+     ════════════════════════════════════════════════════════════════ */
+  const STATES = {
+    c1:    { beat: 14,  desc: 'C-1 · Full Waking Consciousness — normal beta. The starting point for every session; left-brain-dominant everyday awareness.' },
+    f3:    { beat: 10,  desc: 'Focus 3 · Basic Sync — gentle alpha. Brain hemispheres synchronize and the signal becomes coherent. The first signpost.' },
+    f10:   { beat: 8,   desc: 'Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.' },
+    f12:   { beat: 6,   desc: 'Focus 12 · Expanded Awareness — deep theta. Problem solving, patterning, remote viewing, NVC. The workhorse state; answers arrive as symbols, images, or sudden knowing.' },
+    f15:   { beat: 2.5, desc: 'Focus 15 · No Time — deep theta–delta. The state of "no time": pure being, creation and manifestation work.' },
+    f21:   { beat: 1.5, desc: 'Focus 21 · The Bridge — edge of time-space, the deepest mind-awake state and the bridge to other energy systems. Phasing territory.' },
+    f27:   { beat: 0.5, desc: 'Focus 27 · The Park — deepest delta preset. The reception/healing area for transitioned consciousness.' },
+    delta: { beat: 0.5, desc: 'Delta band · 0.5 Hz beat — deep dreamless sleep territory.' },
+    theta: { beat: 4,   desc: 'Theta band · 4 Hz beat — hypnagogia, deep meditation, memory consolidation.' },
+    alpha: { beat: 10,  desc: 'Alpha band · 10 Hz beat — relaxed, eyes-closed wakeful awareness.' },
+    beta:  { beat: 20,  desc: 'Beta band · 20 Hz beat — alert, engaged waking focus.' },
+    gamma: { beat: 40,  desc: 'Gamma band · 40 Hz beat — high-frequency cognition and binding.' },
+  };
+
+  /* ── helpers ── */
+  function getBase() { return parseFloat(document.getElementById('base').value); }
+  function getBeat() { return parseFloat(document.getElementById('beat').value); }
+
+  function updateDisplay() {
+    const base = getBase(), beat = getBeat();
+    document.getElementById('base-val').textContent  = base + ' Hz';
+    document.getElementById('beat-val').textContent  = beat.toFixed(1) + ' Hz';
+    document.getElementById('s-left').textContent    = base;
+    document.getElementById('s-right').textContent   = base + beat;
+    document.getElementById('beat-pill').textContent = 'Δ ' + beat.toFixed(1) + ' Hz';
+    /* offline build: a playing manual session is a baked file — changing the
+       beat needs a restart, so we only update the readouts here. */
+  }
+
+  function applyState() {
+    const key = document.getElementById('state').value;
+    const st = STATES[key];
+    if (!st) return;
+    document.getElementById('beat').value = st.beat;
+    document.getElementById('state-desc').textContent = st.desc;
+    updateDisplay();
+  }
+
+  /* ── carrier pills + fine-tune ── */
+  function syncCarrierPills() {
+    const base = getBase();
+    document.getElementById('cpill-100').classList.toggle('active', base === 100);
+    document.getElementById('cpill-200').classList.toggle('active', base === 200);
+    document.getElementById('cpill-custom').classList.toggle('active',
+      base !== 100 && base !== 200);
+  }
+
+  function setCarrier(v) {
+    document.getElementById('base').value = v;
+    syncCarrierPills();
+    updateDisplay();
+  }
+
+  function toggleFinetune() {
+    const panel = document.getElementById('finetune');
+    const isOpen = panel.classList.toggle('open');
+    document.getElementById('cpill-custom').setAttribute('aria-expanded', isOpen);
+  }
+
+  function onCarrierSlider() {
+    syncCarrierPills();
+    updateDisplay();
+  }
+
+  function onBeatSlider() {
+    /* manual beat tweaking turns the state selector to "Custom" */
+    const sel = document.getElementById('state');
+    sel.value = 'custom';
+    document.getElementById('state-desc').textContent =
+      'Custom — carrier ' + getBase() + ' Hz · beat ' + getBeat().toFixed(1) + ' Hz.';
+    updateDisplay();
+  }
+
+  function setVol() {
+    const v = parseFloat(document.getElementById('vol').value);
+    document.getElementById('vol-val').textContent = Math.round(v * 100) + '%';
+    if (player) player.volume = v;   /* volume stays live via the element */
+  }
+
+  function togglePlay() {
+    if (playing) { stopAudio(); return; }
+    if (bcCtx) stopBeatCheck();
+    if (mode === 'journey') startJourney(); else startAudio();
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     WAV ENCODING  (16-bit PCM, little-endian)
+     ════════════════════════════════════════════════════════════════ */
+  function encodeWAV(channels /* [Float32Array,…] */, sampleRate) {
+    const numCh = channels.length;
+    const n = channels[0].length;
+    const bytesPerSample = 2;
+    const blockAlign = numCh * bytesPerSample;
+    const dataLen = n * blockAlign;
+    const buf = new ArrayBuffer(44 + dataLen);
+    const dv = new DataView(buf);
+    let p = 0;
+    const ws  = s => { for (let i = 0; i < s.length; i++) dv.setUint8(p++, s.charCodeAt(i)); };
+    const u32 = v => { dv.setUint32(p, v, true); p += 4; };
+    const u16 = v => { dv.setUint16(p, v, true); p += 2; };
+
+    ws('RIFF'); u32(36 + dataLen); ws('WAVE');
+    ws('fmt '); u32(16); u16(1); u16(numCh); u32(sampleRate);
+    u32(sampleRate * blockAlign); u16(blockAlign); u16(16);
+    ws('data'); u32(dataLen);
+
+    for (let i = 0; i < n; i++) {
+      for (let c = 0; c < numCh; c++) {
+        let s = channels[c][i];
+        s = s < -1 ? -1 : s > 1 ? 1 : s;
+        dv.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        p += 2;
+      }
+    }
+    return new Blob([buf], { type: 'audio/wav' });
+  }
+
+  function bufferToWavUrl(audioBuf) {
+    const chs = [];
+    for (let c = 0; c < audioBuf.numberOfChannels; c++) chs.push(audioBuf.getChannelData(c));
+    return URL.createObjectURL(encodeWAV(chs, audioBuf.sampleRate));
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     OFFLINE RENDER
+     ════════════════════════════════════════════════════════════════ */
+  function makeOffline(seconds) {
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    try {
+      return new OAC(2, Math.ceil(RENDER_SR * seconds), RENDER_SR);
+    } catch (e) {
+      /* some WebKit builds reject low sample rates — fall back to 44.1k.
+         (WAV header is written from the rendered buffer's own rate, so the
+         file is always correct regardless of what we end up with.) */
+      return new OAC(2, Math.ceil(44100 * seconds), 44100);
+    }
+  }
+
+  /* hard-panned L/R sine pair → master gain → destination */
+  function buildPair(oac, base) {
+    const L = oac.createOscillator(), R = oac.createOscillator();
+    L.type = 'sine'; R.type = 'sine';
+    L.frequency.value = base;
+    const pL = oac.createStereoPanner(), pR = oac.createStereoPanner();
+    pL.pan.value = -1; pR.pan.value = 1;
+    const g = oac.createGain();
+    L.connect(pL); R.connect(pR); pL.connect(g); pR.connect(g); g.connect(oac.destination);
+    return { L, R, g };
+  }
+
+  /* Manual: a short seamless loop. With an integer carrier and a 0.5-Hz beat
+     grid, an even loop length is a whole number of cycles for both ears, so it
+     wraps with no click and no crossfade needed. */
+  async function renderManualLoop(base, beat) {
+    const oac = makeOffline(MANUAL_LOOP);
+    const { L, R, g } = buildPair(oac, base);
+    R.frequency.value = base + beat;
+    g.gain.value = 1;                 /* loudness is set live via player.volume */
+    L.start(0); R.start(0);
+    const buf = await oac.startRendering();
+    return bufferToWavUrl(buf);
+  }
+
+  /* Journey: bake every stage + 15 s glides + optional 25 s end fade into one
+     continuous file (mirrors the live glideBeat / endJourney scheduling). */
+  async function renderJourney(stages, base, fadeOut) {
+    const stageSec = stages.reduce((s, st) => s + st.mins * 60, 0);
+    const totalSec = stageSec + (fadeOut ? END_FADE_SEC : 0);
+    const oac = makeOffline(totalSec);
+    const { L, R, g } = buildPair(oac, base);
+
+    /* beat schedule on the right ear */
+    R.frequency.setValueAtTime(base + stages[0].beat, 0);
+    let t = 0;
+    for (let i = 0; i < stages.length; i++) {
+      if (i > 0) {
+        R.frequency.setValueAtTime(base + stages[i - 1].beat, t);
+        R.frequency.linearRampToValueAtTime(base + stages[i].beat, t + GLIDE_SEC);
+      }
+      t += stages[i].mins * 60;
+    }
+
+    /* gain: tiny fade-in to avoid a click, hold, optional gentle fade-out */
+    g.gain.setValueAtTime(0.0001, 0);
+    g.gain.linearRampToValueAtTime(1, 0.4);
+    if (fadeOut) {
+      g.gain.setValueAtTime(1, stageSec);
+      g.gain.linearRampToValueAtTime(0.0001, stageSec + END_FADE_SEC);
+    }
+
+    L.start(0); R.start(0);
+    const buf = await oac.startRendering();
+    return bufferToWavUrl(buf);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     PLAYER PLUMBING
+     ════════════════════════════════════════════════════════════════ */
+  function setPlayerSrc(url) {
+    if (curUrl) URL.revokeObjectURL(curUrl);
+    curUrl = url;
+    player.src = url;
+  }
+
+  /* iOS: a media element must first play() inside a user gesture before
+     programmatic play() (after our async render) is allowed. Bless it on the
+     first pointerdown with a tiny silent clip. */
+  function unlockPlayer() {
+    if (unlocked || !player) return;
+    unlocked = true;
+    try {
+      const url = URL.createObjectURL(encodeWAV([new Float32Array(64)], RENDER_SR));
+      player.src = url; player.loop = false; player.volume = 0;
+      const done = () => {
+        try { player.pause(); player.currentTime = 0; } catch (_) {}
+        player.volume = 1;
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+      };
+      const pr = player.play();
+      if (pr && pr.then) pr.then(done).catch(() => { player.volume = 1; });
+      else done();
+    } catch (e) { /* unlock best-effort */ }
+  }
+
+  function setMediaSession(title) {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: title, artist: 'Binaural Beats', album: 'self-notes',
+      });
+      navigator.mediaSession.playbackState = 'playing';
+      navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
+      navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
+      navigator.mediaSession.setActionHandler('stop',  () => { stopAudio(); });
+    } catch (e) { /* not supported */ }
+  }
+
+  function clearMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    } catch (e) {}
+  }
+
+  function setPreparing(on, label) {
+    const btn = document.getElementById('play-btn');
+    btn.disabled = on;
+    if (on) document.getElementById('play-label').textContent = label || 'Preparing…';
+  }
+
+  function setBgStatus(active) {
+    document.getElementById('wl-dot').classList.toggle('active', active);
+    document.getElementById('wl-text').textContent = active
+      ? 'Background audio: playing — safe to lock the screen'
+      : 'Background audio: plays with the screen off · lock-screen controls';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     START / STOP
+     ════════════════════════════════════════════════════════════════ */
+  function uiStart(stopLabel) {
+    playing = true;
+    document.getElementById('play-btn').classList.add('playing');
+    document.getElementById('play-icon').innerHTML = '<span class="pulse-dot"></span>';
+    document.getElementById('play-label').textContent = stopLabel;
+    document.getElementById('viz-idle').style.opacity = '0';
+    document.getElementById('timer').classList.add('running');
+    timerInterval = setInterval(updateTimer, 1000); updateTimer();
+    drawViz();
+    setBgStatus(true);
+  }
+
+  async function startAudio() {
+    const base = getBase(), beat = getBeat();
+    const vol  = parseFloat(document.getElementById('vol').value);
+
+    setPreparing(true, 'Preparing…');
+    setAudioStatus(false, 'Rendering tones for background playback…');
+    try {
+      const url = await renderManualLoop(base, beat);
+      setPlayerSrc(url);
+      player.loop = true; player.volume = vol;
+      await player.play();
+    } catch (err) {
+      setPreparing(false);
+      document.getElementById('play-label').textContent = 'Start Session';
+      setAudioStatus(false, 'Could not start playback (' + (err && err.message || err) + '). Tap Start again.');
+      return;
+    }
+    setPreparing(false);
+    uiStart('Stop Session');
+    setMediaSession('Binaural · ' + base + '/' + (base + beat) + ' Hz (Δ ' + beat.toFixed(1) + ')');
+    setAudioStatus(true, 'Playing in background · left ' + base + ' Hz, right ' +
+      (base + beat) + ' Hz — the screen can be off.');
+    checkBluetooth();
+  }
+
+  async function startJourney() {
+    if (!editorStages.length) { alert('Add at least one stage first.'); return; }
+
+    journeyStages = editorStages.map(s => ({ label: s.label, beat: s.beat, mins: Number(s.mins) }));
+    let acc = 0;
+    journeyStages.forEach(s => { s.startSec = acc; acc += s.mins * 60; s.endSec = acc; });
+    journeyTotalStageSec = acc;
+    journeyFadeOut = document.getElementById('journey-fadeout').checked;
+    stageIndex = 0;
+
+    const base = getBase();
+    const vol  = parseFloat(document.getElementById('vol').value);
+
+    setPreparing(true, 'Rendering journey…');
+    setAudioStatus(false, 'Baking the full journey (' + journeyStages.length +
+      ' stages) for hands-free background playback…');
+    try {
+      const url = await renderJourney(journeyStages, base, journeyFadeOut);
+      setPlayerSrc(url);
+      player.loop = false; player.volume = vol;
+      await player.play();
+    } catch (err) {
+      setPreparing(false);
+      document.getElementById('play-label').textContent = 'Start Journey';
+      setAudioStatus(false, 'Could not start journey (' + (err && err.message || err) + '). Tap Start again.');
+      return;
+    }
+    setPreparing(false);
+    uiStart('Stop Journey');
+    setBeatDisplay(journeyStages[0].beat);
+    document.getElementById('journey-live').classList.add('show');
+    renderStageHeader();
+    journeyInterval = setInterval(journeyDisplayTick, 250);
+    setMediaSession(activeJourneyName() + ' · journey');
+    setAudioStatus(true, 'Journey playing in background · ' + journeyStages.length +
+      ' stages · the screen can be off.');
+    checkBluetooth();
+  }
+
+  function stopAudio() {
+    try { player.pause(); } catch (_) {}
+    try { player.currentTime = 0; } catch (_) {}
+    if (curUrl) { URL.revokeObjectURL(curUrl); curUrl = null; }
+    player.removeAttribute('src');
+    try { player.load(); } catch (_) {}
+
+    clearInterval(timerInterval);
+    clearInterval(journeyInterval);
+    journeyInterval = null;
+    cancelAnimationFrame(animFrame);
+    playing = false;
+    clearMediaSession();
+
+    document.getElementById('play-btn').classList.remove('playing');
+    document.getElementById('play-icon').innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 14,8 4,14"/></svg>';
+    document.getElementById('play-label').textContent =
+      mode === 'journey' ? 'Start Journey' : 'Start Session';
+    document.getElementById('viz-idle').style.opacity = '1';
+    document.getElementById('timer').classList.remove('running');
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('journey-live').classList.remove('show');
+    clearCanvas();
+
+    setBgStatus(false);
+    setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
+  }
+
+  /* ── timer (driven by actual audio position) ── */
+  function updateTimer() {
+    const sec = (playing && player) ? Math.floor(player.currentTime) : 0;
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    document.getElementById('timer').textContent = m + ':' + s;
+  }
+
+  /* ── synthetic visualizer (no analyser — must not route the element through
+     a suspendable AudioContext, or background playback would stop) ── */
+  function clearCanvas() {
+    const c = document.getElementById('viz');
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  }
+
+  function vizBeat() {
+    if (mode === 'journey' && journeyStages.length)
+      return journeyStages[Math.min(stageIndex, journeyStages.length - 1)].beat;
+    return getBeat();
+  }
+
+  function drawViz() {
+    const c = document.getElementById('viz');
+    c.width  = c.offsetWidth  * devicePixelRatio;
+    c.height = c.offsetHeight * devicePixelRatio;
+    const cx = c.getContext('2d');
+    cx.scale(devicePixelRatio, devicePixelRatio);
+    const W = c.offsetWidth, H = c.offsetHeight;
+    const t0 = performance.now();
+
+    const grad = cx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0,   'rgba(167,139,250,0.4)');
+    grad.addColorStop(0.5, 'rgba(201,169,110,0.9)');
+    grad.addColorStop(1,   'rgba(167,139,250,0.4)');
+
+    function frame() {
+      animFrame = requestAnimationFrame(frame);
+      const t = (performance.now() - t0) / 1000;
+      const beat = vizBeat();
+      const env = 0.32 + 0.68 * Math.abs(Math.sin(Math.PI * beat * t)); /* amplitude pulses at the beat */
+      const cycles = 14;
+      cx.clearRect(0, 0, W, H);
+
+      const drawLine = (lw, st) => {
+        cx.beginPath(); cx.lineWidth = lw; cx.strokeStyle = st;
+        for (let x = 0; x <= W; x += 2) {
+          const ph = (x / W) * cycles * 2 * Math.PI + t * 6;
+          const y = H / 2 + Math.sin(ph) * (H / 2 - 3) * env;
+          x === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        }
+        cx.stroke();
+      };
+      drawLine(1.5, grad);
+      drawLine(5,   'rgba(167,139,250,0.07)');
+    }
+    frame();
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     MODE SWITCHING
+     ════════════════════════════════════════════════════════════════ */
+  function setMode(m) {
+    if (m === mode) return;
+    if (playing) stopAudio();          /* engines differ — stop cleanly first */
+    mode = m;
+
+    document.getElementById('tab-manual').classList.toggle('active', m === 'manual');
+    document.getElementById('tab-journey').classList.toggle('active', m === 'journey');
+    document.getElementById('tab-manual').setAttribute('aria-selected', m === 'manual');
+    document.getElementById('tab-journey').setAttribute('aria-selected', m === 'journey');
+
+    document.getElementById('manual-mode').style.display  = m === 'manual'  ? '' : 'none';
+    document.getElementById('journey-mode').style.display = m === 'journey' ? '' : 'none';
+
+    document.getElementById('play-label').textContent =
+      m === 'journey' ? 'Start Journey' : 'Start Session';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     JOURNEY DATA
+     ════════════════════════════════════════════════════════════════ */
+  const FOCUS_OPTIONS = [
+    { label: 'C-1',      beat: 14  },
+    { label: 'Focus 3',  beat: 10  },
+    { label: 'Focus 10', beat: 8   },
+    { label: 'Focus 12', beat: 6   },
+    { label: 'Focus 15', beat: 2.5 },
+    { label: 'Focus 21', beat: 1.5 },
+    { label: 'Focus 27', beat: 0.5 },
+    /* ── named practice stages (OBE prep + deep sleep ladders) ── */
+    { label: 'Unwind',     beat: 10 },
+    { label: 'Settle',     beat: 8 },
+    { label: 'Descend',    beat: 7 },
+    { label: 'Work Zone',  beat: 6 },
+    { label: 'Push',       beat: 5 },
+    { label: 'Drift',      beat: 5 },
+    { label: 'Deep Sleep', beat: 2 },
+    { label: 'Delta',    beat: 0.5 },
+    { label: 'Theta',    beat: 4   },
+    { label: 'Alpha',    beat: 10  },
+    { label: 'Beta',     beat: 20  },
+    { label: 'Gamma',    beat: 40  },
+    /* direct Hz beats for fine journey building */
+    { label: '12 Hz', beat: 12 },
+    { label: '10 Hz', beat: 10 },
+    { label: '9 Hz',  beat: 9  },
+    { label: '8 Hz',  beat: 8  },
+    { label: '7 Hz',  beat: 7  },
+    { label: '6 Hz',  beat: 6  },
+    { label: '5 Hz',  beat: 5  },
+    { label: '4 Hz',  beat: 4  },
+    { label: '3 Hz',  beat: 3  },
+    { label: '2 Hz',  beat: 2  },
+    { label: '1 Hz',  beat: 1  },
+  ];
+  function beatFor(label) {
+    const f = FOCUS_OPTIONS.find(o => o.label === label);
+    return f ? f.beat : 8;
+  }
+
+  const BUILTIN_JOURNEYS = {
+    'obe-prep': {
+      name: 'OBE Prep',
+      desc: 'Settle 8 → descend 7 → long 6 Hz hold → optional 5 Hz push · ~55 min — remove the last stage on non-exit nights. No delta on practice nights.',
+      fadeOut: true,
+      stages: [
+        { label: 'Settle',    beat: 8, mins: 10 },
+        { label: 'Descend',   beat: 7, mins: 10 },
+        { label: 'Work Zone', beat: 6, mins: 25 },
+        { label: 'Push',      beat: 5, mins: 10 },
+      ],
+    },
+    'deep-sleep': {
+      name: 'Deep Sleep',
+      desc: 'Unwind 10 → 8 → descend 7 → drift 5 → 2 Hz delta hold, then fade into natural sleep · ~50 min. For sleep, not practice nights.',
+      fadeOut: true,
+      stages: [
+        { label: 'Unwind',     beat: 10, mins: 5  },
+        { label: 'Settle',     beat: 8,  mins: 5  },
+        { label: 'Descend',    beat: 7,  mins: 10 },
+        { label: 'Drift',      beat: 5,  mins: 10 },
+        { label: 'Deep Sleep', beat: 2,  mins: 20 },
+      ],
+    },
+    'relaxation': {
+      name: 'Relaxation',
+      desc: 'C-1 → Focus 3 → Focus 10, then fade out · ~32 min',
+      fadeOut: true,
+      stages: [
+        { label: 'C-1',      beat: 14, mins: 2  },
+        { label: 'Focus 3',  beat: 10, mins: 5  },
+        { label: 'Focus 10', beat: 8,  mins: 25 },
+      ],
+    },
+  };
+
+  const LS_KEY = 'beats-custom-journeys';
+  function loadCustomJourneys() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+    catch (_) { return {}; }
+  }
+  function storeCustomJourneys(obj) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch (_) {}
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     JOURNEY EDITOR UI
+     ════════════════════════════════════════════════════════════════ */
+  function renderJourneyPresets() {
+    const wrap = document.getElementById('journey-presets');
+    const custom = loadCustomJourneys();
+    let html = '';
+
+    const addBtn = (key, j, isCustom) => {
+      const active = key === activeJourneyKey ? ' active' : '';
+      const del = isCustom
+        ? '<button class="stage-del" title="Delete saved journey" onclick="deleteCustomJourney(\'' +
+          key.replace(/'/g, "\\'") + '\')">&times;</button>'
+        : '';
+      return '<div class="jp-wrap">' +
+        '<button class="journey-preset' + active + '" onclick="loadJourneyPreset(\'' +
+        key.replace(/'/g, "\\'") + '\')">' +
+        '<span class="jp-name">' + j.name + (isCustom ? ' · saved' : '') + '</span>' +
+        '<span class="jp-desc">' + (j.desc || journeySummary(j)) + '</span>' +
+        '</button>' + del + '</div>';
+    };
+
+    Object.keys(BUILTIN_JOURNEYS).forEach(k => html += addBtn(k, BUILTIN_JOURNEYS[k], false));
+    Object.keys(custom).forEach(k => html += addBtn('custom:' + k, custom[k], true));
+
+    wrap.innerHTML = html;
+  }
+
+  function journeySummary(j) {
+    const total = j.stages.reduce((s, st) => s + Number(st.mins), 0);
+    return j.stages.map(s => s.label).join(' → ') +
+      (j.fadeOut ? ' → fade out' : '') + ' · ' + total + ' min';
+  }
+
+  function getJourneyByKey(key) {
+    if (key && key.indexOf('custom:') === 0) {
+      return loadCustomJourneys()[key.slice(7)];
+    }
+    return BUILTIN_JOURNEYS[key];
+  }
+
+  function activeJourneyName() {
+    const j = activeJourneyKey ? getJourneyByKey(activeJourneyKey) : null;
+    return j ? j.name : 'Custom journey';
+  }
+
+  function loadJourneyPreset(key) {
+    const j = getJourneyByKey(key);
+    if (!j) return;
+    activeJourneyKey = key;
+    editorStages = j.stages.map(s => ({ label: s.label, beat: beatFor(s.label), mins: Number(s.mins) }));
+    document.getElementById('journey-fadeout').checked = !!j.fadeOut;
+    renderStageList();
+    renderJourneyPresets();
+  }
+
+  function renderStageList() {
+    const list = document.getElementById('stage-list');
+    let html = '';
+    editorStages.forEach((st, i) => {
+      const opts = FOCUS_OPTIONS.map(o =>
+        '<option value="' + o.label + '"' + (o.label === st.label ? ' selected' : '') + '>' +
+        o.label + '</option>').join('');
+      html +=
+        '<div class="stage-row">' +
+          '<span class="stage-idx">' + (i + 1) + '</span>' +
+          '<select onchange="onStageFocus(' + i + ', this.value)">' + opts + '</select>' +
+          '<span class="stage-mins"><input type="number" min="1" max="120" value="' + st.mins +
+            '" onchange="onStageMins(' + i + ', this.value)"><span>min</span></span>' +
+          '<button class="stage-del" title="Remove stage" onclick="removeStage(' + i + ')">&times;</button>' +
+        '</div>';
+    });
+    list.innerHTML = html;
+    renderJourneyTotal();
+  }
+
+  function onStageFocus(i, label) {
+    editorStages[i].label = label;
+    editorStages[i].beat  = beatFor(label);
+    renderJourneyTotal();
+  }
+  function onStageMins(i, val) {
+    let m = parseInt(val, 10);
+    if (isNaN(m) || m < 1) m = 1;
+    if (m > 120) m = 120;
+    editorStages[i].mins = m;
+    renderJourneyTotal();
+  }
+
+  function addStage() {
+    editorStages.push({ label: 'Focus 10', beat: 8, mins: 10 });
+    renderStageList();
+  }
+  function removeStage(i) {
+    if (editorStages.length <= 1) return;
+    editorStages.splice(i, 1);
+    renderStageList();
+  }
+
+  function renderJourneyTotal() {
+    const total = editorStages.reduce((s, st) => s + Number(st.mins), 0);
+    const fade  = document.getElementById('journey-fadeout').checked;
+    document.getElementById('journey-total').textContent =
+      'Total — ' + total + ' min' + (fade ? ' + fade-out' : '');
+  }
+
+  function saveCustomJourney() {
+    const name = (prompt('Name this journey:', 'My Journey') || '').trim();
+    if (!name) return;
+    const custom = loadCustomJourneys();
+    custom[name] = {
+      name: name,
+      fadeOut: document.getElementById('journey-fadeout').checked,
+      stages: editorStages.map(s => ({ label: s.label, mins: Number(s.mins) })),
+    };
+    custom[name].desc = journeySummary(custom[name]);
+    storeCustomJourneys(custom);
+    activeJourneyKey = 'custom:' + name;
+    renderJourneyPresets();
+  }
+
+  function deleteCustomJourney(key) {
+    const name = key.slice(7);
+    if (!confirm('Delete saved journey "' + name + '"?')) return;
+    const custom = loadCustomJourneys();
+    delete custom[name];
+    storeCustomJourneys(custom);
+    if (activeJourneyKey === key) activeJourneyKey = null;
+    renderJourneyPresets();
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     JOURNEY LIVE DISPLAY  (read-only — playback is baked into the file)
+     ════════════════════════════════════════════════════════════════ */
+  function setBeatDisplay(beat) {
+    const base = getBase();
+    document.getElementById('beat').value = beat;
+    document.getElementById('beat-val').textContent = beat.toFixed(1) + ' Hz';
+    document.getElementById('s-right').textContent  = base + beat;
+    document.getElementById('s-left').textContent   = base;
+    document.getElementById('beat-pill').textContent = 'Δ ' + beat.toFixed(1) + ' Hz';
+  }
+
+  function renderStageHeader() {
+    const stage = journeyStages[stageIndex];
+    document.getElementById('jl-stage-name').textContent =
+      stage.label + ' · ' + stage.beat.toFixed(1) + ' Hz';
+    document.getElementById('jl-stage-count').textContent =
+      'Stage ' + (stageIndex + 1) + ' / ' + journeyStages.length;
+    document.getElementById('jl-bar-fill').style.width = '0%';
+
+    const next = journeyStages[stageIndex + 1];
+    document.getElementById('jl-next').textContent = next
+      ? 'Next → ' + next.label + ' (' + next.mins + ' min)'
+      : (journeyFadeOut ? 'Then → gentle fade-out to silence' : 'Final stage');
+  }
+
+  /* Reflects the baked file's current position. While backgrounded this
+     freezes (iOS throttles timers); on return it re-syncs from currentTime. */
+  function journeyDisplayTick() {
+    if (!playing) return;
+    const t = player.currentTime;
+    document.getElementById('jl-total-elapsed').textContent = 'total ' + fmt(t);
+
+    if (t >= journeyTotalStageSec) {
+      /* fade tail */
+      document.getElementById('jl-stage-name').textContent = 'Fading out…';
+      document.getElementById('jl-next').textContent = 'Journey complete — drifting to silence';
+      const fadeRem = Math.max(0, (journeyTotalStageSec + END_FADE_SEC) - t);
+      document.getElementById('jl-stage-remaining').textContent = 'fade ' + fmt(fadeRem);
+      document.getElementById('jl-stage-remaining').classList.remove('gliding');
+      document.getElementById('jl-bar-fill').style.width = '100%';
+      return;
+    }
+
+    let idx = 0;
+    for (let i = 0; i < journeyStages.length; i++) {
+      if (t >= journeyStages[i].startSec) idx = i;
+    }
+    if (idx !== stageIndex) {
+      stageIndex = idx;
+      setBeatDisplay(journeyStages[idx].beat);
+      renderStageHeader();
+    }
+
+    const st = journeyStages[idx];
+    const stageDur = st.endSec - st.startSec;
+    const stageElapsed = t - st.startSec;
+    const pct = Math.min(100, (stageElapsed / stageDur) * 100);
+    document.getElementById('jl-bar-fill').style.width = pct + '%';
+
+    const gliding = idx > 0 && stageElapsed < GLIDE_SEC;
+    const remEl = document.getElementById('jl-stage-remaining');
+    remEl.textContent = (gliding ? '↝ gliding · ' : 'stage ') +
+      fmt(Math.max(0, stageDur - stageElapsed)) + ' left';
+    remEl.classList.toggle('gliding', gliding);
+  }
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.round(sec));
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     DIAGNOSTICS — live (screen-on), confirm the rig before a session
+     ════════════════════════════════════════════════════════════════ */
+
+  /* Test tone: a clear beep in the LEFT ear, then the RIGHT ear. */
+  async function playTestTone() {
+    const t = new (window.AudioContext || window.webkitAudioContext)();
+    if (t.state === 'suspended') { try { await t.resume(); } catch (_) {} }
+
+    const f = getBase();
+    const v = Math.max(0.4, parseFloat(document.getElementById('vol').value));
+    const now = t.currentTime;
+
+    [-1, 1].forEach((pan, i) => {
+      const o = t.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+      const p = t.createStereoPanner(); p.pan.value = pan;
+      const g = t.createGain(); g.gain.value = 0.0001;
+      o.connect(p); p.connect(g); g.connect(t.destination);
+      const s = now + i * 0.75;
+      g.gain.setValueAtTime(0.0001, s);
+      g.gain.linearRampToValueAtTime(v, s + 0.05);
+      g.gain.setValueAtTime(v, s + 0.5);
+      g.gain.linearRampToValueAtTime(0.0001, s + 0.62);
+      o.start(s); o.stop(s + 0.7);
+    });
+
+    const btn = document.getElementById('testtone-btn');
+    btn.classList.add('active');
+    btn.textContent = '◀ left … right ▶';
+    setTimeout(() => {
+      btn.classList.remove('active');
+      btn.innerHTML = '▸ Test tone';
+      try { t.close(); } catch (_) {}
+    }, 1800);
+  }
+
+  /* Beat check: an obvious 300 Hz carrier with a strong 10 Hz beat (live). */
+  function toggleBeatCheck() {
+    if (bcCtx) { stopBeatCheck(); return; }
+    if (playing) stopAudio();
+    setMode('manual');
+    document.getElementById('base').value = 300;
+    document.getElementById('beat').value = 10;
+    if (parseFloat(document.getElementById('vol').value) < 0.45) {
+      document.getElementById('vol').value = 0.5;
+    }
+    document.getElementById('state').value = 'custom';
+    syncCarrierPills();
+    document.getElementById('state-desc').textContent =
+      'Beat check — 300 Hz carrier · strong 10 Hz beat. You should clearly hear a fast ' +
+      'throbbing/pulsing. If you hear a steady tone with no pulse, your output is likely ' +
+      'mono or Bluetooth — switch to wired stereo headphones.';
+    updateDisplay();
+    setVol();
+    startBeatCheck();
+  }
+
+  function startBeatCheck() {
+    const v = Math.max(0.4, parseFloat(document.getElementById('vol').value));
+    bcCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (bcCtx.state === 'suspended') { try { bcCtx.resume(); } catch (_) {} }
+
+    const L = bcCtx.createOscillator(), R = bcCtx.createOscillator();
+    L.type = 'sine'; R.type = 'sine'; L.frequency.value = 300; R.frequency.value = 310;
+    const pL = bcCtx.createStereoPanner(), pR = bcCtx.createStereoPanner();
+    pL.pan.value = -1; pR.pan.value = 1;
+    const g = bcCtx.createGain(); g.gain.value = 0.0001;
+    L.connect(pL); R.connect(pR); pL.connect(g); pR.connect(g); g.connect(bcCtx.destination);
+    L.start(); R.start();
+    g.gain.setTargetAtTime(v, bcCtx.currentTime, 0.05);
+
+    beatCheckActive = true;
+    updateBeatCheckBtn();
+    setAudioStatus(true, 'Beat check · 300 Hz carrier with a strong 10 Hz beat — you should ' +
+      'hear a fast throb. A steady tone with no pulse means mono / Bluetooth output.');
+  }
+
+  function stopBeatCheck() {
+    if (!bcCtx) return;
+    try { bcCtx.close(); } catch (_) {}
+    bcCtx = null;
+    beatCheckActive = false;
+    updateBeatCheckBtn();
+    setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
+  }
+
+  function updateBeatCheckBtn() {
+    const btn = document.getElementById('beatcheck-btn');
+    btn.classList.toggle('active', beatCheckActive);
+    btn.textContent = beatCheckActive ? '■ Stop check' : '◎ Beat check';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     OUTPUT DEVICE / CHANNEL STATUS
+     ════════════════════════════════════════════════════════════════ */
+  function setAudioStatus(live, text) {
+    document.getElementById('audio-status').classList.toggle('live', live);
+    document.getElementById('audio-status-text').innerHTML = text;
+  }
+
+  /* Best-effort Bluetooth-output detection. Device labels are only
+     exposed once a media permission exists, so this is advisory. */
+  async function checkBluetooth() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      const outs = devs.filter(d => d.kind === 'audiooutput');
+      const bt = outs.find(d => /bluetooth|airpod|wireless|headset|\bbt\b/i.test(d.label || ''));
+      const warn = document.getElementById('bt-warning');
+      if (bt) {
+        document.getElementById('bt-warning-text').innerHTML =
+          'Bluetooth output detected (<strong>' + bt.label + '</strong>). BT codecs can ' +
+          'down-mix or desync the channels and destroy the binaural beat — use ' +
+          '<strong>wired</strong> headphones for reliable results.';
+        warn.classList.add('show');
+      } else {
+        warn.classList.remove('show');
+      }
+    } catch (_) { /* enumeration blocked — rely on the static warning */ }
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     INIT
+     ════════════════════════════════════════════════════════════════ */
+  player = document.getElementById('player');
+  player.addEventListener('ended', () => { if (playing) stopAudio(); });
+  player.addEventListener('play',  () => { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; });
+  player.addEventListener('pause', () => { if ('mediaSession' in navigator && playing) navigator.mediaSession.playbackState = 'paused'; });
+
+  /* bless the media element on the first user interaction (iOS gesture rule) */
+  document.addEventListener('pointerdown', unlockPlayer, { once: true });
+  document.addEventListener('touchend',   unlockPlayer, { once: true });
+
+  renderJourneyPresets();
+  loadJourneyPreset('obe-prep');   /* seed the editor with a sensible default */
+  updateDisplay();
+  setBgStatus(false);
+</script>
+</body>
+</html>

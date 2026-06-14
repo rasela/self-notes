@@ -20,3 +20,6 @@
 /delta         /footprint.html         200
 /beats         /beats.html             200
 /binaural      /beats.html             200
+/beats-offline /beats-offline.html     200
+/beats-bg      /beats-offline.html     200
+/background    /beats-offline.html     200
