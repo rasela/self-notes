@@ -1,0 +1,8 @@
+# Static site served straight from the repo root — no build step.
+[build]
+  publish = "."
+  command = ""
+
+# Build deploy previews + branch deploys for every branch.
+[context.deploy-preview]
+[context.branch-deploy]
