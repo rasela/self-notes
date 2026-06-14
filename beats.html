@@ -147,7 +147,6 @@ canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:rgba(255,255,255,.13);border-radius:2px;outline:none;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc),0 0 12px rgba(167,139,250,.5);cursor:pointer}
 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc),0 0 12px rgba(167,139,250,.5);cursor:pointer}
-.vol-row{margin:16px 0}
 
 /* play button */
 .play-btn{width:100%;padding:15px;border-radius:8px;border:1px solid rgba(255,255,255,.13);background:transparent;color:var(--tp);font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;min-height:50px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -433,14 +432,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
           </div>
         </div>
 
-        <div class="ctrl-row vol-row">
-          <div class="ctrl-header">
-            <span class="ctrl-name">Volume</span>
-            <span class="ctrl-readout" id="vol-val">50%</span>
-          </div>
-          <input type="range" id="vol" min="0" max="1" value="0.5" step="0.01" oninput="setVol()">
-        </div>
-
         <button class="play-btn" id="play-btn" onclick="togglePlay()">
           <span id="play-icon">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 14,8 4,14"/></svg>
@@ -511,7 +502,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
         <p>In <strong>Manual</strong> mode you pick a single state and a <strong>duration</strong> (5 min – 3 hr, in 5-minute steps via the stepper). The session plays at that fixed beat and ends itself with a gentle fade — no need to come back and stop it.</p>
         <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
-        <p>This is the <strong>offline build.</strong> Instead of generating the tones live, it <strong>renders the entire session</strong> — every stage glide and the final fade — into a single audio file the moment you press Start (you'll see a brief <strong>"Preparing…"</strong>). That file plays through an ordinary media element, so the phone keeps it alive with the <strong>screen off</strong> and shows <strong>lock-screen controls</strong> — no wake lock, no display drain. Because the audio is baked up front, changing the beat, carrier or journey <strong>re-renders</strong>, so set things up before you press Start (volume stays live).</p>
+        <p>This is the <strong>offline build.</strong> Instead of generating the tones live, it <strong>renders the entire session</strong> — every stage glide and the final fade — into a single audio file the moment you press Start (you'll see a brief <strong>"Preparing…"</strong>). That file plays through an ordinary media element, so the phone keeps it alive with the <strong>screen off</strong> and shows <strong>lock-screen controls</strong> — no wake lock, no display drain. Because the audio is baked up front, changing the beat, carrier or journey <strong>re-renders</strong>, so set things up before you press Start. Use your phone's hardware buttons for volume.</p>
       </div>
     </article>
 
@@ -677,12 +668,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   function stepDuration(delta) {
     manualMins = Math.max(MANUAL_MIN, Math.min(MANUAL_MAX, manualMins + delta));
     renderDuration();
-  }
-
-  function setVol() {
-    const v = parseFloat(document.getElementById('vol').value);
-    document.getElementById('vol-val').textContent = Math.round(v * 100) + '%';
-    if (player) player.volume = v;   /* volume stays live via the element */
   }
 
   function togglePlay() {
@@ -973,6 +958,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     ['carrier-section', 'manual-mode', 'journey-mode'].forEach(id =>
       document.getElementById(id).classList.toggle('setup-locked', on));
     document.querySelector('.mode-tabs').classList.toggle('setup-locked', on);
+    document.querySelector('.diag-row').classList.toggle('setup-locked', on);
   }
 
   function uiStart(stopLabel) {
@@ -990,14 +976,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   async function startAudio() {
     const base = getBase(), beat = getBeat();
-    const vol  = parseFloat(document.getElementById('vol').value);
 
     setPreparing(true, 'Preparing…');
     setAudioStatus(false, 'Rendering tones for background playback…');
     try {
       const url = await renderManual(base, beat, manualMins);
       setPlayerSrc(url);
-      player.loop = false; player.volume = vol;
+      player.loop = false; player.volume = 1;
       await player.play();
     } catch (err) {
       console.error('[beats-offline] manual start failed', err);
@@ -1025,7 +1010,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     stageIndex = 0;
 
     const base = getBase();
-    const vol  = parseFloat(document.getElementById('vol').value);
 
     setPreparing(true, 'Rendering journey…');
     setAudioStatus(false, 'Baking the full journey (' + journeyStages.length +
@@ -1033,7 +1017,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     try {
       const url = await renderJourney(journeyStages, base, journeyFadeOut);
       setPlayerSrc(url);
-      player.loop = false; player.volume = vol;
+      player.loop = false; player.volume = 1;
       await player.play();
     } catch (err) {
       console.error('[beats-offline] journey start failed', err);
@@ -1466,7 +1450,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     if (t.state === 'suspended') { try { await t.resume(); } catch (_) {} }
 
     const f = getBase();
-    const v = Math.max(0.4, parseFloat(document.getElementById('vol').value));
+    const v = 0.7;                     /* fixed diagnostic level (system volume controls loudness) */
     const now = t.currentTime;
 
     [-1, 1].forEach((pan, i) => {
@@ -1499,9 +1483,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     setMode('manual');
     document.getElementById('base').value = 300;
     document.getElementById('beat').value = 10;
-    if (parseFloat(document.getElementById('vol').value) < 0.45) {
-      document.getElementById('vol').value = 0.5;
-    }
     document.getElementById('state').value = 'custom';
     syncCarrierPills();
     document.getElementById('state-desc').textContent =
@@ -1509,12 +1490,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       'throbbing/pulsing. If you hear a steady tone with no pulse, your output is likely ' +
       'mono or Bluetooth — switch to wired stereo headphones.';
     updateDisplay();
-    setVol();
     startBeatCheck();
   }
 
   function startBeatCheck() {
-    const v = Math.max(0.4, parseFloat(document.getElementById('vol').value));
+    const v = 0.7;                     /* fixed diagnostic level (system volume controls loudness) */
     bcCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (bcCtx.state === 'suspended') { try { bcCtx.resume(); } catch (_) {} }
 
