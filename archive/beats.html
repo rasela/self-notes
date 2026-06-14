@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Binaural Beats — Offline (Background) Player</title>
+<title>Binaural Beats — Session Player</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"/>
@@ -111,10 +111,6 @@ canvas#viz{width:100%;height:48px;border-radius:6px;background:var(--bg2);border
 /* state description */
 .state-desc{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:6px;padding:11px 13px;font-family:var(--sans);font-size:12px;line-height:1.65;color:var(--ts);margin-bottom:16px}
 
-/* carrier section (shared across modes) */
-#carrier-section{margin-bottom:16px}
-.carrier-now{margin-left:8px;font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--acc);text-transform:none}
-
 /* carrier pills */
 .carrier-row{display:flex;gap:6px;margin-bottom:6px}
 .cpill{flex:1;min-height:44px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--ts);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
@@ -141,7 +137,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .play-btn:active::before{opacity:1}
 .play-btn.playing{border-color:var(--green);color:var(--green)}
 .play-btn.playing::before{opacity:1;background:var(--greendim)}
-.play-btn[disabled]{opacity:.65;cursor:default}
 @keyframes pulse-ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
 .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;position:relative;flex-shrink:0}
 .pulse-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--green);animation:pulse-ring 1.2s ease-out infinite}
@@ -163,7 +158,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .bt-warning.show{display:flex}
 .bt-warning svg{flex-shrink:0;margin-top:1px}
 
-/* timer + background status */
+/* timer + wake lock */
 .timer-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
 .timer-label{font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm)}
 .timer-val{font-family:var(--mono);font-size:13px;color:var(--ts)}
@@ -240,7 +235,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 <div id="prog"></div>
 
 <nav>
-  <div class="brand">Practice <span>/ Binaural · Offline</span></div>
+  <div class="brand">Practice <span>/ Binaural Beats</span></div>
   <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
     <span class="hline"></span><span class="hline"></span><span class="hline"></span>
   </button>
@@ -259,15 +254,15 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
 <main>
   <div class="hero">
-    <p class="eyebrow">Personal Build · Background Playback</p>
+    <p class="eyebrow">Personal Build · For My Practice</p>
     <h1>Binaural<br><em>Beats</em></h1>
-    <p class="subtitle">Offline Player — Plays With The Screen Off</p>
+    <p class="subtitle">Session Player — Focus Presets &amp; Journeys</p>
     <div class="seq">
       <span class="badge">Wired stereo</span>
       <span class="arrow">→</span>
       <span class="badge">Pick a state</span>
       <span class="arrow">→</span>
-      <span class="badge">Play &amp; lock</span>
+      <span class="badge">Play</span>
       <span class="arrow">→</span>
       <span class="badge">Drift</span>
     </div>
@@ -275,7 +270,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   <div class="warn">
     <div class="warn-inner">
-      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). This is the <strong>offline build</strong>: it renders the whole session to an audio file the moment you press Start, so you can <strong>lock the screen</strong> and it keeps playing — lock-screen play/pause works too, and the battery isn't drained by the display. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
+      <p><strong>Stereo headphones are non-negotiable —</strong> the beat only forms <strong>inside your brain</strong> when each ear receives its own tone, so use <strong>wired</strong> headphones (Bluetooth codecs can collapse the channels). And <strong>don't turn the screen off</strong> — the player keeps it awake during a session, but switching it off manually lets the OS suspend the audio mid-session. Never use while driving; consult a physician if you have epilepsy or take psychotropic medication.</p>
     </div>
   </div>
 
@@ -285,7 +280,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     <article id="player" class="technique">
       <div class="tech-head">
         <h2 class="tech-title">Session Player</h2>
-        <span class="tech-abbr">Offline render · screen-off background playback</span>
+        <span class="tech-abbr">One state at a time · hands-free journeys</span>
       </div>
 
       <div class="player">
@@ -307,33 +302,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <div class="viz-wrap">
           <canvas id="viz"></canvas>
           <div class="viz-idle" id="viz-idle">— press start to begin —</div>
-        </div>
-
-        <!-- ════ CARRIER — shared across Manual + Journey ════ -->
-        <div id="carrier-section">
-          <div class="field-label">Carrier <span class="carrier-now" id="carrier-val">200 Hz</span></div>
-          <div class="carrier-row">
-            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
-            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
-            <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
-          </div>
-          <!-- fine-tune panel: odd carriers + (manual-only) beat -->
-          <div class="finetune" id="finetune">
-            <div class="ctrl-row">
-              <div class="ctrl-header">
-                <span class="ctrl-name">Carrier frequency</span>
-                <span class="ctrl-readout" id="base-val">200 Hz</span>
-              </div>
-              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
-            </div>
-            <div class="ctrl-row" id="beat-row">
-              <div class="ctrl-header">
-                <span class="ctrl-name">Beat frequency (manual)</span>
-                <span class="ctrl-readout" id="beat-val">8.0 Hz</span>
-              </div>
-              <input type="range" id="beat" min="0.5" max="50" value="8" step="0.5" oninput="onBeatSlider()">
-            </div>
-          </div>
         </div>
 
         <div class="mode-tabs" role="tablist">
@@ -380,6 +348,30 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
           <div class="state-desc" id="state-desc">Focus 10 · Mind Awake, Body Asleep — the alpha–theta paradox state: mind fully alert while the body sleeps deeply. The foundation everything else builds on; master this first.</div>
 
+          <div class="field-label">Carrier</div>
+          <div class="carrier-row">
+            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
+            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
+            <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
+          </div>
+
+          <!-- hidden fine-tune panel: odd carriers + manual beat -->
+          <div class="finetune" id="finetune">
+            <div class="ctrl-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Carrier frequency</span>
+                <span class="ctrl-readout" id="base-val">200 Hz</span>
+              </div>
+              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
+            </div>
+            <div class="ctrl-row" id="beat-row">
+              <div class="ctrl-header">
+                <span class="ctrl-name">Beat frequency</span>
+                <span class="ctrl-readout" id="beat-val">8.0 Hz</span>
+              </div>
+              <input type="range" id="beat" min="0.5" max="50" value="8" step="0.5" oninput="onBeatSlider()">
+            </div>
+          </div>
         </div><!-- /manual-mode -->
 
         <!-- ════ JOURNEY MODE ════ -->
@@ -438,7 +430,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         </div>
         <div class="wl-line" id="wl-banner" aria-live="polite">
           <span class="wl-dot" id="wl-dot"></span>
-          <span id="wl-text">Background audio: plays with the screen off · lock-screen controls</span>
+          <span id="wl-text">Screen lock: checking…</span>
         </div>
 
       </div><!-- /player -->
@@ -472,21 +464,21 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     <article id="how" class="technique">
       <div class="tech-head">
         <h2 class="tech-title">How It Works</h2>
-        <span class="tech-abbr">Why wired · why it plays with the screen off</span>
+        <span class="tech-abbr">Why wired · why one state at a time</span>
       </div>
       <div class="tech-body">
         <p>A binaural beat doesn't exist in the audio at all. The left ear gets one pure tone (the <strong>carrier</strong>, e.g. 200 Hz) and the right ear gets a slightly different one (e.g. 208 Hz). Your brainstem combines them and perceives the <strong>difference</strong> — an 8 Hz pulse — which the brain tends to entrain toward (the frequency-following response).</p>
         <p>That's why the player hard-pans each oscillator fully left and right, and why <strong>wired stereo headphones</strong> matter: Bluetooth codecs can down-mix or desync the channels, at which point both ears hear both tones and the beat collapses into ordinary audio.</p>
         <p>Carrier choice is mostly comfort — <strong>lower carriers tend to give a stronger, smoother beat percept</strong> than high ones. The fine-tune slider goes down to <strong>40 Hz</strong>: below that, most headphones stop reproducing a pure sine cleanly and the carrier starts crowding the beat frequency itself, so the tone fades out before the beat does.</p>
         <p>In <strong>Journey</strong> mode the player walks through stages hands-free — each transition glides the beat frequency over 15 seconds instead of jumping, and can end with a gentle fade to silence so the session doesn't snap you out of state. Journeys you build can be saved on-device.</p>
-        <p>This is the <strong>offline build.</strong> Instead of generating the tones live, it <strong>renders the entire session</strong> — every stage glide and the final fade — into a single audio file the moment you press Start (you'll see a brief <strong>"Preparing…"</strong>). That file plays through an ordinary media element, so the phone keeps it alive with the <strong>screen off</strong> and shows <strong>lock-screen controls</strong> — no wake lock, no display drain. Because the audio is baked up front, changing the beat, carrier or journey <strong>re-renders</strong>, so set things up before you press Start (volume stays live).</p>
+        <p>While playing, the player holds a <strong>wake lock</strong> so the screen stays on by itself — <strong>don't switch the screen off manually</strong>. Browsers run inside the OS audio policy, and a screen turned off by hand can suspend the audio engine mid-session (the status line under the timer shows whether the lock is active). Just dim the brightness, lay the phone face-up, and let the player manage the screen.</p>
       </div>
     </article>
 
   </div><!-- /wrap -->
 
   <footer>
-    <p>Binaural Beats · Offline (Background) Player · Personal Build<br>Personal study notes · <a href="beats.html">Live player</a> · <a href="focus-10.html">Focus 10</a> · <a href="protocol.html">4-Week Protocol</a> · <a href="obe-taxonomy.html">OBE Taxonomy</a></p>
+    <p>Binaural Beats · Session Player · Personal Build<br>Personal study notes · <a href="focus-10.html">Focus 10</a> · <a href="protocol.html">4-Week Protocol</a> · <a href="obe-taxonomy.html">OBE Taxonomy</a></p>
   </footer>
 
 </main>
@@ -495,57 +487,92 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
 
-<!-- hidden media element: the rendered session plays through here so iOS keeps
-     it alive with the screen off + exposes lock-screen controls -->
-<audio id="bg-audio" playsinline preload="auto" style="display:none"></audio>
-
 <script src="shared.js"></script>
 <script>
   /* ════════════════════════════════════════════════════════════════
-     BINAURAL BEATS — OFFLINE / BACKGROUND ENGINE
-
-     Live oscillators can't play in the background on iOS (Safari suspends
-     the AudioContext on screen-lock). So instead of synthesizing live, we
-     render the whole session offline (OfflineAudioContext) → encode to a
-     WAV blob → play it through a real <audio> element. A media element is
-     granted background playback + lock-screen controls, so the screen can
-     be off — no wake lock, no battery drain from the display.
-
-     • Manual  → a short seamless loop (loop=true), rendered instantly.
-     • Journey → the entire ladder (all glides + fade) baked into one file
-                 so the OS plays it start-to-finish with zero JS (iOS nearly
-                 freezes JS timers while backgrounded).
+     BINAURAL BEATS ENGINE
+     - True L/R separation via hard-panned StereoPannerNodes (a
+       ChannelMerger silently down-mixes to mono — both ears would
+       hear both tones and no beat would form).
+     - Screen Wake Lock while playing, with graceful fallback.
+     - visibilitychange → AudioContext.resume() + wake-lock re-acquire
+       when the OS suspends them on screen-off.
      ════════════════════════════════════════════════════════════════ */
 
   /* ── state ── */
-  let playing       = false;
-  let mode          = 'manual';   /* 'manual' | 'journey' */
+  let ctx        = null;
+  let leftOsc    = null;
+  let rightOsc   = null;
+  let gainNode   = null;
+  let analyser   = null;
+  let animFrame  = null;
+  let playing    = false;
+  let sessionStart = null;
   let timerInterval = null;
-  let journeyInterval = null;
-  let animFrame     = null;
 
   /* ── mode / journey state ── */
+  let mode          = 'manual';   /* 'manual' | 'journey' */
   let editorStages  = [];         /* [{label, beat, mins}] — the journey being built */
-  let journeyStages = [];         /* running journey snapshot (+ startSec/endSec) */
+  let journeyStages = [];         /* snapshot of stages for the running journey */
   let stageIndex    = 0;
-  let journeyFadeOut = true;
-  let journeyTotalStageSec = 0;   /* sum of stage durations (excludes the fade tail) */
+  let stageStartMs  = 0;
+  let journeyInterval = null;
+  let journeyFadeOut  = true;
+  let journeyEnding   = false;
+  let glideEndTime    = 0;        /* Date.now() ms when the current beat-glide finishes */
   let activeJourneyKey = null;
+  let beatCheckActive  = false;
 
   const GLIDE_SEC    = 15;        /* beat-frequency crossfade duration between stages */
   const END_FADE_SEC = 25;        /* gentle fade-out to silence at journey end */
-  const RENDER_SR    = 8000;      /* preferred render rate — far above Nyquist for ≤~310 Hz tones */
-  let   renderRate   = RENDER_SR; /* actual rate the device accepts (set by probeRenderRate at init) */
-  const MANUAL_LOOP  = 10;        /* manual loop length (s); even → seamless on the 0.5-Hz beat grid */
 
-  /* ── media playback ── */
-  let player    = null;           /* the <audio> element */
-  let curUrl    = null;           /* current object URL (revoked on swap/stop) */
-  let unlocked  = false;          /* iOS: element "blessed" by a gesture yet? */
+  /* ── Wake Lock ── */
+  let wakeLock = null;
+  const wlDot  = document.getElementById('wl-dot');
+  const wlText = document.getElementById('wl-text');
+  const wakeLockSupported = 'wakeLock' in navigator;
 
-  /* ── diagnostics (live, screen-on only) ── */
-  let bcCtx           = null;     /* beat-check AudioContext */
-  let beatCheckActive = false;
+  wlText.textContent = wakeLockSupported
+    ? 'Screen lock: will activate on play'
+    : 'Screen lock: not supported by this browser';
+
+  async function acquireWakeLock() {
+    if (!wakeLockSupported) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wlDot.classList.add('active');
+      wlText.textContent = 'Screen lock: active — screen stays on';
+      wakeLock.addEventListener('release', () => {
+        /* released by OS (e.g. battery saver) */
+        wlDot.classList.remove('active');
+        wlText.textContent = 'Screen lock: released by system';
+        wakeLock = null;
+      });
+    } catch (err) {
+      wlText.textContent = 'Screen lock: blocked (' + err.message + ')';
+    }
+  }
+
+  async function releaseWakeLock() {
+    if (!wakeLock) return;
+    try { await wakeLock.release(); } catch(_) {}
+    wakeLock = null;
+    wlDot.classList.remove('active');
+    wlText.textContent = wakeLockSupported
+      ? 'Screen lock: will activate on play'
+      : 'Screen lock: not supported';
+  }
+
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && playing) {
+      if (ctx && ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch(_) {}
+      }
+      if (wakeLockSupported && !wakeLock) {
+        await acquireWakeLock();
+      }
+    }
+  });
 
   /* ════════════════════════════════════════════════════════════════
      STATE PRESETS — beat-frequency ladder is a community
@@ -573,13 +600,14 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   function updateDisplay() {
     const base = getBase(), beat = getBeat();
     document.getElementById('base-val').textContent  = base + ' Hz';
-    document.getElementById('carrier-val').textContent = base + ' Hz';
     document.getElementById('beat-val').textContent  = beat.toFixed(1) + ' Hz';
     document.getElementById('s-left').textContent    = base;
     document.getElementById('s-right').textContent   = base + beat;
     document.getElementById('beat-pill').textContent = 'Δ ' + beat.toFixed(1) + ' Hz';
-    /* offline build: a playing manual session is a baked file — changing the
-       beat needs a restart, so we only update the readouts here. */
+    if (playing && mode === 'manual' && leftOsc && rightOsc) {
+      leftOsc.frequency.setTargetAtTime(base,        ctx.currentTime, 0.05);
+      rightOsc.frequency.setTargetAtTime(base + beat, ctx.currentTime, 0.05);
+    }
   }
 
   function applyState() {
@@ -629,375 +657,101 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   function setVol() {
     const v = parseFloat(document.getElementById('vol').value);
     document.getElementById('vol-val').textContent = Math.round(v * 100) + '%';
-    if (player) player.volume = v;   /* volume stays live via the element */
+    if (gainNode) gainNode.gain.setTargetAtTime(v, ctx.currentTime, 0.05);
   }
 
   function togglePlay() {
     if (playing) { stopAudio(); return; }
-    if (bcCtx) stopBeatCheck();
     if (mode === 'journey') startJourney(); else startAudio();
   }
 
-  /* ════════════════════════════════════════════════════════════════
-     WAV ENCODING  (16-bit PCM, little-endian)
-     ════════════════════════════════════════════════════════════════ */
-  function pcm16(s) { s = s < -1 ? -1 : s > 1 ? 1 : s; return (s < 0 ? s * 0x8000 : s * 0x7FFF) | 0; }
+  /* Build the WebAudio graph with a hard-panned L/R oscillator pair.
+     Shared by manual sessions, journeys and beat-check. */
+  async function createAudioGraph(base, beat, vol) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-  function writeWavHeader(dv, sampleRate, numCh, frames) {
-    const blockAlign = numCh * 2;
-    const dataLen = frames * blockAlign;
-    let p = 0;
-    const ws  = s => { for (let i = 0; i < s.length; i++) dv.setUint8(p++, s.charCodeAt(i)); };
-    const u32 = v => { dv.setUint32(p, v, true); p += 4; };
-    const u16 = v => { dv.setUint16(p, v, true); p += 2; };
-    ws('RIFF'); u32(36 + dataLen); ws('WAVE');
-    ws('fmt '); u32(16); u16(1); u16(numCh); u32(sampleRate);
-    u32(sampleRate * blockAlign); u16(blockAlign); u16(16);
-    ws('data'); u32(dataLen);
-  }
-
-  function encodeWAV(channels /* [Float32Array,…] */, sampleRate) {
-    const numCh = channels.length, n = channels[0].length;
-    const buf = new ArrayBuffer(44 + n * numCh * 2);
-    const dv = new DataView(buf);
-    writeWavHeader(dv, sampleRate, numCh, n);
-    let p = 44;
-    for (let i = 0; i < n; i++)
-      for (let c = 0; c < numCh; c++) { dv.setInt16(p, pcm16(channels[c][i]), true); p += 2; }
-    return new Blob([buf], { type: 'audio/wav' });
-  }
-
-  /* ════════════════════════════════════════════════════════════════
-     OFFLINE RENDER
-
-     WebKit can reject a too-low OfflineAudioContext sample rate AND a
-     too-large single render. So we (1) probe once for the lowest rate the
-     device actually accepts, and (2) render journeys in bounded chunks
-     streamed straight into the WAV buffer — peak memory stays ≈ the size of
-     the final file (~100 MB even for an hour), never the whole float render.
-     ════════════════════════════════════════════════════════════════ */
-  function probeRenderRate() {
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-    for (const r of [8000, 11025, 16000, 22050, 24000, 44100]) {
-      try { new OAC(1, 1, r); return r; } catch (e) { /* try next */ }
-    }
-    return 44100;
-  }
-
-  function makeOffline(seconds) {
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-    return new OAC(2, Math.max(1, Math.ceil(renderRate * seconds)), renderRate);
-  }
-
-  /* hard-panned L/R sine pair → master gain → destination */
-  function buildPair(oac, base) {
-    const L = oac.createOscillator(), R = oac.createOscillator();
-    L.type = 'sine'; R.type = 'sine';
-    L.frequency.value = base;
-    const pL = oac.createStereoPanner(), pR = oac.createStereoPanner();
-    pL.pan.value = -1; pR.pan.value = 1;
-    const g = oac.createGain();
-    L.connect(pL); R.connect(pR); pL.connect(g); pR.connect(g); g.connect(oac.destination);
-    return { L, R, g };
-  }
-
-  /* Manual: render a short seamless UNIT (integer cycles for both ears at an
-     even length → wraps with no click), then tile it into a long (~20 min) WAV.
-     iOS Safari inserts a brief silence each time a *short* clip loops, which is
-     heard as a pause every ~10 s; a long file pushes that boundary out to once
-     every 20 min (and player.loop=true still covers longer sessions). Tiling a
-     phase-aligned unit stays perfectly gapless — each copy joins like the loop
-     wrap, with none of the journey path's per-chunk crossfade. */
-  async function renderManualLoop(base, beat) {
-    const oac = makeOffline(MANUAL_LOOP);
-    const { L, R, g } = buildPair(oac, base);
-    R.frequency.value = base + beat;
-    g.gain.value = 1;                 /* loudness is set live via player.volume */
-    L.start(0); R.start(0);
-    const buf = await oac.startRendering();
-
-    const sr = buf.sampleRate;
-    const cl = buf.getChannelData(0), cr = buf.getChannelData(1);
-    const unitFrames = buf.length;
-
-    /* one interleaved 16-bit copy of the seamless unit */
-    const unit = new Int16Array(unitFrames * 2);
-    for (let i = 0; i < unitFrames; i++) {
-      unit[i * 2]     = pcm16(cl[i]);
-      unit[i * 2 + 1] = pcm16(cr[i]);
+    /* iOS starts AudioContext 'suspended' until a user gesture; the
+       play tap is that gesture, so resume immediately. */
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch(_) {}
     }
 
-    const repeats = Math.max(1, Math.round((20 * 60) / MANUAL_LOOP));
-    const totalFrames = unitFrames * repeats;
-    const ab = new ArrayBuffer(44 + totalFrames * 4);
-    writeWavHeader(new DataView(ab), sr, 2, totalFrames);
-    const out = new Int16Array(ab, 44);          /* 44 is 2-byte aligned */
-    for (let r = 0; r < repeats; r++) out.set(unit, r * unit.length);
+    leftOsc = ctx.createOscillator();
+    leftOsc.type = 'sine';
+    leftOsc.frequency.value = base;
 
-    return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
+    rightOsc = ctx.createOscillator();
+    rightOsc.type = 'sine';
+    rightOsc.frequency.value = base + beat;
+
+    const panLeft  = ctx.createStereoPanner();
+    const panRight = ctx.createStereoPanner();
+    panLeft.pan.value  = -1;
+    panRight.pan.value =  1;
+
+    gainNode = ctx.createGain();
+    gainNode.gain.value = 0.001;
+
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 1024;
+
+    /*  leftOsc  → panLeft  ┐
+                             ├→ gainNode → analyser → destination
+        rightOsc → panRight ┘  */
+    leftOsc.connect(panLeft);
+    rightOsc.connect(panRight);
+    panLeft.connect(gainNode);
+    panRight.connect(gainNode);
+    gainNode.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    leftOsc.start();
+    rightOsc.start();
+
+    /* fade in to avoid click */
+    gainNode.gain.setTargetAtTime(vol, ctx.currentTime, 0.4);
   }
 
-  /* ── journey schedule maths (absolute time → value) ── */
-  function beatAt(stages, absT) {
-    let t = 0;
-    for (let i = 0; i < stages.length; i++) {
-      const end = t + stages[i].mins * 60;
-      if (absT < end || i === stages.length - 1) {
-        if (i > 0 && absT < t + GLIDE_SEC) {
-          const a = Math.max(0, Math.min(1, (absT - t) / GLIDE_SEC));
-          return stages[i - 1].beat + (stages[i].beat - stages[i - 1].beat) * a;
-        }
-        return stages[i].beat;
-      }
-      t = end;
-    }
-    return stages[stages.length - 1].beat;
-  }
-
-  function gainAt(absT, stageSec, fadeOut) {
-    if (absT < 0.4) return Math.max(0.0001, absT / 0.4);          /* fade-in */
-    if (fadeOut && absT >= stageSec)
-      return Math.max(0.0001, 1 - Math.min(1, (absT - stageSec) / END_FADE_SEC));
-    return 1;
-  }
-
-  /* schedule the right-ear frequency / master gain for ONE chunk window
-     [w0,w1] (local times are absolute − w0). */
-  function scheduleChunk(R, g, base, stages, stageSec, fadeOut, w0, w1) {
-    R.setValueAtTime(base + beatAt(stages, w0), 0);
-    let t = 0;
-    for (let i = 0; i < stages.length; i++) {
-      if (i > 0) {
-        const gS = t, gE = t + GLIDE_SEC;
-        if (gE > w0 && gS < w1) {
-          const ls = Math.max(0, gS - w0);
-          R.setValueAtTime(base + beatAt(stages, w0 + ls), ls);
-          const le = Math.min(w1 - w0, gE - w0);
-          R.linearRampToValueAtTime(base + beatAt(stages, w0 + le), le);
-        }
-      }
-      t += stages[i].mins * 60;
-    }
-
-    g.setValueAtTime(gainAt(w0, stageSec, fadeOut), 0);
-    if (w0 < 0.4) g.linearRampToValueAtTime(1, Math.min(w1 - w0, 0.4 - w0));
-    if (fadeOut) {
-      const fS = stageSec, fE = stageSec + END_FADE_SEC;
-      if (fE > w0 && fS < w1) {
-        const ls = Math.max(0, fS - w0);
-        g.setValueAtTime(gainAt(w0 + ls, stageSec, fadeOut), ls);
-        const le = Math.min(w1 - w0, fE - w0);
-        g.linearRampToValueAtTime(Math.max(0.0001, gainAt(w0 + le, stageSec, fadeOut)), le);
-      }
-    }
-  }
-
-  /* Journey: bake every stage + 15 s glides + optional 25 s end fade into one
-     continuous file (mirrors the live glideBeat / endJourney behaviour),
-     rendered in chunks with equal-power crossfaded joins. */
-  async function renderJourney(stages, base, fadeOut) {
-    const sr = renderRate;
-    const stageSec = stages.reduce((s, st) => s + st.mins * 60, 0);
-    const totalSec = stageSec + (fadeOut ? END_FADE_SEC : 0);
-    const frames = Math.ceil(totalSec * sr);
-    const xf = Math.max(1, Math.round(0.06 * sr));   /* crossfade overlap */
-    const chunkFrames = Math.round(60 * sr);          /* ≤ ~4 MB render per chunk */
-
-    const ab = new ArrayBuffer(44 + frames * 4);      /* stereo 16-bit */
-    const dv = new DataView(ab);
-    writeWavHeader(dv, sr, 2, frames);
-
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-
-    for (let cs = 0; cs < frames; cs += chunkFrames) {
-      const ownEnd     = Math.min(frames, cs + chunkFrames);
-      const renderStart = cs > 0 ? cs - xf : 0;       /* lead-in overlap */
-      const renderEnd   = ownEnd;
-      const len = renderEnd - renderStart;
-      const w0 = renderStart / sr, w1 = renderEnd / sr;
-
-      const oac = new OAC(2, len, sr);
-      const { L, R, g } = buildPair(oac, base);
-      scheduleChunk(R.frequency, g.gain, base, stages, stageSec, fadeOut, w0, w1);
-      L.start(0); R.start(0);
-      const buf = await oac.startRendering();
-      const cl = buf.getChannelData(0), cr = buf.getChannelData(1);
-
-      for (let i = 0; i < len; i++) {
-        const gi = renderStart + i;
-        if (gi >= frames) break;
-        let l = cl[i], r = cr[i];
-        if (cs > 0 && i < xf) {                        /* blend with prev chunk's tail */
-          const a = i / xf, cf = Math.cos(a * Math.PI / 2), sf = Math.sin(a * Math.PI / 2);
-          const q = 44 + gi * 4;
-          l = (dv.getInt16(q,     true) / 0x8000) * cf + l * sf;
-          r = (dv.getInt16(q + 2, true) / 0x8000) * cf + r * sf;
-        }
-        const q = 44 + gi * 4;
-        dv.setInt16(q,     pcm16(l), true);
-        dv.setInt16(q + 2, pcm16(r), true);
-      }
-    }
-    return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
-  }
-
-  /* ════════════════════════════════════════════════════════════════
-     PLAYER PLUMBING
-     ════════════════════════════════════════════════════════════════ */
-  function setPlayerSrc(url) {
-    if (curUrl) URL.revokeObjectURL(curUrl);
-    curUrl = url;
-    player.src = url;
-  }
-
-  /* iOS: a media element must first play() inside a user gesture before
-     programmatic play() (after our async render) is allowed. Bless it on the
-     first pointerdown with a tiny silent clip. */
-  function unlockPlayer() {
-    if (unlocked || !player) return;
-    unlocked = true;
-    try {
-      const url = URL.createObjectURL(encodeWAV([new Float32Array(64)], RENDER_SR));
-      player.src = url; player.loop = false; player.volume = 0;
-      const done = () => {
-        try { player.pause(); player.currentTime = 0; } catch (_) {}
-        player.volume = 1;
-        setTimeout(() => URL.revokeObjectURL(url), 3000);
-      };
-      const pr = player.play();
-      if (pr && pr.then) pr.then(done).catch(() => { player.volume = 1; });
-      else done();
-    } catch (e) { /* unlock best-effort */ }
-  }
-
-  function setMediaSession(title) {
-    if (!('mediaSession' in navigator)) return;
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: title, artist: 'Binaural Beats', album: 'self-notes',
-      });
-      navigator.mediaSession.playbackState = 'playing';
-      navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
-      navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
-      navigator.mediaSession.setActionHandler('stop',  () => { stopAudio(); });
-    } catch (e) { /* not supported */ }
-  }
-
-  function clearMediaSession() {
-    if (!('mediaSession' in navigator)) return;
-    try {
-      navigator.mediaSession.playbackState = 'none';
-      navigator.mediaSession.metadata = null;
-    } catch (e) {}
-  }
-
-  function setPreparing(on, label) {
-    const btn = document.getElementById('play-btn');
-    btn.disabled = on;
-    if (on) document.getElementById('play-label').textContent = label || 'Preparing…';
-  }
-
-  function setBgStatus(active) {
-    document.getElementById('wl-dot').classList.toggle('active', active);
-    document.getElementById('wl-text').textContent = active
-      ? 'Background audio: playing — safe to lock the screen'
-      : 'Background audio: plays with the screen off · lock-screen controls';
-  }
-
-  /* ════════════════════════════════════════════════════════════════
-     START / STOP
-     ════════════════════════════════════════════════════════════════ */
   function uiStart(stopLabel) {
     playing = true;
+    sessionStart = Date.now();
     document.getElementById('play-btn').classList.add('playing');
     document.getElementById('play-icon').innerHTML = '<span class="pulse-dot"></span>';
     document.getElementById('play-label').textContent = stopLabel;
     document.getElementById('viz-idle').style.opacity = '0';
     document.getElementById('timer').classList.add('running');
-    timerInterval = setInterval(updateTimer, 1000); updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
     drawViz();
-    setBgStatus(true);
   }
 
   async function startAudio() {
-    const base = getBase(), beat = getBeat();
-    const vol  = parseFloat(document.getElementById('vol').value);
-
-    setPreparing(true, 'Preparing…');
-    setAudioStatus(false, 'Rendering tones for background playback…');
-    try {
-      const url = await renderManualLoop(base, beat);
-      setPlayerSrc(url);
-      player.loop = true; player.volume = vol;
-      await player.play();
-    } catch (err) {
-      console.error('[beats-offline] manual start failed', err);
-      setPreparing(false);
-      document.getElementById('play-label').textContent = 'Start Session';
-      setAudioStatus(false, 'Could not start playback (' + (err && err.message || err) + '). Tap Start again.');
-      return;
-    }
-    setPreparing(false);
-    uiStart('Stop Session');
-    setMediaSession('Binaural · ' + base + '/' + (base + beat) + ' Hz (Δ ' + beat.toFixed(1) + ')');
-    setAudioStatus(true, 'Playing in background · left ' + base + ' Hz, right ' +
-      (base + beat) + ' Hz — the screen can be off.');
-    checkBluetooth();
-  }
-
-  async function startJourney() {
-    if (!editorStages.length) { alert('Add at least one stage first.'); return; }
-
-    journeyStages = editorStages.map(s => ({ label: s.label, beat: s.beat, mins: Number(s.mins) }));
-    let acc = 0;
-    journeyStages.forEach(s => { s.startSec = acc; acc += s.mins * 60; s.endSec = acc; });
-    journeyTotalStageSec = acc;
-    journeyFadeOut = document.getElementById('journey-fadeout').checked;
-    stageIndex = 0;
-
     const base = getBase();
+    const beat = getBeat();
     const vol  = parseFloat(document.getElementById('vol').value);
 
-    setPreparing(true, 'Rendering journey…');
-    setAudioStatus(false, 'Baking the full journey (' + journeyStages.length +
-      ' stages) for hands-free background playback…');
-    try {
-      const url = await renderJourney(journeyStages, base, journeyFadeOut);
-      setPlayerSrc(url);
-      player.loop = false; player.volume = vol;
-      await player.play();
-    } catch (err) {
-      console.error('[beats-offline] journey start failed', err);
-      setPreparing(false);
-      document.getElementById('play-label').textContent = 'Start Journey';
-      setAudioStatus(false, 'Could not start journey (' + (err && err.message || err) + '). Tap Start again.');
-      return;
-    }
-    setPreparing(false);
-    uiStart('Stop Journey');
-    setBeatDisplay(journeyStages[0].beat);
-    document.getElementById('journey-live').classList.add('show');
-    renderStageHeader();
-    journeyInterval = setInterval(journeyDisplayTick, 250);
-    setMediaSession(activeJourneyName() + ' · journey');
-    setAudioStatus(true, 'Journey playing in background · ' + journeyStages.length +
-      ' stages · the screen can be off.');
+    await createAudioGraph(base, beat, vol);
+    uiStart('Stop Session');
+
+    setAudioStatus(true,
+      'Audio running · left ' + base + ' Hz, right ' + (base + beat) +
+      ' Hz — channels hard-separated.');
+
+    await acquireWakeLock();
     checkBluetooth();
   }
 
   function stopAudio() {
-    try { player.pause(); } catch (_) {}
-    try { player.currentTime = 0; } catch (_) {}
-    if (curUrl) { URL.revokeObjectURL(curUrl); curUrl = null; }
-    player.removeAttribute('src');
-    try { player.load(); } catch (_) {}
+    gainNode.gain.setTargetAtTime(0.001, ctx.currentTime, 0.3);
+    setTimeout(() => {
+      try { leftOsc.stop(); rightOsc.stop(); ctx.close(); } catch(_) {}
+    }, 500);
 
+    cancelAnimationFrame(animFrame);
     clearInterval(timerInterval);
     clearInterval(journeyInterval);
     journeyInterval = null;
-    cancelAnimationFrame(animFrame);
+    journeyEnding = false;
     playing = false;
-    clearMediaSession();
 
     document.getElementById('play-btn').classList.remove('playing');
     document.getElementById('play-icon').innerHTML =
@@ -1006,33 +760,29 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       mode === 'journey' ? 'Start Journey' : 'Start Session';
     document.getElementById('viz-idle').style.opacity = '1';
     document.getElementById('timer').classList.remove('running');
-    document.getElementById('timer').textContent = '00:00';
     document.getElementById('journey-live').classList.remove('show');
     clearCanvas();
 
-    setBgStatus(false);
     setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
+
+    if (beatCheckActive) { beatCheckActive = false; updateBeatCheckBtn(); }
+
+    releaseWakeLock();
   }
 
-  /* ── timer (driven by actual audio position) ── */
+  /* ── timer ── */
   function updateTimer() {
-    const sec = (playing && player) ? Math.floor(player.currentTime) : 0;
-    const m = String(Math.floor(sec / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
+    if (!sessionStart) return;
+    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
     document.getElementById('timer').textContent = m + ':' + s;
   }
 
-  /* ── synthetic visualizer (no analyser — must not route the element through
-     a suspendable AudioContext, or background playback would stop) ── */
+  /* ── canvas viz ── */
   function clearCanvas() {
     const c = document.getElementById('viz');
     c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  }
-
-  function vizBeat() {
-    if (mode === 'journey' && journeyStages.length)
-      return journeyStages[Math.min(stageIndex, journeyStages.length - 1)].beat;
-    return getBeat();
   }
 
   function drawViz() {
@@ -1042,32 +792,35 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     const cx = c.getContext('2d');
     cx.scale(devicePixelRatio, devicePixelRatio);
     const W = c.offsetWidth, H = c.offsetHeight;
-    const t0 = performance.now();
-
-    const grad = cx.createLinearGradient(0, 0, W, 0);
-    grad.addColorStop(0,   'rgba(167,139,250,0.4)');
-    grad.addColorStop(0.5, 'rgba(201,169,110,0.9)');
-    grad.addColorStop(1,   'rgba(167,139,250,0.4)');
+    const buf = new Uint8Array(analyser.frequencyBinCount);
 
     function frame() {
       animFrame = requestAnimationFrame(frame);
-      const t = (performance.now() - t0) / 1000;
-      const beat = vizBeat();
-      const env = 0.32 + 0.68 * Math.abs(Math.sin(Math.PI * beat * t)); /* amplitude pulses at the beat */
-      const cycles = 14;
+      analyser.getByteTimeDomainData(buf);
       cx.clearRect(0, 0, W, H);
 
-      const drawLine = (lw, st) => {
-        cx.beginPath(); cx.lineWidth = lw; cx.strokeStyle = st;
-        for (let x = 0; x <= W; x += 2) {
-          const ph = (x / W) * cycles * 2 * Math.PI + t * 6;
-          const y = H / 2 + Math.sin(ph) * (H / 2 - 3) * env;
-          x === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
-        }
-        cx.stroke();
-      };
-      drawLine(1.5, grad);
-      drawLine(5,   'rgba(167,139,250,0.07)');
+      const grad = cx.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0,   'rgba(167,139,250,0.4)');
+      grad.addColorStop(0.5, 'rgba(201,169,110,0.9)');
+      grad.addColorStop(1,   'rgba(167,139,250,0.4)');
+
+      cx.beginPath(); cx.lineWidth = 1.5; cx.strokeStyle = grad;
+      const sw = W / buf.length; let x = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const y = (buf[i] / 128) * (H / 2);
+        i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        x += sw;
+      }
+      cx.stroke();
+
+      cx.beginPath(); cx.lineWidth = 5; cx.strokeStyle = 'rgba(167,139,250,0.07)';
+      x = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const y = (buf[i] / 128) * (H / 2);
+        i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        x += sw;
+      }
+      cx.stroke();
     }
     frame();
   }
@@ -1087,8 +840,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
     document.getElementById('manual-mode').style.display  = m === 'manual'  ? '' : 'none';
     document.getElementById('journey-mode').style.display = m === 'journey' ? '' : 'none';
-    /* the beat fine-tune slider is manual-only; the carrier control stays shared */
-    document.getElementById('beat-row').style.display     = m === 'manual'  ? '' : 'none';
 
     document.getElementById('play-label').textContent =
       m === 'journey' ? 'Start Journey' : 'Start Session';
@@ -1222,11 +973,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return BUILTIN_JOURNEYS[key];
   }
 
-  function activeJourneyName() {
-    const j = activeJourneyKey ? getJourneyByKey(activeJourneyKey) : null;
-    return j ? j.name : 'Custom journey';
-  }
-
   function loadJourneyPreset(key) {
     const j = getJourneyByKey(key);
     if (!j) return;
@@ -1313,8 +1059,70 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   }
 
   /* ════════════════════════════════════════════════════════════════
-     JOURNEY LIVE DISPLAY  (read-only — playback is baked into the file)
+     JOURNEY PLAYBACK ENGINE
      ════════════════════════════════════════════════════════════════ */
+  async function startJourney() {
+    if (!editorStages.length) { alert('Add at least one stage first.'); return; }
+
+    journeyStages  = editorStages.map(s => ({ label: s.label, beat: s.beat, mins: Number(s.mins) }));
+    journeyFadeOut = document.getElementById('journey-fadeout').checked;
+    journeyEnding  = false;
+    stageIndex     = 0;
+
+    const base = getBase();
+    const vol  = parseFloat(document.getElementById('vol').value);
+
+    await createAudioGraph(base, journeyStages[0].beat, vol);
+    uiStart('Stop Journey');
+
+    stageStartMs = sessionStart;     /* uiStart set sessionStart = Date.now() */
+    glideEndTime = 0;
+    setBeatDisplay(journeyStages[0].beat);
+    document.getElementById('journey-live').classList.add('show');
+    renderStageHeader();
+
+    journeyInterval = setInterval(journeyTick, 250);
+
+    setAudioStatus(true, 'Journey running · ' + journeyStages.length +
+      ' stages · L/R channels separated — hands-free until end.');
+
+    await acquireWakeLock();
+    checkBluetooth();
+  }
+
+  function journeyTick() {
+    if (journeyEnding) return;
+    const nowMs = Date.now();
+    const stage = journeyStages[stageIndex];
+    const stageDur = stage.mins * 60;
+    const stageElapsed = (nowMs - stageStartMs) / 1000;
+    const totalElapsed = (nowMs - sessionStart) / 1000;
+
+    updateJourneyLive(stageElapsed, stageDur, totalElapsed);
+
+    if (stageElapsed >= stageDur) {
+      if (stageIndex < journeyStages.length - 1) {
+        stageIndex++;
+        stageStartMs = nowMs;
+        glideBeat(journeyStages[stageIndex].beat);   /* smooth crossfade, not a jump */
+        renderStageHeader();
+      } else {
+        endJourney();
+      }
+    }
+  }
+
+  /* Crossfade the BEAT frequency (not the audio) into the next stage. */
+  function glideBeat(targetBeat) {
+    const base = getBase();
+    const now  = ctx.currentTime;
+    rightOsc.frequency.cancelScheduledValues(now);
+    rightOsc.frequency.setValueAtTime(rightOsc.frequency.value, now);
+    rightOsc.frequency.linearRampToValueAtTime(base + targetBeat, now + GLIDE_SEC);
+    glideEndTime = Date.now() + GLIDE_SEC * 1000;
+    setBeatDisplay(targetBeat);
+  }
+
   function setBeatDisplay(beat) {
     const base = getBase();
     document.getElementById('beat').value = beat;
@@ -1338,45 +1146,38 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       : (journeyFadeOut ? 'Then → gentle fade-out to silence' : 'Final stage');
   }
 
-  /* Reflects the baked file's current position. While backgrounded this
-     freezes (iOS throttles timers); on return it re-syncs from currentTime. */
-  function journeyDisplayTick() {
-    if (!playing) return;
-    const t = player.currentTime;
-    document.getElementById('jl-total-elapsed').textContent = 'total ' + fmt(t);
-
-    if (t >= journeyTotalStageSec) {
-      /* fade tail */
-      document.getElementById('jl-stage-name').textContent = 'Fading out…';
-      document.getElementById('jl-next').textContent = 'Journey complete — drifting to silence';
-      const fadeRem = Math.max(0, (journeyTotalStageSec + END_FADE_SEC) - t);
-      document.getElementById('jl-stage-remaining').textContent = 'fade ' + fmt(fadeRem);
-      document.getElementById('jl-stage-remaining').classList.remove('gliding');
-      document.getElementById('jl-bar-fill').style.width = '100%';
-      return;
-    }
-
-    let idx = 0;
-    for (let i = 0; i < journeyStages.length; i++) {
-      if (t >= journeyStages[i].startSec) idx = i;
-    }
-    if (idx !== stageIndex) {
-      stageIndex = idx;
-      setBeatDisplay(journeyStages[idx].beat);
-      renderStageHeader();
-    }
-
-    const st = journeyStages[idx];
-    const stageDur = st.endSec - st.startSec;
-    const stageElapsed = t - st.startSec;
+  function updateJourneyLive(stageElapsed, stageDur, totalElapsed) {
     const pct = Math.min(100, (stageElapsed / stageDur) * 100);
     document.getElementById('jl-bar-fill').style.width = pct + '%';
 
-    const gliding = idx > 0 && stageElapsed < GLIDE_SEC;
+    const remaining = Math.max(0, stageDur - stageElapsed);
+    const gliding = Date.now() < glideEndTime;
     const remEl = document.getElementById('jl-stage-remaining');
-    remEl.textContent = (gliding ? '↝ gliding · ' : 'stage ') +
-      fmt(Math.max(0, stageDur - stageElapsed)) + ' left';
+    remEl.textContent = (gliding ? '↝ gliding · ' : 'stage ') + fmt(remaining) + ' left';
     remEl.classList.toggle('gliding', gliding);
+
+    document.getElementById('jl-total-elapsed').textContent = 'total ' + fmt(totalElapsed);
+  }
+
+  function endJourney() {
+    journeyEnding = true;
+    clearInterval(journeyInterval);
+    journeyInterval = null;
+    document.getElementById('jl-bar-fill').style.width = '100%';
+
+    if (journeyFadeOut && gainNode && ctx) {
+      const now = ctx.currentTime;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(0.0001, now + END_FADE_SEC);
+      document.getElementById('jl-stage-name').textContent = 'Fading out…';
+      document.getElementById('jl-next').textContent = 'Journey complete — drifting to silence';
+      document.getElementById('jl-stage-remaining').textContent = 'fade ' + fmt(END_FADE_SEC);
+      setAudioStatus(true, 'Journey complete · gentle fade-out to silence…');
+      setTimeout(() => { if (playing) stopAudio(); }, END_FADE_SEC * 1000 + 400);
+    } else {
+      stopAudio();
+    }
   }
 
   function fmt(sec) {
@@ -1387,7 +1188,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   }
 
   /* ════════════════════════════════════════════════════════════════
-     DIAGNOSTICS — live (screen-on), confirm the rig before a session
+     DIAGNOSTICS — confirm the rig works before a real session
      ════════════════════════════════════════════════════════════════ */
 
   /* Test tone: a clear beep in the LEFT ear, then the RIGHT ear. */
@@ -1422,10 +1223,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     }, 1800);
   }
 
-  /* Beat check: an obvious 300 Hz carrier with a strong 10 Hz beat (live). */
+  /* Beat check: an obvious 300 Hz carrier with a strong 10 Hz beat. */
   function toggleBeatCheck() {
-    if (bcCtx) { stopBeatCheck(); return; }
-    if (playing) stopAudio();
+    if (playing) {
+      const wasBeatCheck = beatCheckActive;
+      stopAudio();
+      if (wasBeatCheck) return;   /* pressing it again just stops */
+    }
     setMode('manual');
     document.getElementById('base').value = 300;
     document.getElementById('beat').value = 10;
@@ -1440,36 +1244,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       'mono or Bluetooth — switch to wired stereo headphones.';
     updateDisplay();
     setVol();
-    startBeatCheck();
-  }
-
-  function startBeatCheck() {
-    const v = Math.max(0.4, parseFloat(document.getElementById('vol').value));
-    bcCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (bcCtx.state === 'suspended') { try { bcCtx.resume(); } catch (_) {} }
-
-    const L = bcCtx.createOscillator(), R = bcCtx.createOscillator();
-    L.type = 'sine'; R.type = 'sine'; L.frequency.value = 300; R.frequency.value = 310;
-    const pL = bcCtx.createStereoPanner(), pR = bcCtx.createStereoPanner();
-    pL.pan.value = -1; pR.pan.value = 1;
-    const g = bcCtx.createGain(); g.gain.value = 0.0001;
-    L.connect(pL); R.connect(pR); pL.connect(g); pR.connect(g); g.connect(bcCtx.destination);
-    L.start(); R.start();
-    g.gain.setTargetAtTime(v, bcCtx.currentTime, 0.05);
-
     beatCheckActive = true;
     updateBeatCheckBtn();
-    setAudioStatus(true, 'Beat check · 300 Hz carrier with a strong 10 Hz beat — you should ' +
-      'hear a fast throb. A steady tone with no pulse means mono / Bluetooth output.');
-  }
-
-  function stopBeatCheck() {
-    if (!bcCtx) return;
-    try { bcCtx.close(); } catch (_) {}
-    bcCtx = null;
-    beatCheckActive = false;
-    updateBeatCheckBtn();
-    setAudioStatus(false, 'Audio idle — press Start. L/R channels are hard-separated.');
+    startAudio();
   }
 
   function updateBeatCheckBtn() {
@@ -1510,24 +1287,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* ════════════════════════════════════════════════════════════════
      INIT
      ════════════════════════════════════════════════════════════════ */
-  player = document.getElementById('bg-audio');
-  player.addEventListener('ended', () => { if (playing) stopAudio(); });
-  player.addEventListener('play',  () => { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; });
-  player.addEventListener('pause', () => { if ('mediaSession' in navigator && playing) navigator.mediaSession.playbackState = 'paused'; });
-
-  /* pick the lowest OfflineAudioContext sample rate the device accepts, so
-     journey files stay small (and we never blow up on a rejected rate) */
-  renderRate = probeRenderRate();
-  console.log('[beats-offline] render rate =', renderRate, 'Hz');
-
-  /* bless the media element on the first user interaction (iOS gesture rule) */
-  document.addEventListener('pointerdown', unlockPlayer, { once: true });
-  document.addEventListener('touchend',   unlockPlayer, { once: true });
-
   renderJourneyPresets();
   loadJourneyPreset('obe-prep');   /* seed the editor with a sensible default */
   updateDisplay();
-  setBgStatus(false);
 </script>
 </body>
 </html>
