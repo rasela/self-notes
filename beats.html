@@ -557,6 +557,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
      ════════════════════════════════════════════════════════════════ */
   function pcm16(s) { s = s < -1 ? -1 : s > 1 ? 1 : s; return (s < 0 ? s * 0x8000 : s * 0x7FFF) | 0; }
 
+  /* TPDF-dithered 16-bit quantize: add triangular noise of ±1 LSB before
+     truncating so quantization error is decorrelated from the signal. Keeps
+     the fade-to-silence tail perfectly smooth instead of stepping/graining
+     down through the lowest bits. The added floor sits ~-90 dB, inaudible. */
+  const LSB = 1 / 0x8000;
+  function pcm16d(s) { return pcm16(s + (Math.random() - Math.random()) * LSB); }
+
   function writeWavHeader(dv, sampleRate, numCh, frames) {
     const blockAlign = numCh * 2;
     const dataLen = frames * blockAlign;
@@ -645,12 +652,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       const u = i % unitFrames;
       let l = cl[u], r = cr[u];
       if (i >= fadeStart) {                       /* equal-power fade to silence */
-        const a = (totalFrames - i) / fadeFrames;
-        out[i * 2]     = pcm16(l * a);
-        out[i * 2 + 1] = pcm16(r * a);
+        const a = (totalFrames - i) / fadeFrames; /* 1 → 0 across the tail */
+        const e = Math.sin(a * Math.PI / 2);      /* equal-power curve */
+        out[i * 2]     = pcm16d(l * e);
+        out[i * 2 + 1] = pcm16d(r * e);
       } else {
-        out[i * 2]     = pcm16(l);
-        out[i * 2 + 1] = pcm16(r);
+        out[i * 2]     = pcm16d(l);
+        out[i * 2 + 1] = pcm16d(r);
       }
     }
 
@@ -675,9 +683,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   }
 
   function gainAt(absT, stageSec, fadeOut) {
-    if (absT < 0.4) return Math.max(0.0001, absT / 0.4);          /* fade-in */
-    if (fadeOut && absT >= stageSec)
-      return Math.max(0.0001, 1 - Math.min(1, (absT - stageSec) / END_FADE_SEC));
+    if (absT < 0.4) return Math.sin((absT / 0.4) * Math.PI / 2);   /* equal-power fade-in */
+    if (fadeOut && absT >= stageSec) {                             /* equal-power fade-out */
+      const a = Math.min(1, (absT - stageSec) / END_FADE_SEC);     /* 0 → 1 across the tail */
+      return Math.cos(a * Math.PI / 2);
+    }
     return 1;
   }
 
@@ -711,8 +721,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     for (let i = 0; i < frames; i++) {
       const t = i / sr;
       const g = gainAt(t, stageSec, fadeOut);
-      out[i * 2]     = pcm16(Math.sin(phaseL) * g);
-      out[i * 2 + 1] = pcm16(Math.sin(phaseR) * g);
+      out[i * 2]     = pcm16d(Math.sin(phaseL) * g);
+      out[i * 2 + 1] = pcm16d(Math.sin(phaseR) * g);
       phaseL += wL;
       phaseR += TWO_PI * (base + beatAt(stages, t)) / sr;
       if (phaseL >= TWO_PI) phaseL -= TWO_PI;
