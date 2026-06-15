@@ -1,9 +1,42 @@
 # Binaural Beats — Sample Rate & Memory (Future TODO / Reference)
 
-> **Status: deferred — not scheduled.** This is a parking-lot note so we don't lose
-> the reasoning. The current build deliberately stays at **8 kHz** (see
-> `beats-sound-quality-plan.md` §2 and §7). Pick this up as its own task when we're
-> ready to improve playback fidelity / add brighter textures.
+> **Status: RESOLVED — won't do (2026-06-15).** After a spike + discussion with the
+> owner, we are **not** raising the sample rate and **not** streaming. The current
+> build stays at **8 kHz, whole-file bake**. Reasoning and spike findings below; the
+> rest of this doc is kept as background for anyone who revisits.
+>
+> **Why we closed it:**
+> - The only thing a higher rate unlocked was **brighter noise/pad beds**. The owner
+>   only cares about the **tones**, and pure ≤310 Hz sines are already perfect at
+>   8 kHz (40 samples/cycle, no aliasing) — they gain nothing from a higher rate.
+> - With no rate increase, the streaming/memory rewrite has no payoff. The current
+>   8 kHz whole-file build is correct for "tones-only, good enough."
+> - The residual reason to stream was **memory on 2–3 hr manual sessions** (~346 MB
+>   file / ~1 GB peak at 8 kHz). Owner confirmed sessions aren't long enough to hit
+>   this. If that changes, the spike findings below are the starting point.
+>
+> **Spike findings (PR #7, `docs/spike-bg-audio.html` — keep it, it's re-runnable):**
+> tested on the owner's iPhone with headphones, screen-locked.
+> 1. **Background JS survives screen lock** — chunk feeding kept up while locked
+>    (setTimeout/'ended' both fire). The original fear that the page can't feed audio
+>    in the background is unfounded.
+> 2. **Web Audio (scheduled `AudioBufferSourceNode`s) DIES on lock** — the
+>    `AudioContext` suspends. So the gapless, sample-accurate approach is unusable for
+>    background/lock-screen playback. (Confirms why the player went offline-render.)
+> 3. **`<audio>` is the only primitive that survives lock**, but: no usable
+>    `MediaSource`/MSE (so no true gapless streaming), `.volume` is ignored on iOS,
+>    and `.play()` has ~100 ms non-deterministic latency (no sample-accurate start).
+> 4. Given (3), the viable streaming primitive is a **fade-to-silence handoff**: each
+>    tone segment fades to true silence, the next fades up from silence on `ended`;
+>    the ~100 ms swap gap lands inside the silence = inaudible. (Crossfade/overlap is
+>    fragile because of the `.volume`/timing limits.) A separate **seamless bed loop**
+>    on its own `<audio loop>` (~10 MB even at high rate, since noise is stationary
+>    and loops indistinguishably) would carry any texture layer at near-zero memory —
+>    i.e. **loop the bed, don't whole-file it**, and it's the *bed* (not the tone)
+>    that would want the high rate. None of this is being built — recorded for reuse.
+>
+> If revisited: the architecture is bed-loop (own element) + tone fade-to-silence
+> handoff segments; memory then decouples from duration and HW/2 rate becomes free.
 
 ---
 
