@@ -78,11 +78,11 @@ died in the background. Test <b>Web Audio</b> first (the real candidate), then
   <h2>Config</h2>
   <div class="row">
     <div><label>Tone Hz</label><input id="hz" type="number" value="220" min="50" max="1000"></div>
-    <div><label>Chunk seconds</label><input id="chunk" type="number" value="10" min="2" max="60"></div>
+    <div><label>Chunk seconds</label><input id="chunk" type="number" value="30" min="2" max="60"></div>
     <div><label>Render rate</label><input id="rate" type="number" value="22050" min="8000" max="48000"></div>
   </div>
   <div class="row" style="margin-top:8px">
-    <div><label>Crossfade sec (XF eng.)</label><input id="xf" type="number" value="0.6" min="0.1" max="3" step="0.1"></div>
+    <div><label>Crossfade sec (XF eng.)</label><input id="xf" type="number" value="1.5" min="0.1" max="5" step="0.1"></div>
     <div><label>Look-ahead chunks (WA)</label><input id="look" type="number" value="3" min="1" max="10"></div>
   </div>
 </div>
@@ -158,6 +158,10 @@ function fillTone(l, r, n, hz, sr){
   const inc=2*Math.PI*hz/sr;
   for(let i=0;i<n;i++){ const s=Math.sin(phase)*0.25; l[i]=s; r[i]=s; phase+=inc; if(phase>=2*Math.PI)phase-=2*Math.PI; }
 }
+function rewindPhase(samples, hz, sr){
+  const inc=2*Math.PI*hz/sr;
+  phase=((phase - samples*inc)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+}
 
 /* ===== state ===== */
 let engine='webaudio', running=false;
@@ -215,10 +219,15 @@ function waStart(){
 }
 
 /* ============ ENGINE B: crossfade <audio> (baked fades) ============ */
-let els=[], cur=0, swapTimer=null;
+let els=[], cur=0, swapTimer=null, xfFirst=true;
 function fadedChunkURL(){
-  // length = chunkSecs body + xf head-fade-in + xf tail-fade-out (overlap region duplicated by phase continuity)
   const total=Math.round((chunkSecs)*sr), nf=Math.round(xfSecs*sr);
+  // Duplicate the overlap region: rewind the phase by nf so this chunk's faded-IN
+  // head replays the previous chunk's faded-OUT tail. Two identical waveforms
+  // crossfading reconstruct to ~constant amplitude even with ~100ms timing slop,
+  // killing the phase-beat dip you hear when the head is just the continuation.
+  if(!xfFirst) rewindPhase(nf, hz, sr);
+  xfFirst=false;
   const l=new Float32Array(total), r=new Float32Array(total);
   fillTone(l,r,total,hz,sr);
   for(let i=0;i<nf;i++){
@@ -316,7 +325,7 @@ function start(){
   sr=+document.getElementById('rate').value;
   xfSecs=+document.getElementById('xf').value;
   lookChunks=+document.getElementById('look').value;
-  phase=0; chunkCount=0; bgCount=0; maxLat=0; clk0=null;
+  phase=0; chunkCount=0; bgCount=0; maxLat=0; clk0=null; xfFirst=true;
   running=true; startWall=performance.now();
   document.getElementById('start').disabled=true; document.getElementById('stop').disabled=false;
   setCard('s-bg',0);
