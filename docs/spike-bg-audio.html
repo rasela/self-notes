@@ -234,10 +234,9 @@ function fadedChunkURL(){
   const l=new Float32Array(total), r=new Float32Array(total);
   fillTone(l,r,total,hz,sr);
   for(let i=0;i<nf;i++){
-    const ein=Math.sin((i/nf)*Math.PI/2);       // equal-power fade-in
-    const eout=Math.cos((i/nf)*Math.PI/2);      // equal-power fade-out
-    l[i]*=ein; r[i]*=ein;
-    l[total-1-i]*=eout; r[total-1-i]*=eout;
+    const e=Math.sin((i/nf)*Math.PI/2);         // 0 at the edge sample, 1 at nf
+    l[i]*=e; r[i]*=e;                            // fade-in (first nf)
+    l[total-1-i]*=e; r[total-1-i]*=e;           // fade-out (last nf, from the end)
   }
   // 16-bit stereo WAV
   const bytes=44+total*4, buf=new ArrayBuffer(bytes), v=new DataView(buf);
@@ -294,9 +293,10 @@ function handoffChunkURL(){
   const total=Math.round(chunkSecs*sr), nf=Math.round(xfSecs*sr);
   const l=new Float32Array(total), r=new Float32Array(total);
   fillTone(l,r,total,hz,sr);
-  for(let i=0;i<nf;i++){                       // equal-power fade up from / down to silence
-    const ein=Math.sin((i/nf)*Math.PI/2), eout=Math.cos((i/nf)*Math.PI/2);
-    l[i]*=ein; r[i]*=ein; l[total-1-i]*=eout; r[total-1-i]*=eout;
+  for(let i=0;i<nf;i++){                       // fade up from / down to TRUE silence
+    const e=Math.sin((i/nf)*Math.PI/2);        // i=0 → 0 at the edge sample (no click)
+    l[i]*=e; r[i]*=e;                           // fade-in (first nf)
+    l[total-1-i]*=e; r[total-1-i]*=e;           // fade-out (last nf, indexed from end)
   }
   return pcmWavURL(l,r,total);
 }
