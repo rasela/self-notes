@@ -68,10 +68,12 @@ died in the background. Test <b>Web Audio</b> first (the real candidate), then
 <div class="card">
   <h2>Engine</h2>
   <div class="seg" id="engsel">
-    <button data-e="webaudio" class="on">Web Audio (scheduled)</button>
-    <button data-e="crossfade">Crossfade &lt;audio&gt;</button>
+    <button data-e="handoff" class="on">Handoff (fade→silence)</button>
+    <button data-e="crossfade">Crossfade</button>
+    <button data-e="webaudio">Web Audio</button>
   </div>
   <p id="engdesc" style="font-size:12px;color:var(--tm);margin:8px 0 0"></p>
+  <label style="margin-top:10px"><input type="checkbox" id="bed" style="width:auto" checked> Continuous bed loop (brown noise) underneath</label>
 </div>
 
 <div class="card">
@@ -164,14 +166,15 @@ function rewindPhase(samples, hz, sr){
 }
 
 /* ===== state ===== */
-let engine='webaudio', running=false;
+let engine='handoff', running=false;
 let hz, chunkSecs, sr, xfSecs, lookChunks;
 let chunkCount=0, startWall=0, bgCount=0, maxLat=0, monTimer=null, schedTimer=null;
 
 /* ---- engine selector ---- */
 const engDesc={
-  webaudio:'AudioBufferSourceNodes scheduled back-to-back with start(when) — sample-accurate, gapless by construction. Open question: does the AudioContext keep running while locked?',
-  crossfade:'Two <audio> elements, next started ~XF before current ends, with equal-power fades BAKED into an overlap region (iOS ignores .volume). Best-effort: timing slop may cause mild amplitude wobble, but should not gap.'
+  handoff:'Each tone segment fades to silence; the next fades up from silence on `ended`. The ~100ms swap gap lands inside the silence = inaudible. No overlap timing, no phase-beat. A continuous bed loop masks the brief tone dip.',
+  crossfade:'Two <audio> elements overlap with equal-power fades baked into a duplicated overlap region. More complex; sensitive to <audio> timing slop.',
+  webaudio:'Scheduled AudioBufferSourceNodes — gapless but the AudioContext DIES on lock (confirmed). Kept for reference only.'
 };
 document.querySelectorAll('#engsel button').forEach(b=>b.onclick=()=>{
   if(running) return;
@@ -179,7 +182,7 @@ document.querySelectorAll('#engsel button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#engsel button').forEach(x=>x.classList.toggle('on',x===b));
   document.getElementById('engdesc').textContent=engDesc[engine];
 });
-document.getElementById('engdesc').textContent=engDesc.webaudio;
+document.getElementById('engdesc').textContent=engDesc.handoff;
 
 /* ============ ENGINE A: Web Audio scheduled ============ */
 let actx=null, waGain=null, nextTime=0, keepAudio=null;
@@ -274,10 +277,69 @@ function scheduleSwap(){
   }, lead*1000);
 }
 
+/* ============ ENGINE C: handoff (fade→silence) + bed loop ============ */
+function pcmWavURL(l, r, n){
+  const bytes=44+n*4, buf=new ArrayBuffer(bytes), v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+n*4,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,n*4,true);
+  let o=44;
+  for(let i=0;i<n;i++){ v.setInt16(o,Math.max(-1,Math.min(1,l[i]))*32767,true);o+=2; v.setInt16(o,Math.max(-1,Math.min(1,r[i]))*32767,true);o+=2; }
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+let hoEls=[], hoCur=0, bedEl=null;
+function handoffChunkURL(){
+  const total=Math.round(chunkSecs*sr), nf=Math.round(xfSecs*sr);
+  const l=new Float32Array(total), r=new Float32Array(total);
+  fillTone(l,r,total,hz,sr);
+  for(let i=0;i<nf;i++){                       // equal-power fade up from / down to silence
+    const ein=Math.sin((i/nf)*Math.PI/2), eout=Math.cos((i/nf)*Math.PI/2);
+    l[i]*=ein; r[i]*=ein; l[total-1-i]*=eout; r[total-1-i]*=eout;
+  }
+  return pcmWavURL(l,r,total);
+}
+function makeBedURL(){
+  // ~20 s brown-noise bed, low level, wrap-crossfaded so loop=true is seamless
+  const secs=20, n=Math.round(secs*sr), nf=Math.round(0.4*sr);
+  const l=new Float32Array(n), r=new Float32Array(n);
+  let bl=0,br=0; const lvl=0.18;
+  for(let i=0;i<n;i++){
+    bl=(bl+0.02*(Math.random()*2-1))/1.02; br=(br+0.02*(Math.random()*2-1))/1.02;
+    l[i]=bl*3.5*lvl; r[i]=br*3.5*lvl;
+  }
+  for(let i=0;i<nf;i++){                        // blend tail into head for a clickless loop
+    const a=i/nf;
+    l[i]=l[i]*a + l[n-nf+i]*(1-a); r[i]=r[i]*a + r[n-nf+i]*(1-a);
+  }
+  return pcmWavURL(l,r,n);
+}
+function handoffStart(){
+  setCard('s-engine','Handoff (fade→silence)'); setCard('s-gap','n/a (silent seam)');
+  if(document.getElementById('bed').checked){
+    bedEl=new Audio(); bedEl.loop=true; bedEl.src=makeBedURL();
+    bedEl.play().then(()=>log('bed loop playing','g')).catch(e=>log('bed rejected: '+e,'r'));
+  }
+  hoEls=[new Audio(), new Audio()];
+  hoEls.forEach(a=>{a.preload='auto'; a.addEventListener('ended',()=>{
+    if(!running||engine!=='handoff') return;
+    const t0=performance.now(); const old=hoEls[hoCur]; hoCur=1-hoCur;
+    hoEls[hoCur].play().then(()=>log(`handoff→el${hoCur} (${(performance.now()-t0).toFixed(0)}ms gap, in silence)`,'g'))
+                       .catch(e=>log('handoff rejected: '+e,'r'));
+    URL.revokeObjectURL(old.src); old.src=handoffChunkURL();
+    chunkCount++; setCard('s-chunks',chunkCount);
+  });});
+  hoEls[0].src=handoffChunkURL(); hoEls[1].src=handoffChunkURL();
+  hoCur=0; chunkCount=1; setCard('s-chunks',1);
+  hoEls[0].play().then(()=>log('handoff chunk0 playing','g')).catch(e=>log('play() rejected: '+e,'r'));
+}
+
 /* ===== monitor / verdict ===== */
 function setCard(id,val){ document.getElementById(id).textContent=val; }
 function audioClock(){
   if(engine==='webaudio'&&actx) return actx.currentTime;
+  if(engine==='handoff'&&hoEls[hoCur]) return (chunkCount-1)*chunkSecs + (hoEls[hoCur].currentTime||0);
   if(els[cur]) return (chunkCount-1)*Math.max(0,chunkSecs-xfSecs) + (els[cur].currentTime||0);
   return 0;
 }
@@ -301,6 +363,13 @@ document.addEventListener('visibilitychange', ()=>{
 function updateVerdict(){
   const wall=(performance.now()-startWall)/1000;
   const v=document.getElementById('verdict');
+  if(engine==='handoff'){
+    const expected=Math.floor(wall/Math.max(0.1,chunkSecs))+1;
+    v.innerHTML = chunkCount/Math.max(1,expected)>0.9
+      ? `<span class="g">✓ Handoff kept feeding while locked.</span> ${chunkCount} chunks vs ~${expected}. Seams land in silence (no overlap timing). Bed loop ${document.getElementById('bed').checked?'on':'off'} — should mask the tone dip.`
+      : `<span class="r">✗ Handoff fell behind.</span> ${chunkCount} vs ~${expected} — background throttling delayed the 'ended' handoff.`;
+    return;
+  }
   if(engine==='webaudio'){
     const advancing = actx && (actx.currentTime-clk0) > wall*0.9;
     const alive = actx && actx.state==='running';
@@ -334,7 +403,7 @@ function start(){
     try{ navigator.mediaSession.metadata=new MediaMetadata({title:'BG Audio Spike',artist:'self-notes'});
          navigator.mediaSession.setActionHandler('pause',()=>{}); }catch(e){}
   }
-  engine==='webaudio'? waStart() : xfStart();
+  engine==='webaudio'? waStart() : engine==='handoff'? handoffStart() : xfStart();
   monitor();
 }
 function stop(){
@@ -342,6 +411,8 @@ function stop(){
   if(schedTimer)clearInterval(schedTimer); if(swapTimer)clearTimeout(swapTimer); if(monTimer)clearTimeout(monTimer);
   if(actx){ try{actx.close();}catch(e){} actx=null; }
   els.forEach(a=>{try{a.pause();URL.revokeObjectURL(a.src);}catch(e){}}); els=[];
+  hoEls.forEach(a=>{try{a.pause();URL.revokeObjectURL(a.src);}catch(e){}}); hoEls=[];
+  if(bedEl){try{bedEl.pause();URL.revokeObjectURL(bedEl.src);}catch(e){} bedEl=null;}
   document.getElementById('start').disabled=false; document.getElementById('stop').disabled=true;
   log('=== STOP ===','r'); updateVerdict();
 }
