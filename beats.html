@@ -239,7 +239,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
         <div class="freq-display">
           <div class="freq-block left">
             <div class="freq-label">Left ear</div>
-            <div class="freq-val"><span id="s-left">200</span><span class="freq-unit">Hz</span></div>
+            <div class="freq-val"><span id="s-left">100</span><span class="freq-unit">Hz</span></div>
           </div>
           <div class="freq-sep">
             <div class="beat-pill" id="beat-pill">Δ 8.0 Hz</div>
@@ -252,10 +252,10 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
         <!-- ════ CARRIER — shared across Manual + Journey ════ -->
         <div id="carrier-section">
-          <div class="field-label">Carrier <span class="carrier-now" id="carrier-val">200 Hz</span></div>
+          <div class="field-label">Carrier <span class="carrier-now" id="carrier-val">100 Hz</span></div>
           <div class="carrier-row">
-            <button class="cpill" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
-            <button class="cpill active" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
+            <button class="cpill active" id="cpill-100" onclick="setCarrier(100)">100 Hz</button>
+            <button class="cpill" id="cpill-200" onclick="setCarrier(200)">200 Hz</button>
             <button class="cpill" id="cpill-custom" onclick="toggleFinetune()" aria-expanded="false">⚙ Fine-tune</button>
           </div>
           <!-- fine-tune panel: odd carriers + (manual-only) beat -->
@@ -263,9 +263,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
             <div class="ctrl-row">
               <div class="ctrl-header">
                 <span class="ctrl-name">Carrier frequency</span>
-                <span class="ctrl-readout" id="base-val">200 Hz</span>
+                <span class="ctrl-readout" id="base-val">100 Hz</span>
               </div>
-              <input type="range" id="base" min="40" max="500" value="200" step="1" oninput="onCarrierSlider()">
+              <input type="range" id="base" min="40" max="500" value="100" step="1" oninput="onCarrierSlider()">
             </div>
             <div class="ctrl-row" id="beat-row">
               <div class="ctrl-header">
@@ -284,7 +284,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
             <button class="cpill active" id="bed-none"  onclick="setBed('none')">None</button>
             <button class="cpill"        id="bed-brown" onclick="setBed('brown')">Brown</button>
             <button class="cpill"        id="bed-pink"  onclick="setBed('pink')">Pink</button>
-            <button class="cpill"        id="bed-pad"   onclick="setBed('pad')">Pad</button>
+            <button class="cpill"        id="bed-sea"   onclick="setBed('sea')">Sea</button>
+            <button class="cpill"        id="bed-rain"  onclick="setBed('rain')">Rain</button>
           </div>
         </div>
 
@@ -432,7 +433,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   let activeJourneyKey = null;
 
   /* ── comfort bed (background texture, baked into the rendered file) ── */
-  let bedType  = 'none';          /* 'none' | 'brown' | 'pink' | 'pad' */
+  let bedType  = 'none';          /* 'none' | 'brown' | 'pink' | 'sea' | 'rain' */
   let bedLevel = 0.20;            /* 0..0.40 — peak amplitude of the bed */
   const BED_LS_KEY = 'beats-bed-type';
 
@@ -530,10 +531,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
   function setBed(type) {
     bedType = type;
-    ['none', 'brown', 'pink', 'pad'].forEach(t =>
+    ['none', 'brown', 'pink', 'sea', 'rain'].forEach(t =>
       document.getElementById('bed-' + t).classList.toggle('active', t === type));
     document.getElementById('bed-val').textContent =
-      { none: 'None', brown: 'Brown noise', pink: 'Pink noise', pad: 'Warm pad' }[type];
+      { none: 'None', brown: 'Brown noise', pink: 'Pink noise',
+        sea: 'Sea waves', rain: 'Rain' }[type];
     try { localStorage.setItem(BED_LS_KEY, type); } catch (_) {}
   }
 
@@ -690,26 +692,40 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
       };
       return { next() { return { l: pink(L), r: pink(R) }; } };
     }
-    if (type === 'pad') {
+    if (type === 'sea') {
+      /* brown-noise wash under a slow, irregular swell — surf rising and
+         washing out. Two detuned sub-Hz LFOs beat against each other so no
+         two "waves" land the same; the swell is squared so troughs sit quiet
+         and crests surge (the asymmetric shape that reads as ocean). */
       const TWO_PI = Math.PI * 2;
-      const partials = [
-        { f: base / 2,   a: 0.55, det: 0.15 },     /* sub-octave */
-        { f: base,       a: 0.30, det: 0.20 },     /* root */
-        { f: base * 1.5, a: 0.18, det: 0.25 },     /* fifth */
-      ];
-      const pl = partials.map(() => 0), pr = partials.map(() => 0);
-      let lfo = 0; const lfoInc = TWO_PI * 0.05 / sr;   /* ~0.05 Hz swell */
+      let bl = 0, br = 0, p1 = 0, p2 = 0;
+      const inc1 = TWO_PI * 0.09 / sr;            /* ~11 s period */
+      const inc2 = TWO_PI * 0.06 / sr;            /* ~17 s period → irregular beat */
+      const step = prev => {
+        const w = Math.random() * 2 - 1;
+        return (prev + 0.02 * w) / 1.02;          /* leaky integrator (brown-ish) */
+      };
       return { next() {
-        lfo += lfoInc; const swell = 0.75 + 0.25 * Math.sin(lfo);
-        let l = 0, r = 0;
-        partials.forEach((p, i) => {
-          pl[i] += TWO_PI * (p.f - p.det) / sr; if (pl[i] >= TWO_PI) pl[i] -= TWO_PI;
-          pr[i] += TWO_PI * (p.f + p.det) / sr; if (pr[i] >= TWO_PI) pr[i] -= TWO_PI;
-          l += Math.sin(pl[i]) * p.a;
-          r += Math.sin(pr[i]) * p.a;
-        });
-        const norm = 0.85;                          /* keep partial sum within ~[-1,1] */
-        return { l: l * norm * swell, r: r * norm * swell };
+        bl = step(bl); br = step(br);
+        p1 += inc1; p2 += inc2;
+        let s = 0.5 + 0.5 * (0.6 * Math.sin(p1) + 0.4 * Math.sin(p2));
+        if (s < 0) s = 0;
+        const swell = 0.12 + 0.88 * s * s;        /* quiet troughs, surging crests */
+        return { l: bl * 3.5 * swell, r: br * 3.5 * swell };
+      } };
+    }
+    if (type === 'rain') {
+      /* steady rain = a soft low-frequency wash (lowpassed noise) plus bright
+         patter (highpassed noise = white minus its own lowpass). Independent
+         L/R streams widen it. No discrete droplet triggers — the broadband
+         hiss already reads as steady rainfall. */
+      let bL = 0, bR = 0, dL = 0, dR = 0;
+      return { next() {
+        const wl = Math.random() * 2 - 1, wr = Math.random() * 2 - 1;
+        bL = bL * 0.85 + wl * 0.15; bR = bR * 0.85 + wr * 0.15;   /* wash (lowpass) */
+        dL = dL * 0.55 + wl * 0.45; dR = dR * 0.55 + wr * 0.45;   /* lowpass for HP */
+        const pL = wl - dL, pR = wr - dR;                          /* patter (highpass) */
+        return { l: bL * 1.6 + pL * 0.5, r: bR * 1.6 + pR * 0.5 };
       } };
     }
     return { next: () => ({ l: 0, r: 0 }) };        /* 'none' */
@@ -1472,7 +1488,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* restore + paint the saved comfort-bed choice (defaults to 'none') */
   let savedBed = 'none';
   try { savedBed = localStorage.getItem(BED_LS_KEY) || 'none'; } catch (_) {}
-  if (!['none', 'brown', 'pink', 'pad'].includes(savedBed)) savedBed = 'none';
+  if (!['none', 'brown', 'pink', 'sea', 'rain'].includes(savedBed)) savedBed = 'none';
   setBed(savedBed);
 
   renderJourneyPresets();
