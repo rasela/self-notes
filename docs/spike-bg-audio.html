@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Spike — Background Audio (locked-screen JS feed)</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --bgc:#141418; --border:rgba(255,255,255,.1);
+    --tp:#e8e8ea; --ts:#a0a0a8; --tm:#6b6b73; --acc:#34d3c4; --red:#ef6b6b; --green:#5fd38a; --gold:#c9a96e;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tp);font-family:var(--sans);
+       line-height:1.5;padding:16px;max-width:680px;margin:0 auto;-webkit-text-size-adjust:100%}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--ts);font-size:13px;margin:0 0 16px}
+  .card{background:var(--bgc);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin:0 0 10px}
+  label{display:block;font-size:13px;color:var(--ts);margin:8px 0 4px}
+  input[type=number]{width:100%;padding:8px;background:#0d0d10;border:1px solid var(--border);
+       color:var(--tp);border-radius:6px;font-family:var(--mono);font-size:15px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:120px}
+  button{appearance:none;border:1px solid var(--border);background:#1c1c22;color:var(--tp);
+       padding:12px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;
+       -webkit-tap-highlight-color:transparent;width:100%}
+  button.primary{background:var(--acc);color:#04201d;border-color:var(--acc)}
+  button.stop{background:#2a1414;color:var(--red);border-color:#5a2a2a}
+  button:disabled{opacity:.4}
+  .kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .kv b{color:var(--acc);font-weight:600}
+  .pill{display:inline-block;font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:99px;border:1px solid var(--border);margin:2px 4px 2px 0}
+  .ok{color:var(--green);border-color:#2a5a3a}
+  .bad{color:var(--red);border-color:#5a2a2a}
+  .warn{color:var(--gold);border-color:#5a4a2a}
+  #log{font-family:var(--mono);font-size:11.5px;line-height:1.45;white-space:pre-wrap;
+       max-height:42vh;overflow:auto;background:#08080a;border:1px solid var(--border);
+       border-radius:6px;padding:10px;color:var(--ts)}
+  .g{color:var(--green)} .r{color:var(--red)} .y{color:var(--gold)} .d{color:var(--tm)}
+  .note{font-size:12.5px;color:var(--ts);background:#0d1614;border-left:3px solid var(--acc);padding:10px 12px;border-radius:4px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<h1>Background-Audio Spike</h1>
+<p class="sub">Tests whether iOS Safari keeps feeding gapless audio while the screen is locked.
+The load-bearing question for <code>beats.html</code> streaming.</p>
+
+<div class="note">
+<b>How to run the test:</b> wired or BT headphones, plug in or charged.
+Tap <b>Start</b>, confirm you hear a steady tone, then <b>lock the phone</b> and pocket it.
+Wait ~3–5 min, unlock, and read the log + verdict below. The tone uses a continuous
+phase accumulator across chunks, so any <i>gap</i> you hear is a swap stall, and any
+<i>pitch jump</i> would be a phase break (there should be none). Each chunk swap is
+logged with wall-clock drift, so even if you didn't hear it, the log shows whether
+JS kept up in the background.
+</div>
+
+<div class="card">
+  <h2>Environment</h2>
+  <div id="env"></div>
+</div>
+
+<div class="card">
+  <h2>Config</h2>
+  <div class="row">
+    <div><label>Tone Hz</label><input id="hz" type="number" value="220" min="50" max="1000"></div>
+    <div><label>Chunk seconds</label><input id="chunk" type="number" value="10" min="2" max="30"></div>
+    <div><label>Render rate</label><input id="rate" type="number" value="22050" min="8000" max="48000"></div>
+  </div>
+  <label style="margin-top:10px">
+    <input type="checkbox" id="useMSE" style="width:auto;flex:none"> Try MSE engine instead of audio ping-pong (only if supported above)
+  </label>
+</div>
+
+<div class="row" style="margin-bottom:14px">
+  <button class="primary" id="start">Start</button>
+  <button class="stop" id="stop" disabled>Stop</button>
+</div>
+<div class="row" style="margin-bottom:14px">
+  <button id="clear">Clear log</button>
+  <button id="copy">Copy log</button>
+</div>
+
+<div class="card">
+  <h2>Live status</h2>
+  <div class="kv"><span>Engine</span><b id="s-engine">—</b></div>
+  <div class="kv"><span>Chunks fed</span><b id="s-chunks">0</b></div>
+  <div class="kv"><span>Audio currentTime</span><b id="s-ct">0.00</b></div>
+  <div class="kv"><span>Elapsed (wall)</span><b id="s-wall">0.0</b></div>
+  <div class="kv"><span>Drift (audio − wall)</span><b id="s-drift">0.00</b></div>
+  <div class="kv"><span>Max swap gap</span><b id="s-gap">0 ms</b></div>
+  <div class="kv"><span>Backgrounded events</span><b id="s-bg">0</b></div>
+</div>
+
+<div class="card">
+  <h2>Verdict</h2>
+  <div id="verdict" style="font-family:var(--mono);font-size:13px;color:var(--ts)">Run a test, lock the screen, come back.</div>
+</div>
+
+<div class="card">
+  <h2>Event log <span class="pill d" id="logcount">0</span></h2>
+  <div id="log"></div>
+</div>
+
+<script>
+/* ---------- tiny WAV encoder (stereo 16-bit) ---------- */
+function encodeWAV(l, r, sr){
+  const n=l.length, bytes=44+n*4, buf=new ArrayBuffer(bytes), v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+n*4,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,n*4,true);
+  let o=44;
+  for(let i=0;i<n;i++){
+    let a=Math.max(-1,Math.min(1,l[i]))*32767, b=Math.max(-1,Math.min(1,r[i]))*32767;
+    v.setInt16(o,a,true);o+=2;v.setInt16(o,b,true);o+=2;
+  }
+  return new Blob([buf],{type:'audio/wav'});
+}
+
+/* ---------- continuous tone chunk via persistent phase ---------- */
+let phase=0;
+function makeChunkBlob(hz, secs, sr){
+  const n=Math.round(secs*sr), l=new Float32Array(n), r=new Float32Array(n);
+  const inc=2*Math.PI*hz/sr;
+  for(let i=0;i<n;i++){ const s=Math.sin(phase)*0.25; l[i]=s; r[i]=s; phase+=inc; if(phase>=2*Math.PI)phase-=2*Math.PI; }
+  return encodeWAV(l,r,sr);
+}
+
+/* ---------- logging ---------- */
+const logEl=document.getElementById('log'), logCount=document.getElementById('logcount');
+let logLines=[];
+function tstamp(){ const d=new Date(); return d.toLocaleTimeString('en-GB',{hour12:false})+'.'+String(d.getMilliseconds()).padStart(3,'0'); }
+function log(msg, cls){
+  const line=`<span class="d">${tstamp()}</span> <span class="${cls||''}">${msg}</span>`;
+  logLines.push(line.replace(/<[^>]+>/g,''));         // plain copy
+  logEl.insertAdjacentHTML('afterbegin', line+'\n');
+  logCount.textContent=logLines.length;
+  try{ localStorage.setItem('spikeLog', logLines.join('\n')); }catch(e){}
+}
+
+/* ---------- environment probe ---------- */
+(function(){
+  const e=document.getElementById('env');
+  const ac=window.AudioContext||window.webkitAudioContext;
+  let hwRate='?'; try{ const c=new ac(); hwRate=c.sampleRate; c.close(); }catch(x){}
+  const mseTypes=['audio/mpeg','audio/mp4; codecs="mp4a.40.2"','audio/aac','audio/wav'];
+  let mseSupport=[];
+  if(window.MediaSource){
+    mseTypes.forEach(t=>{ if(MediaSource.isTypeSupported(t)) mseSupport.push(t); });
+  }
+  const ms=window.MediaSource? (mseSupport.length? '<span class="pill ok">MSE: '+mseSupport.length+' type(s)</span>' : '<span class="pill bad">MSE present, 0 appendable audio types</span>') : '<span class="pill bad">No MediaSource</span>';
+  const wl='wakeLock' in navigator? '<span class="pill ok">WakeLock API</span>':'<span class="pill warn">No WakeLock</span>';
+  const msess='mediaSession' in navigator? '<span class="pill ok">MediaSession</span>':'<span class="pill warn">No MediaSession</span>';
+  e.innerHTML =
+    `<div class="kv"><span>HW sample rate</span><b>${hwRate} Hz</b></div>`+
+    `<div class="kv"><span>HW / 2 (target)</span><b>${hwRate==='?'?'?':hwRate/2} Hz</b></div>`+
+    `<div style="margin-top:8px">${ms} ${msess} ${wl}</div>`+
+    (mseSupport.length? `<div style="margin-top:6px;font-size:11px;color:var(--tm)">MSE audio: ${mseSupport.join(', ')}</div>`:'')+
+    `<div style="margin-top:6px;font-size:11px;color:var(--tm)">UA: ${navigator.userAgent}</div>`;
+})();
+
+/* ---------- ping-pong audio engine ---------- */
+let running=false, engine='', chunkCount=0, maxGap=0, startWall=0, bgCount=0, lastDriftCard=null;
+let els=[], cur=0, hz, chunkSecs, sr, pending=null, wakeLock=null;
+
+function setCard(id,val){ document.getElementById(id).textContent=val; }
+
+function nextBlobURL(){
+  const b=makeChunkBlob(hz, chunkSecs, sr);
+  return URL.createObjectURL(b);
+}
+
+function pingpongStart(){
+  engine='ping-pong (2× <audio>)'; setCard('s-engine',engine);
+  els=[new Audio(), new Audio()];
+  els.forEach(a=>{ a.preload='auto'; });
+  // prime both
+  els[0].src=nextBlobURL();
+  els[1].src=nextBlobURL();
+  cur=0;
+  wire(els[0]); wire(els[1]);
+  els[0].play().then(()=>log('▶ chunk 0 playing','g')).catch(e=>log('play() rejected: '+e,'r'));
+  chunkCount=1; setCard('s-chunks',1);
+}
+
+let swapExpectedAt=0;
+function wire(a){
+  a.addEventListener('ended', ()=>{
+    if(!running) return;
+    const now=performance.now();
+    const gap = swapExpectedAt? Math.max(0, now - swapExpectedAt) : 0;
+    // swap to the other element (already loaded)
+    cur=1-cur;
+    const other=els[cur];
+    const t0=performance.now();
+    other.play().then(()=>{
+      const lat=performance.now()-t0;
+      maxGap=Math.max(maxGap, lat);
+      setCard('s-gap', Math.round(maxGap)+' ms');
+      log(`↻ swap → el${cur}  startLatency ${lat.toFixed(0)}ms  ${lat>120?'⚠ audible gap':'ok'}`, lat>120?'y':'g');
+    }).catch(e=>log('swap play() rejected: '+e,'r'));
+    // refill the element that just ended for the chunk-after-next
+    URL.revokeObjectURL(a.src);
+    a.src=nextBlobURL();
+    chunkCount++; setCard('s-chunks',chunkCount);
+    swapExpectedAt = now + chunkSecs*1000;
+  });
+}
+
+/* ---------- MSE engine (best-effort; needs an appendable type) ---------- */
+function mseStart(){
+  if(!window.MediaSource){ log('MSE unavailable — falling back to ping-pong','r'); pingpongStart(); return; }
+  log('MSE engine selected. NOTE: raw WAV is not appendable; this path needs an','y');
+  log('MP3/fMP4 encoder to truly stream. Reporting support only, using ping-pong.','y');
+  pingpongStart();
+}
+
+/* ---------- media session (helps keep us alive in background) ---------- */
+function setupMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({title:'BG Audio Spike', artist:'self-notes'});
+  navigator.mediaSession.setActionHandler('pause', ()=>{ /* keep playing */ });
+}
+
+/* ---------- monitor loop ---------- */
+let monTimer=null;
+function monitor(){
+  if(!running) return;
+  const a=els[cur];
+  const wall=(performance.now()-startWall)/1000;
+  // "ideal" audio position = chunks completed*chunkSecs + current el time
+  const audioPos=(chunkCount-1)*chunkSecs + (a&&!isNaN(a.currentTime)?a.currentTime:0);
+  const drift=audioPos - wall;
+  setCard('s-wall', wall.toFixed(1));
+  setCard('s-ct', (a?a.currentTime:0).toFixed(2));
+  setCard('s-drift', drift.toFixed(2)+'s');
+  monTimer=setTimeout(monitor, 1000);
+}
+
+/* ---------- visibility = proxy for backgrounded/locked ---------- */
+document.addEventListener('visibilitychange', ()=>{
+  if(!running) return;
+  bgCount++; setCard('s-bg',bgCount);
+  log(document.hidden? '— screen HIDDEN/locked —':'— screen VISIBLE again —', document.hidden?'y':'g');
+  if(!document.hidden) updateVerdict();
+});
+
+function updateVerdict(){
+  const wall=(performance.now()-startWall)/1000;
+  const expectedChunks=Math.floor(wall/chunkSecs)+1;
+  const ratio=chunkCount/Math.max(1,expectedChunks);
+  const v=document.getElementById('verdict');
+  let html='';
+  if(ratio>0.95) html=`<span class="g">✓ JS kept up while backgrounded.</span> Fed ${chunkCount} chunks, expected ~${expectedChunks}. Max swap latency ${Math.round(maxGap)}ms.`;
+  else html=`<span class="r">✗ JS fell behind.</span> Fed ${chunkCount} chunks but ~${expectedChunks} expected over ${wall.toFixed(0)}s — background throttling stalled the feed. Full streaming won't work; use a large look-ahead bake.`;
+  if(maxGap>120) html+=`<br><span class="y">⚠ swap latency ${Math.round(maxGap)}ms — audible gaps at boundaries; need overlap/crossfade or MSE.</span>`;
+  v.innerHTML=html;
+}
+
+/* ---------- controls ---------- */
+async function start(){
+  if(running) return;
+  hz=+document.getElementById('hz').value;
+  chunkSecs=+document.getElementById('chunk').value;
+  sr=+document.getElementById('rate').value;
+  phase=0; chunkCount=0; maxGap=0; bgCount=0; swapExpectedAt=performance.now()+chunkSecs*1000;
+  running=true; startWall=performance.now();
+  document.getElementById('start').disabled=true;
+  document.getElementById('stop').disabled=false;
+  setCard('s-bg',0); setCard('s-gap','0 ms');
+  log(`=== START  hz=${hz} chunk=${chunkSecs}s rate=${sr} ===`,'g');
+  setupMediaSession();
+  try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); log('wakeLock acquired (will drop on lock)','d'); } }catch(e){}
+  document.getElementById('useMSE').checked? mseStart() : pingpongStart();
+  monitor();
+}
+function stop(){
+  running=false;
+  els.forEach(a=>{ try{a.pause(); URL.revokeObjectURL(a.src);}catch(e){} });
+  if(monTimer)clearTimeout(monTimer);
+  if(wakeLock){ try{wakeLock.release();}catch(e){} wakeLock=null; }
+  document.getElementById('start').disabled=false;
+  document.getElementById('stop').disabled=true;
+  log('=== STOP ===','r');
+  updateVerdict();
+}
+document.getElementById('start').onclick=start;
+document.getElementById('stop').onclick=stop;
+document.getElementById('clear').onclick=()=>{ logLines=[]; logEl.textContent=''; logCount.textContent=0; try{localStorage.removeItem('spikeLog');}catch(e){} };
+document.getElementById('copy').onclick=()=>{ navigator.clipboard?.writeText(logLines.join('\n')); log('(log copied)','d'); };
+
+/* restore any prior log so a locked-screen session survives a reload */
+try{ const prev=localStorage.getItem('spikeLog'); if(prev){ logLines=prev.split('\n'); logEl.textContent=logLines.slice().reverse().join('\n'); logCount.textContent=logLines.length; } }catch(e){}
+</script>
+</body>
+</html>
