@@ -103,6 +103,8 @@ h1 em{font-style:italic;color:var(--gold)}
 
 /* carrier section (shared across modes) */
 #carrier-section{margin-bottom:16px}
+#bed-section{margin-bottom:16px}
+#bed-row{flex-wrap:wrap}
 .carrier-now{margin-left:8px;font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--acc);text-transform:none}
 
 /* carrier pills */
@@ -275,6 +277,17 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
           </div>
         </div>
 
+        <!-- ════ TEXTURE / BED — shared across Manual + Journey ════ -->
+        <div id="bed-section">
+          <div class="field-label">Texture <span class="carrier-now" id="bed-val">None</span></div>
+          <div class="carrier-row" id="bed-row">
+            <button class="cpill active" id="bed-none"  onclick="setBed('none')">None</button>
+            <button class="cpill"        id="bed-brown" onclick="setBed('brown')">Brown</button>
+            <button class="cpill"        id="bed-pink"  onclick="setBed('pink')">Pink</button>
+            <button class="cpill"        id="bed-pad"   onclick="setBed('pad')">Pad</button>
+          </div>
+        </div>
+
         <div class="mode-tabs" role="tablist">
           <button class="mode-tab active" id="tab-manual" role="tab" aria-selected="true" onclick="setMode('manual')">Manual</button>
           <button class="mode-tab" id="tab-journey" role="tab" aria-selected="false" onclick="setMode('journey')">Journey</button>
@@ -418,6 +431,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   let journeyTotalStageSec = 0;   /* sum of stage durations (excludes the fade tail) */
   let activeJourneyKey = null;
 
+  /* ── comfort bed (background texture, baked into the rendered file) ── */
+  let bedType  = 'none';          /* 'none' | 'brown' | 'pink' | 'pad' */
+  let bedLevel = 0.20;            /* 0..0.40 — peak amplitude of the bed */
+  const BED_LS_KEY = 'beats-bed-type';
+
   const GLIDE_SEC    = 15;        /* beat-frequency crossfade duration between stages */
   const END_FADE_SEC = 25;        /* gentle fade-out to silence at journey end */
   const RENDER_SR    = 8000;      /* preferred render rate — far above Nyquist for ≤~310 Hz tones */
@@ -510,6 +528,15 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     updateDisplay();
   }
 
+  function setBed(type) {
+    bedType = type;
+    ['none', 'brown', 'pink', 'pad'].forEach(t =>
+      document.getElementById('bed-' + t).classList.toggle('active', t === type));
+    document.getElementById('bed-val').textContent =
+      { none: 'None', brown: 'Brown noise', pink: 'Pink noise', pad: 'Warm pad' }[type];
+    try { localStorage.setItem(BED_LS_KEY, type); } catch (_) {}
+  }
+
   function toggleFinetune() {
     const panel = document.getElementById('finetune');
     const isOpen = panel.classList.toggle('open');
@@ -591,6 +618,12 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* ════════════════════════════════════════════════════════════════
      OFFLINE RENDER
 
+     NOTE (deferred work, see docs/beats-sound-quality-plan.md §7): the whole
+     session is baked into one in-memory WAV at renderRate (≈8 kHz). A future
+     task can stream small just-in-time chunks (MediaSource Extensions / rolling
+     buffer) to cut memory and unblock a higher sample rate (brighter beds). The
+     8 kHz + whole-file bake is intentional for now to keep this work low-risk.
+
      WebKit can reject a too-low OfflineAudioContext sample rate AND a
      too-large single render. So we (1) probe once for the lowest rate the
      device actually accepts, and (2) render journeys in bounded chunks
@@ -622,6 +655,66 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     return { L, R, g };
   }
 
+  /* ── comfort bed generator ──
+     Returns { next() -> {l, r} } yielding samples in roughly [-1, 1]. Stepped
+     once per OUTPUT FRAME in both renderers (NOT tiled), so the bed runs
+     continuously across the whole file — no seam at the manual 10 s tile wrap.
+     Independent L/R streams give a wider, enveloping feel (the bed carries no
+     beat, so decorrelation is fine). */
+  function makeBed(type, sr, base) {
+    if (type === 'brown') {
+      let bl = 0, br = 0;
+      const step = prev => {
+        const w = Math.random() * 2 - 1;
+        return (prev + 0.02 * w) / 1.02;          /* leaky integrator (brown-ish) */
+      };
+      return { next() {
+        bl = step(bl); br = step(br);
+        return { l: bl * 3.5, r: br * 3.5 };      /* ~normalize; headroom+pcm16d clamp */
+      } };
+    }
+    if (type === 'pink') {
+      const mk = () => ({ b0:0, b1:0, b2:0, b3:0, b4:0, b5:0, b6:0 });
+      const L = mk(), R = mk();
+      const pink = s => {
+        const w = Math.random() * 2 - 1;
+        s.b0 = 0.99886 * s.b0 + w * 0.0555179;
+        s.b1 = 0.99332 * s.b1 + w * 0.0750759;
+        s.b2 = 0.96900 * s.b2 + w * 0.1538520;
+        s.b3 = 0.86650 * s.b3 + w * 0.3104856;
+        s.b4 = 0.55000 * s.b4 + w * 0.5329522;
+        s.b5 = -0.7616 * s.b5 - w * 0.0168980;
+        const out = s.b0 + s.b1 + s.b2 + s.b3 + s.b4 + s.b5 + s.b6 + w * 0.5362;
+        s.b6 = w * 0.115926;
+        return out * 0.11;                         /* ~normalize to ~[-1,1] */
+      };
+      return { next() { return { l: pink(L), r: pink(R) }; } };
+    }
+    if (type === 'pad') {
+      const TWO_PI = Math.PI * 2;
+      const partials = [
+        { f: base / 2,   a: 0.55, det: 0.15 },     /* sub-octave */
+        { f: base,       a: 0.30, det: 0.20 },     /* root */
+        { f: base * 1.5, a: 0.18, det: 0.25 },     /* fifth */
+      ];
+      const pl = partials.map(() => 0), pr = partials.map(() => 0);
+      let lfo = 0; const lfoInc = TWO_PI * 0.05 / sr;   /* ~0.05 Hz swell */
+      return { next() {
+        lfo += lfoInc; const swell = 0.75 + 0.25 * Math.sin(lfo);
+        let l = 0, r = 0;
+        partials.forEach((p, i) => {
+          pl[i] += TWO_PI * (p.f - p.det) / sr; if (pl[i] >= TWO_PI) pl[i] -= TWO_PI;
+          pr[i] += TWO_PI * (p.f + p.det) / sr; if (pr[i] >= TWO_PI) pr[i] -= TWO_PI;
+          l += Math.sin(pl[i]) * p.a;
+          r += Math.sin(pr[i]) * p.a;
+        });
+        const norm = 0.85;                          /* keep partial sum within ~[-1,1] */
+        return { l: l * norm * swell, r: r * norm * swell };
+      } };
+    }
+    return { next: () => ({ l: 0, r: 0 }) };        /* 'none' */
+  }
+
   /* Manual: render a short seamless UNIT (integer cycles for both ears at an
      even length → wraps with no click), then tile it to the chosen duration and
      bake a gentle end-fade into the tail. The file is finite (player.loop=false)
@@ -644,22 +737,32 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     const totalFrames = Math.max(unitFrames, Math.round(mins * 60 * sr));
     const fadeFrames  = Math.min(totalFrames, Math.round(END_FADE_SEC * sr));
     const fadeStart   = totalFrames - fadeFrames;
+    const fadeInFrames = Math.min(totalFrames, Math.round(0.4 * sr)); /* gentle onset */
+
+    /* bed runs continuously across totalFrames (NOT tiled) so the 10 s tone
+       tile wrap stays seamless; duck the tone to leave headroom when active */
+    const bed = makeBed(bedType, sr, base);
+    const carrierAmp = bedType === 'none' ? 1.0 : 0.72;
+    const bedAmp     = bedType === 'none' ? 0.0 : bedLevel;
 
     const ab = new ArrayBuffer(44 + totalFrames * 4);
     writeWavHeader(new DataView(ab), sr, 2, totalFrames);
     const out = new Int16Array(ab, 44);          /* 44 is 2-byte aligned */
     for (let i = 0; i < totalFrames; i++) {
       const u = i % unitFrames;
-      let l = cl[u], r = cr[u];
-      if (i >= fadeStart) {                       /* equal-power fade to silence */
-        const a = (totalFrames - i) / fadeFrames; /* 1 → 0 across the tail */
-        const e = Math.sin(a * Math.PI / 2);      /* equal-power curve */
-        out[i * 2]     = pcm16d(l * e);
-        out[i * 2 + 1] = pcm16d(r * e);
-      } else {
-        out[i * 2]     = pcm16d(l);
-        out[i * 2 + 1] = pcm16d(r);
+      const bs = bed.next();
+      let outL = carrierAmp * cl[u] + bedAmp * bs.l;
+      let outR = carrierAmp * cr[u] + bedAmp * bs.r;
+      let e = 1;
+      if (i < fadeInFrames) {                      /* equal-power fade-in */
+        e = Math.sin((i / fadeInFrames) * Math.PI / 2);
       }
+      if (i >= fadeStart) {                        /* equal-power fade to silence */
+        const a = (totalFrames - i) / fadeFrames;  /* 1 → 0 across the tail */
+        e = Math.sin(a * Math.PI / 2);             /* equal-power curve */
+      }
+      out[i * 2]     = pcm16d(outL * e);           /* envelope both tone + bed */
+      out[i * 2 + 1] = pcm16d(outR * e);
     }
 
     return URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
@@ -716,13 +819,19 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     const wL = TWO_PI * base / sr;                    /* left ear: constant carrier */
     let phaseL = 0, phaseR = 0;
 
+    /* continuous comfort bed + headroom duck (see makeBed / renderManual) */
+    const bed = makeBed(bedType, sr, base);
+    const carrierAmp = bedType === 'none' ? 1.0 : 0.72;
+    const bedAmp     = bedType === 'none' ? 0.0 : bedLevel;
+
     /* yield to the event loop periodically so a long render never blocks the UI */
     const YIELD_EVERY = Math.round(5 * sr);
     for (let i = 0; i < frames; i++) {
       const t = i / sr;
       const g = gainAt(t, stageSec, fadeOut);
-      out[i * 2]     = pcm16d(Math.sin(phaseL) * g);
-      out[i * 2 + 1] = pcm16d(Math.sin(phaseR) * g);
+      const bs = bed.next();
+      out[i * 2]     = pcm16d((carrierAmp * Math.sin(phaseL) + bedAmp * bs.l) * g);
+      out[i * 2 + 1] = pcm16d((carrierAmp * Math.sin(phaseR) + bedAmp * bs.r) * g);
       phaseL += wL;
       phaseR += TWO_PI * (base + beatAt(stages, t)) / sr;
       if (phaseL >= TWO_PI) phaseL -= TWO_PI;
@@ -748,7 +857,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     if (unlocked || !player) return;
     unlocked = true;
     try {
-      const url = URL.createObjectURL(encodeWAV([new Float32Array(64)], RENDER_SR));
+      const url = URL.createObjectURL(encodeWAV([new Float32Array(64)], renderRate));
       player.src = url; player.loop = false; player.volume = 0;
       const done = () => {
         try { player.pause(); player.currentTime = 0; } catch (_) {}
@@ -795,7 +904,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
      baked file, so changing carrier / beat / duration / journey mid-play has no
      effect. Stop to change. Volume + diagnostics stay live. */
   function lockSetup(on) {
-    ['carrier-section', 'manual-mode', 'journey-mode'].forEach(id =>
+    ['carrier-section', 'bed-section', 'manual-mode', 'journey-mode'].forEach(id =>
       document.getElementById(id).classList.toggle('setup-locked', on));
     document.querySelector('.mode-tabs').classList.toggle('setup-locked', on);
     document.querySelector('.diag-row').classList.toggle('setup-locked', on);
@@ -1359,6 +1468,12 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   /* bless the media element on the first user interaction (iOS gesture rule) */
   document.addEventListener('pointerdown', unlockPlayer, { once: true });
   document.addEventListener('touchend',   unlockPlayer, { once: true });
+
+  /* restore + paint the saved comfort-bed choice (defaults to 'none') */
+  let savedBed = 'none';
+  try { savedBed = localStorage.getItem(BED_LS_KEY) || 'none'; } catch (_) {}
+  if (!['none', 'brown', 'pink', 'pad'].includes(savedBed)) savedBed = 'none';
+  setBed(savedBed);
 
   renderJourneyPresets();
   loadJourneyPreset('obe-prep');   /* seed the editor with a sensible default */
