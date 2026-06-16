@@ -45,6 +45,13 @@ h1 em{font-style:italic;color:var(--acc)}
 .subtitle{font-family:var(--sans);font-size:12.5px;letter-spacing:.04em;color:var(--ts);line-height:1.75;margin-bottom:4px;max-width:620px}
 
 .wrap{max-width:980px;margin:0 auto;padding:0 12px}
+/* mobile: reclaim the side gutters so the cards run nearly edge-to-edge */
+@media(max-width:920px){
+  .wrap{padding:0 6px}
+  #rmd-root{padding:10px;border-radius:10px}
+  .rmd-grid{gap:10px}
+  .rmd-card{padding:13px}
+}
 
 /* how-to-read */
 .explainer{max-width:720px;margin:30px auto 0;padding:0 16px}
@@ -66,7 +73,6 @@ h1 em{font-style:italic;color:var(--acc)}
 
 <nav>
   <div class="brand">Trading <span>/ Risk Dashboard</span></div>
-  <a class="hbtn" href="index.html" aria-label="All notes" style="display:flex;align-items:center;text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ts);width:auto;padding:0 4px">← ALL NOTES</a>
 </nav>
 
 <main>
