@@ -65,6 +65,29 @@ h1 em{font-style:italic;color:var(--acc)}
 .risk-warn .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
 .risk-warn p{font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts);margin:0}
 .risk-warn p strong{color:var(--gold);font-weight:600}
+
+/* the two chains */
+.chains{margin:18px 0 6px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:12px}
+.pill{font-family:var(--sans);font-size:12px;font-weight:600;line-height:1.3;padding:7px 11px;border-radius:6px;border:1px solid}
+.pill.r{color:#ffb4bc;background:var(--reddim);border-color:rgba(255,93,108,.32)}
+.pill.g{color:#a8f0c2;background:var(--greendim);border-color:rgba(74,222,128,.32)}
+.chain .ar{color:var(--tm);font-size:12px}
+/* win-rate ladder (table replacement) */
+.ladder{display:flex;flex-direction:column;gap:8px;margin:16px 0 4px}
+.lrow{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:1fr;gap:6px}
+.lrow .lwr{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--tp);letter-spacing:.02em}
+.lrow .lcells{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.lcell .ck{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:4px}
+.lcell .cv{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ts)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid}
+.tag.r{color:#ffb4bc;background:var(--reddim);border-color:rgba(255,93,108,.3)}
+.tag.am{color:var(--gold);background:var(--golddim);border-color:rgba(201,169,110,.3)}
+.tag.g{color:#a8f0c2;background:var(--greendim);border-color:rgba(74,222,128,.3)}
+.cv.r{color:#ff8a93}.cv.am{color:var(--gold)}.cv.g{color:#7fe3a3}
+@media(min-width:640px){
+  .lrow{grid-template-columns:84px 1fr;align-items:center;gap:14px}
+}
 </style>
 </head>
 <body>
@@ -504,6 +527,51 @@ h1 em{font-style:italic;color:var(--acc)}
 
     <div class="rdef"><div class="k">Simulation → The fan</div>
       <p>The equity curve is a <strong>Monte Carlo</strong> fan of runs using the applied risk size. Green is the best path, red the worst, the shaded band is the 95% confidence area. The <strong>spread multiple</strong> shows how far best and worst diverge — a wide fan means the same edge can still hand you very different outcomes.</p></div>
+
+    <div class="rdef" style="border-left-color:var(--gold)"><div class="k" style="color:var(--gold)">The two chains</div>
+      <p>Win rate drives everything downstream. The two flows below are the same mechanism pulling in opposite directions:</p>
+      <div class="chains">
+        <div class="chain">
+          <span class="pill r">Higher position sizing</span><span class="ar">→</span>
+          <span class="pill r">Bigger drawdown</span><span class="ar">→</span>
+          <span class="pill r">Lower pass rate</span>
+        </div>
+        <div class="chain">
+          <span class="pill g">Higher win rate</span><span class="ar">→</span>
+          <span class="pill g">Smaller drawdown</span><span class="ar">→</span>
+          <span class="pill g">Can risk more</span><span class="ar">→</span>
+          <span class="pill g">Higher pass rate + faster</span>
+        </div>
+      </div>
+
+      <div class="ladder">
+        <div class="lrow"><div class="lwr">30–40%</div>
+          <div class="lcells">
+            <div class="lcell"><div class="ck">Safe size</div><div class="cv"><span class="tag r">0.25 – 0.5%</span></div></div>
+            <div class="lcell"><div class="ck">Exp. drawdown</div><div class="cv r">High</div></div>
+            <div class="lcell"><div class="ck">Pass rate</div><div class="cv"><span class="tag r">Low (~73%)</span></div></div>
+          </div></div>
+        <div class="lrow"><div class="lwr">50–55%</div>
+          <div class="lcells">
+            <div class="lcell"><div class="ck">Safe size</div><div class="cv"><span class="tag am">~1%</span></div></div>
+            <div class="lcell"><div class="ck">Exp. drawdown</div><div class="cv am">Moderate</div></div>
+            <div class="lcell"><div class="ck">Pass rate</div><div class="cv"><span class="tag am">Moderate</span></div></div>
+          </div></div>
+        <div class="lrow"><div class="lwr">65–75%</div>
+          <div class="lcells">
+            <div class="lcell"><div class="ck">Safe size</div><div class="cv"><span class="tag g">1 – 1.5%</span></div></div>
+            <div class="lcell"><div class="ck">Exp. drawdown</div><div class="cv g">Low</div></div>
+            <div class="lcell"><div class="ck">Pass rate</div><div class="cv"><span class="tag g">High (94–99%)</span></div></div>
+          </div></div>
+        <div class="lrow"><div class="lwr">80%+</div>
+          <div class="lcells">
+            <div class="lcell"><div class="ck">Safe size</div><div class="cv"><span class="tag g">1.5 – 2%+</span></div></div>
+            <div class="lcell"><div class="ck">Exp. drawdown</div><div class="cv g">Very low</div></div>
+            <div class="lcell"><div class="ck">Pass rate</div><div class="cv"><span class="tag g">Very high</span></div></div>
+          </div></div>
+      </div>
+      <p style="margin-top:14px"><strong>With a 30% win rate you have to risk 0.5% or less just to stay inside the drawdown limit.</strong> Push the win rate to 70% and the same limit lets you risk 1.5%+ — smaller dips, more headroom, and you reach targets faster. The edge buys you size.</p>
+    </div>
 
     <div class="risk-warn"><div class="k">Read me first</div>
       <p>This is a planning toy, not a guarantee. Expectancy and profit factor are exact from your inputs; <strong>risk of ruin is an approximation</strong> and the sim assumes fixed-fractional compounding with i.i.d. trades — real returns are streaky and correlated. Garbage-in win rate ⇒ garbage-out size. Use it to compare sizing choices, not to predict your account.</p></div>
