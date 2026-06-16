@@ -88,6 +88,43 @@ h1 em{font-style:italic;color:var(--acc)}
 @media(min-width:640px){
   .lrow{grid-template-columns:84px 1fr;align-items:center;gap:14px}
 }
+
+/* prop-firm notes */
+.pf-h2{font-family:var(--serif);font-size:clamp(21px,6vw,28px);font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.pf-h2 em{font-style:italic;color:var(--acc)}
+.pf-lead{font-family:var(--sans);font-size:12.5px;letter-spacing:.03em;color:var(--tm);line-height:1.6;margin:0 0 18px}
+.pf-sec{margin:26px 0 0}
+.pf-sec h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.pf-sec h3::before{content:'';width:18px;height:1px;background:var(--acc);opacity:.5}
+.pf-sec p{font-family:var(--sans);font-size:13.5px;line-height:1.7;color:var(--ts);margin:0 0 12px}
+.pf-sec p strong{color:var(--tp);font-weight:600}
+.pf-list{list-style:none;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:9px}
+.pf-list li{position:relative;padding-left:18px;font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts)}
+.pf-list li::before{content:'';position:absolute;left:3px;top:8px;width:5px;height:5px;border-radius:1px;background:var(--acc)}
+.pf-list li strong{color:var(--tp);font-weight:600}
+.pf-num{counter-reset:pf;list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.pf-num li{counter-increment:pf;position:relative;padding-left:34px;font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ts);min-height:24px;display:flex;align-items:center}
+.pf-num li::before{content:counter(pf);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:6px;background:var(--accdim);border:1px solid var(--bora);color:var(--acc);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.pf-num li strong{color:var(--tp);font-weight:600}
+/* roi table */
+.roi{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.roi-row{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.roi-row .strat{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--tp);margin-bottom:8px}
+.roi-cells{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.roi-cell .ck{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:3px}
+.roi-cell .cv{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--ts)}
+.roi-cell .cv.roi-v{font-size:14px}
+.roi-v.pos{color:#7fe3a3}.roi-v.neg{color:#ff8a93}
+@media(min-width:560px){.roi-cells{grid-template-columns:repeat(4,1fr)}}
+/* external links */
+.calc-links{display:flex;flex-direction:column;gap:10px;margin:14px 0 0}
+.calc-link{display:flex;align-items:center;gap:12px;background:var(--bgc);border:1px solid var(--border);border-radius:8px;padding:13px 15px;text-decoration:none;transition:border-color .2s,background .2s;-webkit-tap-highlight-color:transparent}
+.calc-link:active,.calc-link:hover{border-color:var(--bora);background:var(--accdim)}
+.calc-link .cl-ico{flex:none;width:30px;height:30px;border-radius:7px;background:var(--accdim);border:1px solid var(--bora);color:var(--acc);display:flex;align-items:center;justify-content:center;font-size:14px}
+.calc-link .cl-tx{min-width:0}
+.calc-link .cl-name{font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--tp);margin-bottom:2px}
+.calc-link .cl-url{font-family:var(--mono);font-size:10.5px;color:var(--tm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calc-link .cl-arr{margin-left:auto;flex:none;color:var(--tm);font-size:14px}
 </style>
 </head>
 <body>
@@ -575,6 +612,116 @@ h1 em{font-style:italic;color:var(--acc)}
 
     <div class="risk-warn"><div class="k">Read me first</div>
       <p>This is a planning toy, not a guarantee. Expectancy and profit factor are exact from your inputs; <strong>risk of ruin is an approximation</strong> and the sim assumes fixed-fractional compounding with i.i.d. trades — real returns are streaky and correlated. Garbage-in win rate ⇒ garbage-out size. Use it to compare sizing choices, not to predict your account.</p></div>
+  </div>
+
+  <div class="explainer" style="margin-top:46px">
+    <h2 class="pf-h2">Prop Firm <em>Math</em></h2>
+    <p class="pf-lead">Notes — passing challenges. Source: YouTube "prop firm stats / math".</p>
+
+    <div class="rdef"><div class="k">Core thesis</div>
+      <p><strong>Passing challenges ≠ being profitable.</strong> It's about variance and consistency, not profit size. Only ~12.4% of traders pass (sample 100k+) — and they fail from variance and breaching <strong>max drawdown</strong>, not lack of edge. A trader with <em>zero edge</em> but the right setup can outperform a profitable trader running a high-RR system. The goal is to <strong>minimise variance / smooth the equity curve</strong>, not maximise profit.</p></div>
+
+    <div class="pf-sec">
+      <h3>Account choice</h3>
+      <ul class="pf-list">
+        <li>Recommended: <strong>50K futures account</strong> — cheap, easier to pass.</li>
+        <li>50K specs: <strong>$2,000 max drawdown (4%)</strong>, <strong>$3,000 / 6% profit target</strong> — i.e. you must make <strong>150% of your max drawdown</strong> to pass.</li>
+        <li>Bigger accounts (~3% DD, 6% target) are effectively <strong>~50% harder</strong>.</li>
+        <li>Cheaper account → you care less about the outcome → you trade better.</li>
+      </ul>
+    </div>
+
+    <div class="pf-sec">
+      <h3>The 3 levers</h3>
+      <p>Win rate · risk-reward · position sizing — all feed into drawdown.</p>
+
+      <p style="margin-bottom:6px"><strong>1 · Risk-reward (the common mistake).</strong> WR and RR are inversely correlated: higher RR → lower WR → <strong>higher variance</strong>. High RR / low WR means long losing streaks that hit max DD before the profit target. <strong>Sweet spot: low RR + high win rate.</strong> Anything above 1:2 RR hurts your pass rate. Same 0.53 expectancy edge, two very different rides:</p>
+      <ul class="pf-list">
+        <li>High WR (90%) / 0.7 RR → best–worst spread <strong>1.37</strong>, tiny loss streaks.</li>
+        <li>Low WR / high RR → spread <strong>4.8</strong>, avg loss streak <strong>10.9</strong>, can stay underwater 100+ days.</li>
+      </ul>
+
+      <p style="margin:14px 0 6px"><strong>2 · Position sizing.</strong> You're really trading a <strong>$2,000 account</strong>, not 50K — so 1% "real" risk = <strong>25% of working capital</strong>. Size off win rate + RR, not a fixed 1% rule:</p>
+      <ul class="pf-list">
+        <li>WR &lt; 50% → risk <strong>0.25–0.5%</strong> (slow to pass).</li>
+        <li>WR &gt; 65% → risk <strong>1–1.5%</strong> (same pass rate, much faster).</li>
+      </ul>
+
+      <p style="margin:14px 0 6px"><strong>3 · The hidden traps</strong> (the ~12% pass-rate killers).</p>
+      <ul class="pf-list">
+        <li><strong>Consistency rule:</strong> max ~40–50% of total profit from one day → can't pass in a single session.</li>
+        <li><strong>End-of-day trailing drawdown:</strong> the DD floor trails up on profitable days, tightening on you.</li>
+        <li>Combined, these knock <strong>~12–15%</strong> off the pass rate.</li>
+        <li>Fix: take <strong>3–5 trades/day</strong> so DD trails per few trades, not per trade — a win then a loss can leave the floor untouched.</li>
+        <li>Best of all: find an eval with <strong>no consistency rule</strong> → +12–15% pass rate.</li>
+      </ul>
+    </div>
+
+    <div class="pf-sec">
+      <h3>Worked ROI (eval w/ consistency rule · $60/eval · $800 avg payout)</h3>
+      <div class="roi">
+        <div class="roi-row"><div class="strat">Tiny edge, low RR · 0.5 RR @ 1.5%</div>
+          <div class="roi-cells">
+            <div class="roi-cell"><div class="ck">Pass</div><div class="cv">~30%</div></div>
+            <div class="roi-cell"><div class="ck">Payout</div><div class="cv">~40%</div></div>
+            <div class="roi-cell"><div class="ck">Rule</div><div class="cv">consistency</div></div>
+            <div class="roi-cell"><div class="ck">ROI / $</div><div class="cv roi-v pos">+60%</div></div>
+          </div></div>
+        <div class="roi-row"><div class="strat">Tiny edge · no consistency rule · 0.5 RR @ 1.5%</div>
+          <div class="roi-cells">
+            <div class="roi-cell"><div class="ck">Pass</div><div class="cv">higher</div></div>
+            <div class="roi-cell"><div class="ck">Payout</div><div class="cv">—</div></div>
+            <div class="roi-cell"><div class="ck">Rule</div><div class="cv">none</div></div>
+            <div class="roi-cell"><div class="ck">ROI / $</div><div class="cv roi-v pos">~+100%</div></div>
+          </div></div>
+        <div class="roi-row"><div class="strat">Profitable but high RR · 3 RR @ 27.5% WR</div>
+          <div class="roi-cells">
+            <div class="roi-cell"><div class="ck">Pass</div><div class="cv">~16.9%</div></div>
+            <div class="roi-cell"><div class="ck">Payout</div><div class="cv">~22.2%</div></div>
+            <div class="roi-cell"><div class="ck">Rule</div><div class="cv">consistency</div></div>
+            <div class="roi-cell"><div class="ck">ROI / $</div><div class="cv roi-v neg">−60%</div></div>
+          </div></div>
+        <div class="roi-row"><div class="strat">Decent edge, low RR · 0.5 RR @ 1.5%</div>
+          <div class="roi-cells">
+            <div class="roi-cell"><div class="ck">Pass</div><div class="cv">~63%</div></div>
+            <div class="roi-cell"><div class="ck">Payout</div><div class="cv">~67%</div></div>
+            <div class="roi-cell"><div class="ck">Rule</div><div class="cv">consistency</div></div>
+            <div class="roi-cell"><div class="ck">ROI / $</div><div class="cv roi-v pos">+460%</div></div>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="pf-sec">
+      <h3>TL;DR rules</h3>
+      <ol class="pf-num">
+        <li>Use the cheap <strong>50K</strong> account.</li>
+        <li><strong>Win-rate max:</strong> target 60–70% WR.</li>
+        <li>Keep RR <strong>≤ 1:1</strong> (never above 1:2).</li>
+        <li>Size off WR + RR, not a fixed 1%.</li>
+        <li>Prefer evals with <strong>no consistency rule</strong>.</li>
+        <li>Take <strong>multiple trades/day</strong> to loosen trailing DD.</li>
+        <li>Optimise for <strong>consistency, not profitability</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="pf-sec">
+      <h3>Advanced calculators</h3>
+      <p>External tools that model prop-firm evaluations in more depth than this page:</p>
+      <div class="calc-links">
+        <a class="calc-link" href="https://www.tradingpilot.com/calculator" target="_blank" rel="noopener">
+          <span class="cl-ico">↗</span>
+          <span class="cl-tx"><span class="cl-name">TradingPilot — Calculator</span><span class="cl-url">tradingpilot.com/calculator</span></span>
+          <span class="cl-arr">→</span></a>
+        <a class="calc-link" href="https://tradetanto.com/tools/prop-firm-simulator" target="_blank" rel="noopener">
+          <span class="cl-ico">↗</span>
+          <span class="cl-tx"><span class="cl-name">TradeTanto — Prop Firm Simulator</span><span class="cl-url">tradetanto.com/tools/prop-firm-simulator</span></span>
+          <span class="cl-arr">→</span></a>
+        <a class="calc-link" href="https://damnpropfirms.com/futures-prop-firm-evaluation-calculator/" target="_blank" rel="noopener">
+          <span class="cl-ico">↗</span>
+          <span class="cl-tx"><span class="cl-name">DamnPropFirms — Futures Eval Calculator</span><span class="cl-url">damnpropfirms.com/futures-prop-firm-evaluation-calculator</span></span>
+          <span class="cl-arr">→</span></a>
+      </div>
+    </div>
   </div>
 
   <footer>
