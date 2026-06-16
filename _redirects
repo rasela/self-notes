@@ -23,3 +23,6 @@
 /beats-offline /beats.html             200
 /beats-bg      /beats.html             200
 /background    /beats.html             200
+/risk          /risk-dashboard.html    200
+/sizing        /risk-dashboard.html    200
+/montecarlo    /risk-dashboard.html    200

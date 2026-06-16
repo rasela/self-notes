@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Risk Dashboard — Sizing &amp; Monte Carlo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+:root{
+  --bg:        #08090b;
+  --bg2:       #0f1114;
+  --bgc:       #111418;
+  --border:    rgba(255,255,255,0.07);
+  --bora:      rgba(52,211,196,0.22);
+  --tp:        #e7eceb;
+  --ts:        #94a0a0;
+  --tm:        #57625f;
+  --acc:       #34d3c4;
+  --accdim:    rgba(52,211,196,0.1);
+  --red:       #ff5d6c;
+  --reddim:    rgba(255,93,108,0.1);
+  --green:     #4ade80;
+  --greendim:  rgba(74,222,128,0.1);
+  --gold:      #c9a96e;
+  --golddim:   rgba(201,169,110,0.1);
+  --blue:      #6f9fff;
+  --serif:     'Lora', Georgia, serif;
+  --sans:      'Inter', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* progress */
+#prog{position:fixed;top:52px;left:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--green));z-index:101;width:0;opacity:.7;transition:width .1s linear}
+
+/* hero */
+.hero{padding:34px 16px 22px;max-width:980px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:420px;height:420px;background:radial-gradient(ellipse,rgba(52,211,196,.07) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(34px,10vw,60px);font-weight:600;line-height:1.08;letter-spacing:-.015em;margin-bottom:10px}
+h1 em{font-style:italic;color:var(--acc)}
+.subtitle{font-family:var(--sans);font-size:12.5px;letter-spacing:.04em;color:var(--ts);line-height:1.75;margin-bottom:4px;max-width:620px}
+
+.wrap{max-width:980px;margin:0 auto;padding:0 12px}
+
+/* how-to-read */
+.explainer{max-width:720px;margin:30px auto 0;padding:0 16px}
+.explainer h2{font-family:var(--serif);font-size:clamp(21px,6vw,28px);font-weight:600;letter-spacing:-.01em;margin-bottom:14px}
+.explainer h2 em{font-style:italic;color:var(--acc)}
+.rdef{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:4px;padding:13px 16px;margin:10px 0}
+.rdef .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:5px}
+.rdef p{font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts);margin:0}
+.rdef p strong{color:var(--tp);font-weight:600}
+.risk-warn{background:linear-gradient(90deg,var(--golddim),transparent);border:1px solid rgba(201,169,110,.2);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:22px 0 0}
+.risk-warn .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.risk-warn p{font-family:var(--sans);font-size:13.5px;line-height:1.65;color:var(--ts);margin:0}
+.risk-warn p strong{color:var(--gold);font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">Trading <span>/ Risk Dashboard</span></div>
+  <a class="hbtn" href="index.html" aria-label="All notes" style="display:flex;align-items:center;text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ts);width:auto;padding:0 4px">← ALL NOTES</a>
+</nav>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Position Sizing · Monte Carlo</p>
+    <h1>Risk <em>Dashboard</em></h1>
+    <p class="subtitle">An interactive calculator. Set your edge — win rate, R:R, drawdown tolerance — and it solves for the position size that keeps your worst-case equity dip inside your limit, then stress-tests that size across a fan of simulated runs.</p>
+  </div>
+
+  <div class="wrap">
+<!-- Trading Risk Management Dashboard — standalone, no dependencies. -->
+<div id="rmd-root">
+<style>
+  #rmd-root{
+    --bg:#0a0e1a; --panel:#121829; --panel2:#0e1322; --line:#1e2740;
+    --ink:#e6ecff; --muted:#7e8aa8; --muted2:#5b6480;
+    --green:#3ddc84; --green-dim:#1f7a4d; --red:#ff5a6e; --violet:#34d3c4;
+    --slot:#0c1120; --accent:#34d3c4;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); padding:18px; border-radius:14px;
+    box-sizing:border-box;
+  }
+  #rmd-root *{box-sizing:border-box}
+  .rmd-grid{display:grid; grid-template-columns:300px 1fr 300px; gap:14px}
+  @media(max-width:920px){.rmd-grid{grid-template-columns:1fr}}
+  .rmd-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px}
+  .rmd-tabs{display:flex; gap:6px; margin-bottom:14px}
+  .rmd-tab{flex:1; text-align:center; padding:9px 6px; font-size:11px; letter-spacing:.08em;
+    font-weight:600; border-radius:8px; cursor:pointer; color:var(--muted);
+    background:var(--panel2); border:1px solid var(--line); user-select:none; transition:.15s}
+  .rmd-tab.active{background:linear-gradient(180deg,#34d3c4,#1fa89b); color:#04150c; border-color:transparent}
+  .rmd-tab:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .rmd-title{display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; margin:2px 0 18px}
+  .rmd-title::before{content:""; width:4px; height:16px; background:var(--violet); border-radius:2px}
+  .rmd-field{margin-bottom:20px}
+  .rmd-flabel{display:flex; justify-content:space-between; align-items:center; margin-bottom:9px}
+  .rmd-flabel label{font-size:11px; letter-spacing:.07em; font-weight:600; color:var(--ink)}
+  .rmd-val{background:var(--slot); border:1px solid var(--line); border-radius:6px;
+    padding:3px 9px; font-size:13px; font-weight:700; min-width:48px; text-align:center; color:var(--ink)}
+  .rmd-val.unit{display:inline-flex; gap:3px; align-items:baseline}
+  .rmd-val .u{font-size:10px; color:var(--muted)}
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:4px;
+    background:var(--line); border-radius:3px; outline:none; cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:15px; height:15px;
+    border-radius:50%; background:var(--violet); cursor:pointer; box-shadow:0 0 0 3px rgba(52,211,196,.2)}
+  input[type=range].dd::-webkit-slider-thumb{background:var(--red); box-shadow:0 0 0 3px rgba(255,90,110,.2)}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border:none;border-radius:50%;background:var(--violet)}
+  .rmd-hint{font-size:10px; color:var(--muted2); margin-top:7px}
+  .rmd-optimal{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px; margin-top:8px}
+  .rmd-optimal .row{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px}
+  .rmd-optimal .lbl{font-size:11px; letter-spacing:.06em; font-weight:600; color:var(--muted)}
+  .rmd-optimal .big{font-size:17px; font-weight:800; color:var(--green)}
+  .rmd-apply{width:100%; padding:11px; border:none; border-radius:8px; cursor:pointer;
+    background:var(--green); color:#04150c; font-weight:700; font-size:12px; letter-spacing:.04em}
+  .rmd-apply:hover{filter:brightness(1.07)}
+  .rmd-apply:focus-visible{outline:2px solid #fff; outline-offset:2px}
+  .rmd-chart-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px}
+  .rmd-chart-head .ttl{font-size:12px; letter-spacing:.08em; font-weight:700; color:var(--ink)}
+  .rmd-chip{font-size:10px; color:var(--muted); background:var(--panel2); border:1px solid var(--line);
+    border-radius:5px; padding:3px 8px; display:inline-block; margin-top:6px}
+  .rmd-spread{text-align:right; font-size:10px; color:var(--muted)}
+  .rmd-spread b{color:var(--green)} .rmd-spread .w{color:var(--red)} .rmd-spread .m{color:var(--green); font-weight:800}
+  .rmd-risk-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .rmd-metric{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:13px}
+  .rmd-metric .k{font-size:10px; letter-spacing:.05em; font-weight:700; color:var(--muted); line-height:1.3}
+  .rmd-metric .v{font-size:22px; font-weight:800; margin:6px 0 3px}
+  .rmd-metric .s{font-size:9px; color:var(--muted2)}
+  .v.green{color:var(--green)} .v.violet{color:var(--violet)} .v.ink{color:var(--ink)}
+  .rmd-sub{font-size:11px; color:var(--muted); margin:-6px 0 16px}
+  .rmd-row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .rmd-stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px}
+  .rmd-stat .k{font-size:10px;letter-spacing:.05em;font-weight:700;color:var(--muted)}
+  .rmd-stat .v{font-size:20px;font-weight:800;margin-top:6px;color:var(--ink)}
+  .hidden{display:none}
+  text{font-family:inherit}
+</style>
+
+<div class="rmd-grid">
+  <!-- LEFT: controls -->
+  <div class="rmd-card">
+    <div class="rmd-tabs">
+      <div class="rmd-tab active" data-tab="strategy" tabindex="0" role="button">STRATEGY</div>
+      <div class="rmd-tab" data-tab="sizing" tabindex="0" role="button">SIZING</div>
+      <div class="rmd-tab" data-tab="simulation" tabindex="0" role="button">SIMULATION</div>
+    </div>
+
+    <!-- STRATEGY -->
+    <div class="rmd-pane" data-pane="strategy">
+      <div class="rmd-title">Strategy Metrics</div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>WIN RATE</label>
+          <span class="rmd-val unit"><span id="wrOut">30</span><span class="u">%</span></span></div>
+        <input type="range" id="wr" min="1" max="99" step="1" value="30">
+        <div class="rmd-hint">Historical winning percentage.</div>
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>RISK : REWARD</label>
+          <span class="rmd-val unit"><span id="rrOut">4.1</span><span class="u">R</span></span></div>
+        <input type="range" id="rr" min="0.1" max="10" step="0.1" value="4.1">
+        <div class="rmd-hint">Average profit relative to risk.</div>
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>MAX DRAWDOWN</label>
+          <span class="rmd-val unit"><span id="ddOut">20</span><span class="u">%</span></span></div>
+        <input type="range" id="dd" class="dd" min="5" max="60" step="1" value="20">
+        <div class="rmd-hint">Maximum equity drop you want to tolerate.</div>
+      </div>
+
+      <div class="rmd-optimal">
+        <div class="row"><span class="lbl">OPTIMAL RISK (BASED ON MAX DD)</span>
+          <span class="big" id="optRisk">1.1%</span></div>
+        <button class="rmd-apply" id="applyBtn">Apply to Calculator</button>
+      </div>
+    </div>
+
+    <!-- SIZING -->
+    <div class="rmd-pane hidden" data-pane="sizing">
+      <div class="rmd-title">Position Sizing</div>
+      <div class="rmd-sub">Turns your risk % into contracts and dollars.</div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>ACCOUNT SIZE</label>
+          <span class="rmd-val unit"><span class="u">$</span><span id="acctOut">25,000</span></span></div>
+        <input type="range" id="acct" min="1000" max="200000" step="1000" value="25000">
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>RISK PER TRADE</label>
+          <span class="rmd-val unit"><span id="riskOut">1.1</span><span class="u">%</span></span></div>
+        <input type="range" id="riskPct" min="0.1" max="10" step="0.1" value="1.1">
+        <div class="rmd-hint">Pulled from Optimal Risk when you hit Apply.</div>
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>STOP DISTANCE</label>
+          <span class="rmd-val unit"><span id="stopOut">30</span><span class="u">pts</span></span></div>
+        <input type="range" id="stop" min="1" max="200" step="1" value="30">
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>$ PER POINT</label>
+          <span class="rmd-val unit"><span class="u">$</span><span id="ppOut">10</span></span></div>
+        <input type="range" id="pp" min="1" max="50" step="1" value="10">
+        <div class="rmd-hint">MGC ≈ $10/pt · GC ≈ $100 · MNQ ≈ $2 · NQ ≈ $20.</div>
+      </div>
+
+      <div class="rmd-optimal">
+        <div class="row"><span class="lbl">$ RISK PER TRADE</span><span class="big" id="dollarRisk">$275</span></div>
+        <div class="row"><span class="lbl">CONTRACTS</span><span class="big ink" id="contracts" style="color:var(--ink)">0.92</span></div>
+        <div class="row" style="margin-bottom:0"><span class="lbl">ROUNDED</span><span class="big violet" id="contractsR" style="color:var(--violet)">1</span></div>
+      </div>
+    </div>
+
+    <!-- SIMULATION -->
+    <div class="rmd-pane hidden" data-pane="simulation">
+      <div class="rmd-title">Simulation Controls</div>
+      <div class="rmd-sub">Tune the Monte Carlo run behind the equity curve.</div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>NUMBER OF SIMS</label>
+          <span class="rmd-val"><span id="simsOut">20</span></span></div>
+        <input type="range" id="sims" min="5" max="100" step="5" value="20">
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>TRADES PER SIM</label>
+          <span class="rmd-val"><span id="trdsOut">100</span></span></div>
+        <input type="range" id="trds" min="20" max="500" step="10" value="100">
+      </div>
+
+      <div class="rmd-field">
+        <div class="rmd-flabel"><label>STARTING BALANCE</label>
+          <span class="rmd-val unit"><span class="u">$</span><span id="startOut">10,000</span></span></div>
+        <input type="range" id="start" min="1000" max="100000" step="1000" value="10000">
+      </div>
+
+      <div class="rmd-optimal">
+        <button class="rmd-apply" id="reroll" style="background:var(--violet);color:#04150c">Re-roll Simulation</button>
+        <div class="rmd-hint" style="text-align:center;margin-top:10px">Same seed = stable curves until you re-roll.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: equity curve -->
+  <div class="rmd-card">
+    <div class="rmd-chart-head">
+      <div>
+        <div class="ttl">EQUITY CURVE (<span id="simLabel">20</span> SIMS)</div>
+        <span class="rmd-chip">95% CI Area</span>
+      </div>
+      <div class="rmd-spread">PERFORMANCE SPREAD (MULTIPLE)<br>
+        <b>Best</b> / <span class="w">Worst</span> = <span class="m" id="spread">1.37x</span></div>
+    </div>
+    <svg id="chart" viewBox="0 0 560 440" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto"></svg>
+  </div>
+
+  <!-- RIGHT: risk analysis -->
+  <div class="rmd-card">
+    <div class="rmd-title">Risk Analysis</div>
+    <div class="rmd-risk-grid">
+      <div class="rmd-metric"><div class="k">RECOMMENDED<br>RISK</div>
+        <div class="v violet" id="mRisk">1.1%</div><div class="s">per trade</div></div>
+      <div class="rmd-metric"><div class="k">EXPECTANCY</div>
+        <div class="v green" id="mExp">0.53R</div><div class="s">avg return/trade</div></div>
+      <div class="rmd-metric"><div class="k">PROFIT<br>FACTOR</div>
+        <div class="v green" id="mPF">1.76</div><div class="s">gross profit / loss</div></div>
+      <div class="rmd-metric"><div class="k">RISK OF RUIN</div>
+        <div class="v ink" id="mRoR">&lt; 1%</div><div class="s">approximate</div></div>
+      <div class="rmd-metric"><div class="k">AVG WIN<br>STREAK</div>
+        <div class="v green" id="mWS">3.3</div><div class="s">consecutive wins</div></div>
+      <div class="rmd-metric"><div class="k">AVG LOSS<br>STREAK</div>
+        <div class="v green" id="mLS">10.9</div><div class="s">consecutive losses</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const root = document.getElementById('rmd-root');
+  const $ = id => root.querySelector('#'+id);
+  const fmt = n => n.toLocaleString('en-US');
+  const GAMMA = 0.5772156649;
+
+  // ---------- pure math ----------
+  function expectancy(p,R){ return p*R - (1-p); }
+  function profitFactor(p,R){ return (1-p)<=0 ? Infinity : (p*R)/(1-p); }
+  function expLongestRun(q,N){            // Schilling expected longest run
+    if(q<=0) return 0; if(q>=1) return N;
+    const l = Math.log(1/q);
+    return Math.max(0, Math.log(N*(1-q))/l + GAMMA/l - 0.5 + 0.5);
+  }
+  function riskOfRuin(p,R,f){             // approx via per-trade growth variance
+    const edge = expectancy(p,R);
+    if(edge<=0) return 1;                 // negative edge -> certain ruin long run
+    // crude but monotonic: ruin shrinks with edge, grows with risk fraction
+    const a = Math.exp(-2*edge/(f*(1+R)));
+    return Math.min(1, a);
+  }
+
+  // ---------- seeded RNG (mulberry32) ----------
+  function rng(seed){ return function(){
+    seed|=0; seed = seed+0x6D2B79F5|0;
+    let t = Math.imul(seed^seed>>>15, 1|seed);
+    t = t+Math.imul(t^t>>>7, 61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };}
+
+  // ---------- monte carlo ----------
+  function simulate(p,R,f,nSims,nTrades,start,seed){
+    const sims=[];
+    for(let s=0;s<nSims;s++){
+      const rand = rng(seed + s*7919);
+      let eq=start, peak=start, maxDD=0;
+      const path=[start];
+      for(let t=0;t<nTrades;t++){
+        const win = rand()<p;
+        eq += win ? eq*f*R : -eq*f;       // compounding by risk fraction
+        if(eq>peak) peak=eq;
+        const dd=(peak-eq)/peak; if(dd>maxDD) maxDD=dd;
+        path.push(eq);
+      }
+      sims.push({path,final:eq,maxDD});
+    }
+    return sims;
+  }
+
+  // optimal risk: binary-search f whose MEDIAN simulated maxDD == target
+  function optimalRisk(p,R,targetDD,seed){
+    let lo=0.001, hi=0.5;
+    for(let i=0;i<24;i++){
+      const f=(lo+hi)/2;
+      const sims=simulate(p,R,f,40,100,10000,seed);
+      const dds=sims.map(s=>s.maxDD).sort((a,b)=>a-b);
+      // 95th-percentile max DD: conservative "won't exceed this" reading
+      const q95=dds[Math.floor(dds.length*0.95)];
+      if(q95>targetDD) hi=f; else lo=f;
+    }
+    return (lo+hi)/2;
+  }
+
+  // ---------- state ----------
+  const st = {wr:30, rr:4.1, dd:20, acct:25000, riskPct:1.1, stop:30, pp:10,
+              sims:20, trds:100, start:10000, seed:12345};
+
+  // ---------- chart ----------
+  function drawChart(sims, start){
+    const svg=$('chart'), W=560,H=440, padL=52,padR=14,padT=14,padB=28;
+    const plotW=W-padL-padR, plotH=H-padT-padB;
+    let lo=Infinity,hi=-Infinity;
+    sims.forEach(s=>s.path.forEach(v=>{if(v<lo)lo=v; if(v>hi)hi=v;}));
+    lo=Math.min(lo,start); const range=(hi-lo)||1; lo-=range*0.05; hi+=range*0.05;
+    const n=sims[0].path.length-1;
+    const X=i=>padL+(i/n)*plotW;
+    const Y=v=>padT+plotH-((v-lo)/(hi-lo))*plotH;
+
+    // CI band (5th-95th percentile per step)
+    const band=[];
+    for(let i=0;i<=n;i++){
+      const col=sims.map(s=>s.path[i]).sort((a,b)=>a-b);
+      band.push([col[Math.floor(col.length*0.05)], col[Math.ceil(col.length*0.95)-1]]);
+    }
+    let bandPath='M';
+    band.forEach((b,i)=>bandPath+=`${X(i)},${Y(b[1])} `);
+    for(let i=n;i>=0;i--) bandPath+=`${X(i)},${Y(band[i][0])} `;
+    bandPath+='Z';
+
+    const finals=sims.map((s,i)=>({i,f:s.final}));
+    finals.sort((a,b)=>a.f-b.f);
+    const worstI=finals[0].i, bestI=finals[finals.length-1].i;
+    const line=s=>'M'+s.path.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' L');
+
+    // y gridlines
+    let grid='';
+    for(let g=0;g<=4;g++){
+      const v=lo+(hi-lo)*g/4, y=Y(v);
+      grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2236" stroke-width="1"/>`;
+      grid+=`<text x="${padL-8}" y="${y+4}" fill="#5b6480" font-size="10" text-anchor="end">$${(v/1000).toFixed(1)}k</text>`;
+    }
+    // x labels
+    const xt=[9,21,34,47,60,73,86,100];
+    let xlab='';
+    xt.forEach(t=>{ if(t<=n) xlab+=`<text x="${X(t)}" y="${H-8}" fill="#5b6480" font-size="10" text-anchor="middle">${t}</text>`; });
+
+    let faint='';
+    sims.forEach((s,i)=>{ if(i!==bestI&&i!==worstI) faint+=`<path d="${line(s)}" fill="none" stroke="#2f6f6a" stroke-width="0.8" opacity="0.3"/>`; });
+
+    const baseY=Y(start);
+    svg.innerHTML = grid
+      + `<line x1="${padL}" y1="${baseY}" x2="${W-padR}" y2="${baseY}" stroke="#3ddc84" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>`
+      + `<path d="${bandPath}" fill="#34d3c4" opacity="0.10"/>`
+      + faint
+      + `<path d="${line(sims[worstI])}" fill="none" stroke="#ff5a6e" stroke-width="2"/>`
+      + `<path d="${line(sims[bestI])}" fill="none" stroke="#3ddc84" stroke-width="2.4"/>`
+      + xlab;
+
+    return finals[finals.length-1].f / Math.max(1, finals[0].f);
+  }
+
+  // ---------- render ----------
+  function render(){
+    const p=st.wr/100, R=st.rr;
+    // strategy outputs
+    $('wrOut').textContent=st.wr;
+    $('rrOut').textContent=st.rr.toFixed(1);
+    $('ddOut').textContent=st.dd;
+
+    const fOpt=optimalRisk(p,R,st.dd/100,st.seed);
+    const optPct=(fOpt*100);
+    $('optRisk').textContent=optPct.toFixed(1)+'%';
+    $('mRisk').textContent=(st.riskPct).toFixed(1)+'%';
+
+    // risk analysis
+    $('mExp').textContent=expectancy(p,R).toFixed(2)+'R';
+    const pf=profitFactor(p,R);
+    $('mPF').textContent=isFinite(pf)?pf.toFixed(2):'∞';
+    const ror=riskOfRuin(p,R,st.riskPct/100);
+    $('mRoR').textContent= ror<0.01?'< 1%':(ror*100).toFixed(0)+'%';
+    $('mWS').textContent=expLongestRun(p,st.trds).toFixed(1);
+    $('mLS').textContent=expLongestRun(1-p,st.trds).toFixed(1);
+
+    // sizing
+    $('acctOut').textContent=fmt(st.acct);
+    $('riskOut').textContent=st.riskPct.toFixed(1);
+    $('stopOut').textContent=st.stop;
+    $('ppOut').textContent=st.pp;
+    const dollarRisk=st.acct*st.riskPct/100;
+    const contracts=dollarRisk/(st.stop*st.pp);
+    $('dollarRisk').textContent='$'+Math.round(dollarRisk).toLocaleString();
+    $('contracts').textContent=contracts.toFixed(2);
+    $('contractsR').textContent=Math.max(0,Math.round(contracts));
+
+    // simulation
+    $('simsOut').textContent=st.sims;
+    $('trdsOut').textContent=st.trds;
+    $('startOut').textContent=fmt(st.start);
+    $('simLabel').textContent=st.sims;
+
+    // chart uses the applied riskPct
+    const sims=simulate(p,R,st.riskPct/100,st.sims,st.trds,st.start,st.seed);
+    const spread=drawChart(sims,st.start);
+    $('spread').textContent=spread.toFixed(2)+'x';
+  }
+
+  // ---------- wiring ----------
+  function bindSlider(id,key,after){
+    $(id).addEventListener('input',e=>{ st[key]=parseFloat(e.target.value); if(after)after(); render(); });
+  }
+  bindSlider('wr','wr'); bindSlider('rr','rr'); bindSlider('dd','dd');
+  bindSlider('acct','acct'); bindSlider('riskPct','riskPct'); bindSlider('stop','stop'); bindSlider('pp','pp');
+  bindSlider('sims','sims'); bindSlider('trds','trds'); bindSlider('start','start');
+
+  $('applyBtn').addEventListener('click',()=>{
+    const p=st.wr/100, fOpt=optimalRisk(p,st.rr,st.dd/100,st.seed);
+    st.riskPct=Math.round(fOpt*1000)/10;
+    $('riskPct').value=st.riskPct;
+    render();
+  });
+  $('reroll').addEventListener('click',()=>{ st.seed=(Math.random()*1e6)|0; render(); });
+
+  // tabs
+  root.querySelectorAll('.rmd-tab').forEach(tab=>{
+    const go=()=>{
+      root.querySelectorAll('.rmd-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      root.querySelectorAll('.rmd-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==tab.dataset.tab));
+    };
+    tab.addEventListener('click',go);
+    tab.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();go();} });
+  });
+
+  render();
+})();
+</script>
+</div>
+  </div>
+
+  <div class="explainer">
+    <h2>How to <em>read</em> it</h2>
+
+    <div class="rdef"><div class="k">Strategy → Optimal Risk</div>
+      <p>Enter your real <strong>win rate</strong> and <strong>R:R</strong>, then a drawdown you can stomach. The tool binary-searches the risk-per-trade fraction whose 95th-percentile simulated max drawdown just touches your limit — that's your <strong>Optimal Risk</strong>. Hit <strong>Apply</strong> to push it into the sizing tab.</p></div>
+
+    <div class="rdef"><div class="k">Sizing → Contracts</div>
+      <p>Risk % × account = dollars at risk. Divide by (stop distance × $ per point) and you get the <strong>contract count</strong>, rounded for the order ticket. The $/point presets cover gold and Nasdaq futures.</p></div>
+
+    <div class="rdef"><div class="k">Simulation → The fan</div>
+      <p>The equity curve is a <strong>Monte Carlo</strong> fan of runs using the applied risk size. Green is the best path, red the worst, the shaded band is the 95% confidence area. The <strong>spread multiple</strong> shows how far best and worst diverge — a wide fan means the same edge can still hand you very different outcomes.</p></div>
+
+    <div class="risk-warn"><div class="k">Read me first</div>
+      <p>This is a planning toy, not a guarantee. Expectancy and profit factor are exact from your inputs; <strong>risk of ruin is an approximation</strong> and the sim assumes fixed-fractional compounding with i.i.d. trades — real returns are streaky and correlated. Garbage-in win rate ⇒ garbage-out size. Use it to compare sizing choices, not to predict your account.</p></div>
+  </div>
+
+  <footer>
+    <p>Trading · Risk Dashboard · <a href="index.html">All Notes</a></p>
+  </footer>
+
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="shared.js"></script>
+</body>
+</html>
