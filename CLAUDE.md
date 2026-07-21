@@ -22,10 +22,21 @@ no build step). The site is hosted on a static host that reads
   `.check`/`.night` checklists, back-to-top. Every feature is guarded, so
   pages missing an element (e.g. no `#prog`) can still use it.
 - **`_redirects`** — short-URL → file mappings, e.g. `/obe /abtb.html 200`.
+- **`search.js` + `search-index.json`** — client-side **semantic search** on
+  `index.html`, 100% in the browser (no server, no key). `search.js` loads a
+  small embedding model (`Xenova/all-MiniLM-L6-v2`, ~23MB, cached after first
+  load) via transformers.js WASM from a CDN, embeds the query, and ranks it
+  against the prebuilt `search-index.json`. Shows a "Content Matches" panel of
+  article-level hits that deep-link to `note.html#id`. The old keyword
+  card-filter still runs for short queries; failure degrades to it silently.
+- **`tools/`** — the **offline indexer** (`build-search-index.mjs` +
+  build-only `package.json`). Kept OUT of the repo root on purpose so the host
+  never auto-installs `node_modules` into the published site.
 - **`README.md`** — intentionally minimal.
 
-There is no framework, bundler, or package.json. "Build" = edit HTML. "Deploy" =
-commit + push (the host serves the repo root).
+No framework or bundler. The only package.json is `tools/` (build-only, not
+served). "Build a page" = edit HTML. "Deploy" = commit + push (host serves the
+repo root). Search index is prebuilt and committed — see the rebuild step below.
 
 ## Adding a new note (the standard flow)
 
@@ -39,7 +50,10 @@ When the user drops a markdown/source file and says "add this note":
    rendered from those data-attributes by the script at the bottom — don't write
    inner markup. `data-title` uses Bebas Neue so keep it short (≈2 words).
 3. **Add 1–2 redirects** to `_redirects` for nice short URLs.
-4. **Commit on a branch + open a PR** (do this by default once the change is
+4. **Rebuild the search index** so the new note is searchable:
+   `cd tools && npm install && npm run index` (regenerates `../search-index.json`;
+   the model is cached after first run). Commit the updated `search-index.json`.
+5. **Commit on a branch + open a PR** (do this by default once the change is
    complete, unless the user explicitly says not to) — see the workflow under
    *Conventions* below, and share the Netlify deploy preview link.
 
