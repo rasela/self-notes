@@ -17,3 +17,6 @@
 /beats-offline /beats.html             200
 /beats-bg      /beats.html             200
 /background    /beats.html             200
+/ksearch       /ksearch.html           200
+/semsearch     /ksearch.html           200
+/notes-search  /ksearch.html           200

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ksearch — Local Semantic Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap"/>
+<link rel="stylesheet" href="shared.css"/>
+<style>
+:root{
+  --bg:        #080a09;
+  --bg2:       #0f1512;
+  --bgc:       #101613;
+  --border:    rgba(255,255,255,0.07);
+  --bora:      rgba(52,211,153,0.22);
+  --tp:        #e6efe9;
+  --ts:        #93a89b;
+  --tm:        #56685d;
+  --acc:       #34d399;
+  --accdim:    rgba(52,211,153,0.1);
+  --gold:      #c9a96e;
+  --golddim:   rgba(201,169,110,0.1);
+  --serif:     'Lora', Georgia, serif;
+  --sans:      'Inter', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* hero */
+.hero{padding:32px 16px 28px;max-width:680px;margin:0 auto;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-120px;width:400px;height:400px;background:radial-gradient(ellipse,rgba(52,211,153,.06) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--acc);opacity:.5}
+h1{font-family:var(--serif);font-size:clamp(32px,9vw,58px);font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+h1 em{font-style:italic;color:var(--gold)}
+.subtitle{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:20px}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:6px 11px;border:1px solid var(--acc);border-radius:2px;color:var(--acc);background:var(--accdim)}
+.arrow{color:var(--tm);font-size:12px}
+
+/* warn banner */
+.warn{max-width:680px;margin:0 auto 0;padding:0 16px 24px}
+.warn-inner{background:var(--bgc);border:1px solid rgba(52,211,153,.15);border-left:3px solid var(--acc);border-radius:4px;padding:14px 16px}
+.warn-inner p{font-family:var(--sans);font-size:13px;line-height:1.65;color:var(--ts)}
+.warn-inner p strong{color:var(--acc)}
+
+/* content */
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+/* technique */
+.technique{margin-bottom:44px;animation:fu .5s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.tech-head{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.tech-title{font-family:var(--serif);font-size:clamp(22px,7vw,32px);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:4px}
+.tech-abbr{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.tech-body p{font-family:var(--serif);font-size:clamp(16px,4.5vw,18px);line-height:1.85;color:#c6d0c9;margin-bottom:16px}
+.tech-body p strong{color:#e7efea;font-weight:600}
+.tech-body p:last-child{margin-bottom:0}
+.tech-body em{color:var(--gold);font-style:italic}
+
+/* inline code + code block */
+code{font-family:var(--mono);font-size:.86em;background:var(--accdim);color:var(--acc);padding:1px 6px;border-radius:3px;word-break:break-word}
+pre.code{background:#0b100d;border:1px solid var(--border);border-left:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#c9d4cd;-webkit-overflow-scrolling:touch}
+pre.code code{background:none;color:inherit;padding:0;font-size:1em}
+pre.code .c{color:var(--tm)}       /* comment */
+pre.code .k{color:var(--acc)}      /* keyword/command */
+pre.code .s{color:var(--gold)}     /* string/arg */
+
+/* tip / note */
+.tip{background:var(--bgc);border:1px solid var(--border);border-top:2px solid var(--acc);border-radius:4px;padding:14px 16px;margin:16px 0}
+.tip p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.tip p strong{color:var(--acc) !important;font-weight:600}
+.note{background:var(--bgc);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin:16px 0}
+.note p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.note p strong{color:var(--gold) !important}
+.caution{background:var(--bgc);border:1px solid var(--border);border-left:3px solid #e0796b;border-radius:4px;padding:14px 16px;margin:16px 0}
+.caution p{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts);margin:0 !important}
+.caution p strong{color:#e0796b !important}
+
+/* steps */
+.steps{margin:16px 0;display:flex;flex-direction:column;gap:12px}
+.step{background:var(--bgc);border:1px solid var(--border);border-radius:4px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.step-n{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--acc);min-width:20px;padding-top:3px}
+.step-body{font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ts)}
+.step-body strong{color:var(--tp);font-weight:600;display:block;margin-bottom:3px}
+.step-body code{font-size:.92em}
+
+/* spec rows (param / key-value table replacement — reflows on mobile) */
+.spec{margin:16px 0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bgc)}
+.spec-row{display:flex;flex-wrap:wrap;gap:6px 14px;padding:12px 16px;border-top:1px solid var(--border)}
+.spec-row:first-child{border-top:none}
+.spec-k{font-family:var(--mono);font-size:12.5px;color:var(--acc);min-width:132px;flex-shrink:0}
+.spec-v{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts);flex:1;min-width:180px}
+.spec-v code{font-size:.92em}
+
+/* signal / pill grid */
+.signals{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.sig{font-family:var(--sans);font-size:12.5px;color:var(--ts);background:var(--bgc);border:1px solid var(--border);border-radius:20px;padding:7px 13px}
+
+/* stages */
+.stages{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.stage{background:var(--bgc);border:1px solid var(--border);border-radius:6px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.stage-n{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--acc);min-width:26px;line-height:1.3}
+.stage-b strong{font-family:var(--serif);font-size:17px;color:var(--tp);display:block;margin-bottom:3px}
+.stage-b p{font-family:var(--sans);font-size:13px;line-height:1.6;color:var(--ts)}
+.stage-b code{font-size:.92em}
+
+/* divider */
+.div{display:flex;align-items:center;gap:14px;margin:8px 0 44px}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+.div-dot{width:4px;height:4px;border:1px solid var(--acc);transform:rotate(45deg);opacity:.4}
+
+/* checklist */
+.checklist{margin:16px 0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bgc)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.check:first-child{border-top:none}
+.cbox{flex-shrink:0;width:20px;height:20px;border:1.5px solid var(--bora);border-radius:5px;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.cbox svg{width:12px;height:12px;color:#080a09;opacity:0;transition:opacity .2s}
+.check.done .cbox{background:var(--acc);border-color:var(--acc)}
+.check.done .cbox svg{opacity:1}
+.check-text{font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ts);transition:opacity .2s}
+.check.done .check-text{opacity:.45;text-decoration:line-through}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="brand">ksearch <span>/ Local Semantic Search</span></div>
+  <button class="hbtn" id="hbtn" aria-label="Menu" aria-expanded="false">
+    <span class="hline"></span><span class="hline"></span><span class="hline"></span>
+  </button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <p class="toc-label">Contents</p>
+  <ul class="toc-list">
+    <li><a href="#what" data-a="what"><span class="toc-tag">◆</span>What It Is</a></li>
+    <li><a href="#why-local" data-a="why-local"><span class="toc-tag">☼</span>Why Local</a></li>
+    <li><a href="#build" data-a="build"><span class="toc-tag">⚙</span>How It's Built</a></li>
+    <li><a href="#use" data-a="use"><span class="toc-tag">›</span>How to Use It</a></li>
+    <li><a href="#gate" data-a="gate"><span class="toc-tag">⚑</span>Resource Gate</a></li>
+    <li><a href="#apps" data-a="apps"><span class="toc-tag">✦</span>What Local Embeddings Unlock</a></li>
+    <li><a href="#extend" data-a="extend"><span class="toc-tag">＋</span>Extending It</a></li>
+    <li><a href="#review" data-a="review"><span class="toc-tag">✓</span>Mental Model</a></li>
+  </ul>
+  <p class="toc-back"><a href="index.html">← All notes</a></p>
+</aside>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Local-first tooling</p>
+    <h1>ksearch<br><em>search by meaning</em></h1>
+    <p class="subtitle">Semantic search over my notes — no cloud, no key, no cost</p>
+    <div class="seq">
+      <span class="badge">Notes</span>
+      <span class="arrow">→</span>
+      <span class="badge">Embed</span>
+      <span class="arrow">→</span>
+      <span class="badge">Index</span>
+      <span class="arrow">→</span>
+      <span class="badge">Recall</span>
+    </div>
+  </div>
+
+  <div class="warn">
+    <div class="warn-inner">
+      <p><strong>One line —</strong> <code>ksearch</code> finds notes by <strong>what they mean</strong>, not the words they contain. Ask "how do dealers hedge short gamma" and it returns the right section even if that exact phrase appears nowhere. Runs entirely on my own machine off a small local model.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- What it is -->
+    <article id="what" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">What It Is</h2>
+        <span class="tech-abbr">Meaning, not keywords</span>
+      </div>
+      <div class="tech-body">
+        <p><code>grep</code> matches <strong>letters</strong>. Search a paraphrase — "quietly absorbing supply into strength" — and if my note said "hidden accumulation on the bid," grep returns nothing. The idea is identical; the words don't overlap, so keyword search is blind to it.</p>
+        <p><strong>Semantic search</strong> matches <em>meaning</em>. Every chunk of text becomes a vector — a list of ~768 numbers that encodes what it's <em>about</em>. Two passages that mean the same thing land near each other in that space, whatever words they used. The query becomes a vector too; the nearest chunks are the answer.</p>
+        <p>So <code>ksearch</code> is a thin tool over that idea, pointed at my own notes: a small program that turns my notes into vectors once, then answers questions by finding the closest ones.</p>
+      </div>
+      <div class="signals">
+        <span class="sig">grep = exact words</span>
+        <span class="sig">semantic = concepts</span>
+        <span class="sig">paraphrase-proof</span>
+        <span class="sig">ranked by closeness</span>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Why local -->
+    <article id="why-local" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Why Local</h2>
+        <span class="tech-abbr">The whole thing runs on my laptop</span>
+      </div>
+      <div class="tech-body">
+        <p>The vectors ("embeddings") come from a model called <code>nomic-embed-text</code> running under <strong>Ollama</strong> — a runner that serves local models over plain HTTP on <code>localhost:11434</code>. The model is ~274&nbsp;MB on disk and holds ~0.3–1&nbsp;GB of RAM while working.</p>
+        <p>Nothing leaves the machine. That buys four things at once:</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">01</span><div class="step-body"><strong>Private</strong>My trading notes and journals never touch a third-party API. The corpus stays on disk.</div></div>
+        <div class="step"><span class="step-n">02</span><div class="step-body"><strong>Free</strong>No per-token bill. Re-index the whole set as often as I like; it costs electricity, not money.</div></div>
+        <div class="step"><span class="step-n">03</span><div class="step-body"><strong>Offline</strong>Works on a plane. No network dependency, no key to rotate, no rate limit.</div></div>
+        <div class="step"><span class="step-n">04</span><div class="step-body"><strong>Small</strong>An <em>embedding</em> model is tiny next to a chat model — it only has to understand text, not generate it. Fits comfortably in spare RAM.</div></div>
+      </div>
+      <div class="tip"><p><strong>Key distinction —</strong> an embedding model <em>reads</em> and returns a vector. A chat model (Llama, etc.) <em>writes</em> and needs many times the memory. ksearch only needs the cheap, read-only kind.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- How it's built -->
+    <article id="build" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">How It's Built</h2>
+        <span class="tech-abbr">One Python file, standard library only</span>
+      </div>
+      <div class="tech-body">
+        <p>The entire tool is a single script — <code>semsearch.py</code> — using nothing but Python's standard library. No <code>torch</code>, no virtualenv, no packages to install. The only outside call is HTTP to the local Ollama server.</p>
+        <p>It has exactly two jobs: <strong>build</strong> the index once, and <strong>query</strong> it many times.</p>
+      </div>
+
+      <p class="tech-abbr" style="margin:24px 0 8px;color:var(--acc)">The pipeline</p>
+<pre class="code"><code><span class="c"># BUILD  (run once, and after notes change)</span>
+knowledge/*.html
+   │  strip &lt;script/style/nav/header/footer&gt;
+   │  split at &lt;h1–h3&gt; headings  →  chunk ≤1500 chars
+   │  embed each chunk  (POST localhost:11434)
+   ▼
+index.json  =  [{ file, heading, text, vec[768] }, ...]
+
+<span class="c"># QUERY  (every search)</span>
+"how do dealers hedge short gamma"
+   │  embed the query  (same model)
+   │  cosine-similarity vs every stored vec
+   │  sort, take top-k
+   ▼
+[1] 0.74  absorption.html › Dealer hedging
+[2] 0.71  footprint.html  › Gamma &amp; flow
+    ...</code></pre>
+
+      <div class="tech-body">
+        <p>The clever part is boring on purpose. <strong>Chunking by heading</strong> keeps each vector about one idea, so a hit points at a section, not a whole page. <strong>Cosine similarity</strong> is just the angle between two vectors — smaller angle, closer meaning — and it's a few lines of plain math, no library needed.</p>
+      </div>
+
+      <div class="stages">
+        <div class="stage"><span class="stage-n">1</span><div class="stage-b"><strong>Clean</strong><p>HTML in, readable text out. Drop tags and boilerplate so only the note's words get embedded.</p></div></div>
+        <div class="stage"><span class="stage-n">2</span><div class="stage-b"><strong>Chunk</strong><p>Cut each page at its headings, then split anything over ~1500 chars on sentence boundaries. One chunk ≈ one idea.</p></div></div>
+        <div class="stage"><span class="stage-n">3</span><div class="stage-b"><strong>Embed</strong><p>Send every chunk to Ollama, get back a 768-number vector. Store text + vector together in one JSON file.</p></div></div>
+        <div class="stage"><span class="stage-n">4</span><div class="stage-b"><strong>Rank</strong><p>At query time, embed the question, score it against every stored vector by cosine, print the closest few with page › heading.</p></div></div>
+      </div>
+      <div class="note"><p><strong>Why it lives off the notes repo —</strong> the notes site auto-publishes its whole folder to the web. The tool + index sit in a separate local directory (<code>~/.local/share/knowledge-semsearch/</code>) so the script and my vectors never ship to the public site.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- How to use -->
+    <article id="use" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">How to Use It</h2>
+        <span class="tech-abbr">Three ways in, one behaviour</span>
+      </div>
+      <div class="tech-body">
+        <p>From a terminal — the shell wrapper auto-starts Ollama if it's asleep:</p>
+      </div>
+<pre class="code"><code><span class="c"># search — top-k chunks, each: score, page, heading, snippet</span>
+<span class="k">ksearch</span> <span class="s">"how do dealers hedge short gamma"</span>
+<span class="k">ksearch</span> <span class="s">"signs of absorption reversal"</span> -k 8
+
+<span class="c"># rebuild the index after editing notes</span>
+<span class="k">ksearch-build</span></code></pre>
+      <div class="tech-body">
+        <p>Without the shell wrapper, the script runs directly:</p>
+      </div>
+<pre class="code"><code><span class="k">python3</span> ~/.local/share/knowledge-semsearch/semsearch.py <span class="s">"concept"</span> -k 5
+<span class="k">python3</span> ~/.local/share/knowledge-semsearch/semsearch.py <span class="k">build</span></code></pre>
+      <div class="tech-body">
+        <p>And inside an AI coding session, a <code>/note-search</code> skill points the assistant at the same script, so it retrieves from my notes by meaning instead of grepping a guessed keyword.</p>
+      </div>
+
+      <p class="tech-abbr" style="margin:24px 0 8px;color:var(--acc)">Commands &amp; parameters</p>
+      <div class="spec">
+        <div class="spec-row"><div class="spec-k">ksearch "q"</div><div class="spec-v">Search. Positional query string. Prints ranked hits.</div></div>
+        <div class="spec-row"><div class="spec-k">-k N</div><div class="spec-v">How many hits to return. Default <code>5</code>.</div></div>
+        <div class="spec-row"><div class="spec-k">ksearch-build</div><div class="spec-v">Full rebuild of the index from the notes. Overwrites — not incremental. Run after edits.</div></div>
+        <div class="spec-row"><div class="spec-k">--src DIR</div><div class="spec-v">(build only) Which folder to index. Defaults to the knowledge notes folder.</div></div>
+      </div>
+
+      <div class="tip"><p><strong>Reading a result —</strong> the leading number is cosine score (higher = closer). Anything above ~0.6 is a solid match; below ~0.45 the notes probably don't cover it — trust that signal instead of forcing a weak hit.</p></div>
+      <div class="caution"><p><strong>No auto-reindex —</strong> the index is a snapshot. Edit or add notes and the old vectors stay until I run <code>ksearch-build</code> again. Stale results almost always mean "forgot to rebuild."</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Resource gate -->
+    <article id="gate" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">The Resource Gate</h2>
+        <span class="tech-abbr">Local models are gated, not banned</span>
+      </div>
+      <div class="tech-body">
+        <p>A heavy local model once ate enough memory to force a hard power-down. So the rule for any AI assistant working on this machine is: <strong>before starting a new local model, show its memory footprint against currently-free RAM and get an explicit OK.</strong></p>
+        <p>It's a gate, not a wall — local inference is fine <em>as long as the resources are there</em>. The embedding model ksearch uses is already on the sanctioned list because it's small and read-only; anything bigger still has to ask first.</p>
+      </div>
+      <div class="signals">
+        <span class="sig">show memory-needed vs free</span>
+        <span class="sig">smallest model that works</span>
+        <span class="sig">unload when done</span>
+        <span class="sig">nomic-embed-text pre-approved</span>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Applications -->
+    <article id="apps" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">What Local Embeddings Unlock</h2>
+        <span class="tech-abbr">ksearch is one use of a general tool</span>
+      </div>
+      <div class="tech-body">
+        <p>Once text can become a vector on my own hardware, the same cheap primitive powers a whole family of tools. ksearch is just the first one I needed. The rest are variations on "compare meanings."</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Semantic search</strong>What ksearch does — find the notes/docs/emails closest in meaning to a question. The backbone of every item below.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>RAG (retrieval-augmented generation)</strong>Feed the top chunks into a chat model as context so it answers <em>from my notes</em> instead of guessing. Semantic search is the "retrieval" half; ksearch already produces exactly that input.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Deduplication</strong>Near-identical notes sit almost on top of each other in vector space. Flag pairs above a similarity threshold to find things I wrote twice.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Clustering &amp; auto-tagging</strong>Group all chunks by proximity and topics fall out on their own — a map of what my notes are actually about, without me tagging anything.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Classification</strong>Embed a few labelled examples, then sort new text by which label it's nearest to. "Is this note about risk, or about a setup?" with no training.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Recommendation / "more like this"</strong>Given one note, surface its nearest neighbours — related reading I'd forgotten I had.</div></div>
+        <div class="step"><span class="step-n">◆</span><div class="step-body"><strong>Code search</strong>Same trick over a codebase: "where do we handle reconnect logic" finds it by concept, across files that never use that phrase.</div></div>
+      </div>
+      <div class="note"><p><strong>The through-line —</strong> every one of these is "turn things into vectors, then measure closeness." Build the embedding step once (that's ksearch's <code>build</code>) and each new tool is a different way of reading the same index.</p></div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Extending -->
+    <article id="extend" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Extending It</h2>
+        <span class="tech-abbr">Where I'd take it next</span>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Point it at more corpora</strong><code>--src</code> already lets build index any folder. Aim it at trade journals, saved articles, or code — one tool, many indexes.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Hybrid search</strong>Run grep and semantic together, blend the scores. Exact ticker symbols where grep wins, fuzzy concepts where embeddings win.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Reranking</strong>Take the top ~20 semantic hits and have a small model re-order them for the specific question — cheap precision boost on top of recall.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Full local RAG</strong>Wire the top chunks into a local chat model and ask questions in plain language — a private assistant that answers only from my own writing.</div></div>
+        <div class="step"><span class="step-n">→</span><div class="step-body"><strong>Bigger embedding model</strong>Swap <code>nomic-embed-text</code> for a stronger one if recall ever disappoints — same code, one constant changes, resource gate permitting.</div></div>
+      </div>
+    </article>
+
+    <div class="div"><div class="div-dot"></div></div>
+
+    <!-- Mental model / review -->
+    <article id="review" class="technique">
+      <div class="tech-head">
+        <h2 class="tech-title">Mental Model</h2>
+        <span class="tech-abbr">Tap to check — the essentials</span>
+      </div>
+      <div class="checklist">
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Text becomes a vector; similar meaning = nearby vectors.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Search a concept, not a keyword — grep is for exact strings.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Everything runs local — private, free, offline, small model.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Rebuild the index after editing notes — no auto-reindex.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Score above ~0.6 trust it; below ~0.45 the notes likely don't cover it.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">A new local model must show memory-vs-free RAM and get an OK first.</div></div>
+        <div class="check"><span class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="check-text">Embeddings also unlock RAG, dedup, clustering, classification.</div></div>
+      </div>
+    </article>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <p>ksearch · local semantic search over my notes<br>Personal tooling notes · <a href="index.html">← All notes</a></p>
+  </footer>
+
+</main>
+
+<button id="btt" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="shared.js"></script>
+</body>
+</html>
