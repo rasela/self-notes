@@ -251,6 +251,11 @@
   .group[data-group="mind"] .note-card::before { background: #f5c400; }
   .group[data-group="mind"] .note-card:hover .card-arrow { color: #f5c400; }
 
+  .group[data-group="tools"] .card-tag { color: #34d399; }
+  .group[data-group="tools"] .note-card:hover { border-color: #34d399; }
+  .group[data-group="tools"] .note-card::before { background: #34d399; }
+  .group[data-group="tools"] .note-card:hover .card-arrow { color: #34d399; }
+
   /* NOTE CARD */
   .note-card {
     background: var(--card);
@@ -492,6 +497,26 @@
           data-title="Binaural"
           data-tag="Personal Build · Background Player"
           data-desc="In-browser binaural beat player that keeps playing with the screen OFF and shows lock-screen controls. Manual mode with a settable duration (5 min – 3 hr) and a gentle end fade, plus hands-free staged journeys with glide and fade-out. Focus-level and brainwave-band presets, 100/200 Hz carriers with fine-tune, hard L/R channel separation, and test-tone/beat-check diagnostics. Renders the whole session up front — no wake lock, no display drain.">
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ===== TOOLS & SYSTEMS ===== -->
+    <section class="group" data-group="tools">
+      <button class="group-head" type="button">
+        <span class="gdot" style="background:#34d399"></span>
+        <span class="gt">Tools &amp; Systems</span>
+        <span class="gline"></span>
+        <span class="gc"></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="group-body">
+
+        <a class="note-card" href="ksearch.html"
+          data-title="ksearch"
+          data-tag="Local Semantic Search · Ollama Embeddings"
+          data-desc="Search my notes by meaning, not keywords — a single-file Python tool over local Ollama embeddings (nomic-embed-text), no cloud, no key, no cost. How it's built (clean → chunk → embed → cosine-rank), how to use it (ksearch / ksearch-build / /note-search), the local-model resource gate, and what embeddings unlock beyond search: RAG, dedup, clustering, classification, code search.">
         </a>
 
       </div>
