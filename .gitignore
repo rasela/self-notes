@@ -1,0 +1,3 @@
+# Build-only deps for the search indexer — never served, never committed.
+tools/node_modules/
+tools/package-lock.json

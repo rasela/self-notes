@@ -1,0 +1,12 @@
+{
+  "name": "self-notes-search-indexer",
+  "private": true,
+  "type": "module",
+  "description": "Build-only. Offline indexer for the notes' client-side semantic search. Lives in tools/ (NOT repo root) so Netlify never auto-installs deps into the published root. Run `npm run index` here after editing notes to regenerate ../search-index.json.",
+  "scripts": {
+    "index": "node build-search-index.mjs"
+  },
+  "devDependencies": {
+    "@huggingface/transformers": "^3.8.1"
+  }
+}
